@@ -7,7 +7,6 @@
 import pandas as pd
 import numpy as np
 from service import FactorValueService, IndexConstituentsService, StockService
-from common_api import datajiji
 from utils.common import logger
 
 class FactorCalService:
@@ -16,6 +15,8 @@ class FactorCalService:
     def _prepare_data(stock_code: str, start_date: str, end_date: str) -> pd.DataFrame:
 
         """统一获取并标准化行情数据"""
+
+        from utils.data_loader import datajiji
 
         stock = StockService.get_stock_by_symbol(stock_code)
         assert stock is not None

@@ -11,8 +11,8 @@ from config import cache_setting
 from app import api_prefix, cache
 from service import StockService, FactorValueService
 from service import JobService, MarketFearGreedService, ResearchReportService, CompanyProfileService
-from common_api import get_date_by_years, datajiji
-from utils.common import get_today, dict_to_markdown_recursive
+from utils.data_loader import datajiji
+from utils.common import get_today, dict_to_markdown_recursive, get_date_by_years
 
 stock_bp = Blueprint('stock', __name__)
 
@@ -162,7 +162,7 @@ def get_stock_history_db(stock_code):
     # 获取查询参数
     start_date = request.args.get('start_date', default=get_date_by_years(years=-3))
     end_date = request.args.get('end_date', default=get_today())
-    securities_data = datajiji.get_stock_history(stock_code, start_date, end_date)
+    securities_data = datajiji.get_history(stock_code, start_date, end_date)
 
     # 将DataFrame转换为字典列表
     securities_data_dict = securities_data.to_dict(orient='records')
@@ -207,8 +207,6 @@ def _stock_reanalysis(symbol, sync_history=False, send_notification=False):
 
     if stock is None:
         return
-
-    # job_stock_analysis(stock_code, sync_history=True, send_notification=False)
 
     # 重新计算恐惧贪婪指标
     JobService.send_job({

@@ -1,0 +1,176 @@
+"""
+ * @author Yc
+ * Chaos isn't a pit. Chaos is a ladder. - Littlefinger
+ * Copyright (c) 2025 yccheni@163.com. All rights reserved.
+"""
+
+import json
+from staffs import get_staff
+from service import FactorValueService
+from service import InvestmentPortfolioService, PortfolioAssetsService, StockService, IndexDailyDataService, MarketNewsService
+from common_api import get_date_by_n
+from utils.common import get_today, logger
+from string import Template
+from utils.common import df_to_compact_csv, send_feishu_markdown_message
+from typing import List, Dict
+from utils.gen_feishu_report import generate_feishu_report
+from prompts.prompt_generator import load_prompt_template_by_name
+
+prompt_quant_decision = """
+'你现在是一名金融分析师，你对股票市场、金融市场、投资策略和财务规划有深厚的理解。'
+'你能基于用户的基础数据给出股票投资决策帮助，请在这个角色下为我解答以下问题。'
+'请以JSON格式输出'
+"""
+
+doubao_model = 'doubao-seed-1-8-251228'
+
+def job_position_plan_daily(portfolio_id=None, send_feishu=False):
+
+    if portfolio_id is None:
+        return False
+
+    # 策略设置
+    strategy_setting = {
+        'news_limit': 100,
+        'stock_pool': 300,
+        'stock_position_limit': 10,
+        'max_market_limit': 120
+    }
+
+    # 获取大盘数据
+    market_data = IndexDailyDataService.get_history(
+        symbol="000001",
+        start_date=get_date_by_n(-1 * strategy_setting.get('max_market_limit', 120)),
+        end_date=get_today()
+    )
+
+    # 获取持仓信息
+    investment_info = InvestmentPortfolioService.get_by_portfolio_id(portfolio_id)
+    holding_assets = PortfolioAssetsService.get_all_by_portfolio_id(portfolio_id)
+
+    # 调仓计划
+    position_plan = investment_info.get('position_plan')
+
+    # 根据策略获取大模型对象
+    llm_base = investment_info.get('llm_base', 'doubao')
+    staff = get_staff(llm_base=llm_base)
+    if llm_base == 'doubao':
+        staff.set_model(model=doubao_model)
+
+    staff.role_base = prompt_quant_decision
+    staff.set_response_json()
+
+    # 大模型提示词
+    llm_prompt_str = investment_info.get('llm_prompt')
+
+    # 可用资金
+    available_money = int(investment_info.get('current_cash'))
+
+    # 股票池
+    stock_pool = StockService.get_monitoring_stock_pool(per_page=strategy_setting.get('stock_pool'))
+
+    # 近期新闻
+    recent_news = MarketNewsService.get_by_time_range(limit=strategy_setting.get('news_limit'))
+
+    # 股指期货收盘分析报告todo
+
+    # print(stocks)
+    # print(investment_info)
+    # print(start_date)
+    # print(end_date)
+
+    market_csv = df_to_compact_csv(market_data, max_rows=strategy_setting.get('max_market_limit', 120))
+    template = Template(llm_prompt_str)
+    template_sys = load_prompt_template_by_name('prompt_strategy_template')
+    holdings_text = format_holdings_text(holding_assets)
+    stock_pool_text = format_stock_pool_text(stock_pool)
+
+    # 系统预设 prompt
+    prompt_sys = template_sys.safe_substitute(
+        current_date=get_today(),
+        market_data_csv=market_csv,
+        holdings_text=holdings_text,
+        stock_pool_text=stock_pool_text,
+        available_money=available_money,
+        stock_position_limit=strategy_setting.get('stock_position_limit', 8),
+        position_plan=position_plan,
+        recent_news=json.dumps(recent_news, ensure_ascii=False)
+    )
+
+    # 用户预设 prompt
+    prompt = template.safe_substitute(
+        current_date=get_today(),
+        market_data_csv=market_csv,
+        holdings_text=holdings_text,
+        stock_pool_text=stock_pool_text,
+        available_money=available_money,
+        stock_position_limit=strategy_setting.get('stock_position_limit', 8),
+        position_plan=position_plan,
+        recent_news=json.dumps(recent_news, ensure_ascii=False)
+    )
+
+    logger.info(f"#{portfolio_id}, 传入大模型进行调仓分析，大模型版本：{staff.model}")
+    ai_resp = staff.ask(question=prompt)
+
+    ai_ans = ai_resp.replace("```json", "")
+    ai_ans = ai_ans.replace("```", "")
+    answer_json = json.loads(ai_ans)
+
+    logger.info(answer_json)
+
+    logger.info(f"#{portfolio_id}, 分析完成，调仓建议写入数据库，模型版本：{staff.model}")
+
+    InvestmentPortfolioService.update_by_portfolio_id(portfolio_id, {
+        'position_plan': answer_json,
+        'desc': answer_json.get('position_style'),
+    })
+
+    if send_feishu:
+        report_md = generate_feishu_report(answer_json)
+        send_feishu_markdown_message(f"{investment_info.get('name')} - 交易复盘与策略", markdown_text=report_md)
+
+    return True
+
+def format_holdings_text(holdings: List[Dict]) -> str:
+    if not holdings:
+        return "无持仓。"
+    lines = []
+    for h in holdings:
+        line = (
+            f"- {h['stock_code']} ({h['asset_name']}): "
+            f"持仓 {h['position_size']} 股，成本 {h['cost_price']:.2f} 元，最新收盘价 {h['position_price']:.2f} 元"
+        )
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def format_stock_pool_text(stock_pool: List[Dict]) -> str:
+    if not stock_pool:
+        return "空池（无可用标的）"
+    items = [f"{s['symbol']} ({s['name']})" for s in stock_pool]
+    return ", ".join(items)
+
+def job_position_plan_daily_all(trade_day_override=False):
+
+    """
+    交易日运行策略
+    """
+
+    # 判断交易日
+    if FactorValueService.is_trading_day() is False and trade_day_override is False:
+        return
+
+    portfolios = InvestmentPortfolioService.get_all()
+
+    for prof in portfolios:
+        # 跳过没有设置大模型的策略
+        if prof.get('llm_base') == '':
+            continue
+        job_position_plan_daily(portfolio_id=prof.get('portfolio_id'))
+
+
+if __name__ == '__main__':
+
+    job_position_plan_daily_all(trade_day_override=True)
+
+    # job_position_plan_daily(portfolio_id=14, send_feishu=False)

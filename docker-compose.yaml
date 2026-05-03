@@ -1,0 +1,80 @@
+services:
+
+  web:
+    image: finfilo-service:latest
+    ports:
+      - "8080:8080"
+    working_dir: /app
+    command: python3 /app/run_app.py
+    environment:
+      DATABASE_CONN_STR: ${DATABASE_CONN_STR}
+      REDIS_HOST: ${REDIS_HOST}
+    depends_on:
+      - redis
+    restart: always
+
+  web_slave:
+    image: finfilo-service:latest
+    ports:
+      - "8081:8080"
+    working_dir: /app
+    command: python3 /app/run_app.py
+    environment:
+      DATABASE_CONN_STR: ${DATABASE_CONN_STR}
+      REDIS_HOST: ${REDIS_HOST}
+    depends_on:
+      - redis
+    restart: always
+
+  scheduler:
+    image: finfilo-service:latest
+    working_dir: /app
+    command: python3 /app/scheduler.py
+    environment:
+      DATABASE_CONN_STR: ${DATABASE_CONN_STR}
+      REDIS_HOST: ${REDIS_HOST}
+    depends_on:
+      - redis
+    restart: always
+
+  job_server:
+    image: finfilo-service:latest
+    working_dir: /app
+    command: python3 /app/job_server_mq.py
+    environment:
+      DATABASE_CONN_STR: ${DATABASE_CONN_STR}
+      REDIS_HOST: ${REDIS_HOST}
+    depends_on:
+      - redis
+    restart: always
+
+  job_server_slave:
+    image: finfilo-service:latest
+    working_dir: /app
+    command: python3 /app/job_server_mq.py
+    environment:
+      DATABASE_CONN_STR: ${DATABASE_CONN_STR}
+      REDIS_HOST: ${REDIS_HOST}
+    depends_on:
+      - redis
+    restart: always
+
+  news_server:
+    image: finfilo-service:latest
+    working_dir: /app
+    command: python3 /app/news_server.py
+    environment:
+      DATABASE_CONN_STR: ${DATABASE_CONN_STR}
+      REDIS_HOST: ${REDIS_HOST}
+    depends_on:
+      - redis
+    restart: always
+
+  redis:
+    image: registry.openanolis.cn/openanolis/redis:5.0.3-8.6
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--protected-mode", "no"]
+    volumes:
+      - /mnt/redis-data:/data
+    restart: always

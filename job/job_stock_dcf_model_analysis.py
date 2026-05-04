@@ -7,8 +7,9 @@
 from staffs import get_staff
 from utils.common import logger
 from utils.common import get_today, get_date_by_n
-from service import MarketDataService, StockService, FactorValueService, MarketNewsService
+from service import StockService, FactorValueService, MarketNewsService
 from service import CompanyProfileService, ResearchReportService, JobService
+from utils.data_loader import datajiji
 from pathlib import Path
 from string import Template
 
@@ -45,13 +46,12 @@ def job_stock_dcf_model_analysis(_stock_code, model_override='qwen', send_notifi
 
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
     try:
-        market_data = MarketDataService.get_history(
+        market_data = datajiji.get_history(
             symbol=_stock_code,
             start_date=start_date,
             end_date=end_date)
         # 需要重置索引，否则输出的数据没有日期
         market_data = market_data.reset_index()
-        market_data = market_data.drop(columns=['name', 'pe_ratio', 'pb_ratio', 'turnover', 'market', 'securities_type'])
     except Exception as e:
         raise f"数据获取失败: {e}"
 

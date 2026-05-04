@@ -6,10 +6,10 @@
 
 import json
 from staffs import get_staff
-from job.job_update_stock_market_data import job_update_stock_market_data
+from utils.data_loader import datajiji
 from utils.common import logger, send_feishu_markdown_message, dict_to_markdown_recursive, get_now
 from utils.common import get_today, get_date_by_n
-from service import MarketDataService, StockService, FactorValueService, MarketNewsService
+from service import StockService, FactorValueService, MarketNewsService
 from service import JobService, CompanyProfileService, ResearchReportService
 from service.log_service import LogService
 from datetime import date, datetime
@@ -56,10 +56,6 @@ def job_fix_stock_market_data():
             })
 
 def job_market_digging_daily(override=False):
-
-    # 判断交易日
-    # if FactorValueService.is_trading_day() is False:
-    #     return
 
     stocks = StockService.search_stocks(securities_type='stock', monitoring=1, per_page=10000)
 
@@ -113,24 +109,22 @@ def job_market_digging(_stock_code, sync_history=False, send_notification=False)
     staff.role_base = prompt_quant_decision2
 
     stock_info = StockService.get_stock_by_symbol(symbol=_stock_code)
+    assert stock_info is not None
+
     stock_name = stock_info.get('name')
     start_date = get_date_by_n(-120, _format='%Y%m%d') # 获取120天的行情
     end_date = FactorValueService.get_latest_trading_date().strftime('%Y%m%d')
 
-    # 全量覆盖行情数据
-    if sync_history:
-        end_date = get_today()
-        job_update_stock_market_data(_stock_code, None, end_date, delete_old_data=True)
-
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
     try:
-        market_data = MarketDataService.get_history(
+        market_data = datajiji.get_history(
             symbol=_stock_code,
             start_date=start_date,
-            end_date=end_date)
+            end_date=end_date,
+            market=stock_info.get('market')
+        )
         # 需要重置索引，否则输出的数据没有日期
         market_data = market_data.reset_index()
-        market_data = market_data.drop(columns=['name', 'pe_ratio', 'pb_ratio', 'market', 'securities_type'])
     except Exception as e:
         raise f"数据获取失败: {e}"
 
@@ -226,6 +220,7 @@ def send_job(_stock_code, send_notification=False):
 
 if __name__ == '__main__':
 
-    stock_code = '002812'
+    job_market_digging_daily(override=True)
 
-    job_market_digging(stock_code, sync_history=False, send_notification=False)
+    # stock_code = '002281'
+    # job_market_digging(stock_code, sync_history=False, send_notification=False)

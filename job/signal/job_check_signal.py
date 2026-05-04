@@ -6,13 +6,14 @@
 import json
 
 from service import JobService
-from service import StockService, FactorValueService, FactorSelectorService, MarketDataService, ResearchReportService
+from service import StockService, FactorValueService, FactorSelectorService, ResearchReportService
 from service.factor_desc import factor_descriptions
 from staffs import get_staff
 from utils.common import logger, get_today
 from utils.common import get_date_by_n
 from pathlib import Path
 from string import Template
+from utils.data_loader import datajiji
 
 # 获取当前 Python 文件所在目录
 CURRENT_DIR = Path(__file__).parent
@@ -22,6 +23,9 @@ prompt_quant_decision2 = ""
 prompt_template = Path(CURRENT_DIR / '../prompt_stock_tech_analysis.md').read_text(encoding='utf-8')
 
 def job_check_signal(_stock_code):
+
+    stock_info = StockService.get_stock_by_symbol(symbol=_stock_code)
+    assert stock_info is not None
 
     # 获取最新交易日的因子数据
     trade_date = FactorValueService.get_latest_trading_date()
@@ -35,21 +39,20 @@ def job_check_signal(_stock_code):
 
     trade_date = FactorValueService.get_latest_trading_date()
     staff.role_base = prompt_quant_decision2
-
-    stock_info = StockService.get_stock_by_symbol(symbol=_stock_code)
     stock_name = stock_info.get('name')
     start_date = get_date_by_n(-360, _format='%Y%m%d') # 获取120天的行情
     end_date = FactorValueService.get_latest_trading_date().strftime('%Y%m%d')
 
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
     try:
-        market_data = MarketDataService.get_history(
+        market_data = datajiji.get_history(
             symbol=_stock_code,
             start_date=start_date,
-            end_date=end_date)
+            end_date=end_date,
+            market=stock_info.get('market')
+        )
         # 需要重置索引，否则输出的数据没有日期
         market_data = market_data.reset_index()
-        market_data = market_data.drop(columns=['name', 'pe_ratio', 'pb_ratio', 'turnover', 'market', 'securities_type'])
     except Exception as e:
         raise f"数据获取失败: {e}"
 
@@ -70,7 +73,7 @@ def job_check_signal(_stock_code):
 
     content = staff.ask(question=prompt)
 
-    # print(content)
+    logger.info(content)
 
     # 1. 单条插入
     data = {
@@ -102,7 +105,7 @@ def job_check_signal_daily(override=False):
 
 if __name__ == '__main__':
 
-    # stock_code = '688322'
-    # job_check_signal(_stock_code=stock_code)
+    stock_code = '688322'
+    job_check_signal(_stock_code=stock_code)
 
-    job_check_signal_daily()
+    # job_check_signal_daily()

@@ -4,6 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
+from job.job_stock_llm_analysis import job_market_digging
 from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data
 from job.signal.job_check_signal import job_check_signal
@@ -12,7 +13,7 @@ from job.job_update_factors import job_update_stock_factor
 def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
 
     # 计算走势指标
-    job_update_stock_greedy_data(index_code=stock_code, override_all=sync_history)
+    job_update_stock_greedy_data(index_code=stock_code, override_all=True)
 
     # 计算因子
     job_update_stock_factor(stock_code=stock_code, save_last=False, time_period=-360)
@@ -23,9 +24,11 @@ def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
     # 技术分析
     job_check_signal(stock_code)
 
+    # 旧版分析
+    job_market_digging(stock_code, sync_history=False, send_notification=send_notification)
+
 if __name__ == '__main__':
 
-    stock_code = '002281'
-    sync_history = False
+    stock_code = '02382'
 
-    job_stock_analysis(stock_code, sync_history=sync_history)
+    job_stock_analysis(stock_code, sync_history=False)

@@ -8,7 +8,8 @@ import json
 from staffs import get_staff
 from service import FactorValueService
 from service import InvestmentPortfolioService, PortfolioAssetsService, StockService, IndexDailyDataService, MarketNewsService
-from utils.common import get_today, logger, get_date_by_n
+from common_api import get_date_by_n
+from utils.common import get_today, logger
 from string import Template
 from utils.common import df_to_compact_csv, send_feishu_markdown_message
 from typing import List, Dict

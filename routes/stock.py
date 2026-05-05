@@ -70,7 +70,7 @@ def update_stock(symbol):
 
     # 提交个股分析任务
     if is_update_history:
-        _stock_reanalysis(symbol, sync_history=True, send_notification=True)
+        _stock_reanalysis(symbol, sync_history=False, send_notification=True)
 
     return jsonify({'code': 0, 'message': 'Stock updated successfully!'})
 

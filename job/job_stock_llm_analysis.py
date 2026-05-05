@@ -38,23 +38,6 @@ PHASE_MAPPING = {
     "出货阶段 (末期)": 6
 }
 
-def job_fix_stock_market_data():
-    stocks = StockService.search_stocks(securities_type='stock', monitoring=1, per_page=10000)
-    # 循环对个股进行每日挖掘
-    for stock in stocks:
-        # 日期为None，默认触发
-        if stock.get('last_llm_analysis') is None:
-            # print(stock.get('name', stock.get('symbol')))
-            JobService.send_job({
-                'job_func': 'job_update_stock_market_data',
-                'job_args': {
-                    'stock_code': stock.get('symbol'),
-                    'start_date': None,
-                    'end_date': get_today(),
-                    'delete_old_data': True,
-                }
-            })
-
 def job_market_digging_daily(override=False):
 
     stocks = StockService.search_stocks(securities_type='stock', monitoring=1, per_page=10000)
@@ -101,8 +84,8 @@ def get_stock_detail(_stock_code):
 
 def job_market_digging(_stock_code, sync_history=False, send_notification=False):
 
-    staff = get_staff(llm_base='qwen')
-    staff.set_model(model='qwen3.6-plus')
+    staff = get_staff(llm_base='doubao')
+    # staff.set_model(model='qwen3.6-plus')
     staff.set_response_json()
 
     trade_date = FactorValueService.get_latest_trading_date()
@@ -220,7 +203,7 @@ def send_job(_stock_code, send_notification=False):
 
 if __name__ == '__main__':
 
-    job_market_digging_daily(override=True)
+    # job_market_digging_daily(override=True)
 
-    # stock_code = '002281'
-    # job_market_digging(stock_code, sync_history=False, send_notification=False)
+    stock_code = '600150'
+    job_market_digging(stock_code, sync_history=False, send_notification=False)

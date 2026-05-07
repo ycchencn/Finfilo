@@ -180,7 +180,7 @@ def job_market_digging(_stock_code, sync_history=False, send_notification=False)
     )
 
     # logger.info(dict_to_markdown_recursive(content_json))
-    logger.info(content_json)
+    # logger.info(content_json)
 
     if send_notification:
         send_feishu_markdown_message(

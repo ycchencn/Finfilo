@@ -141,7 +141,7 @@ const formatType = (phaseInt) => {
                         'text-green-600': parseFloat(data.calculated_return_rate) < 0,
                     }">
                         {{ formatCurrency(data.summary.total_assets - data.init_cash, true) }}
-                        {{ data.calculated_return_rate.toFixed(2) }}%
+                        ({{ data.calculated_return_rate.toFixed(2) }}%)
                     </span>
                 </template>
             </Column>
@@ -154,12 +154,6 @@ const formatType = (phaseInt) => {
                       'text-green-600': data.summary.total_unrealized_pnl < 0,
                     }">{{ formatCurrency(data.summary.total_unrealized_pnl, true) }}
                     </span>
-                </template>
-            </Column>
-
-            <Column field="name" filterField="name" header="可用资金" class="font-mono">
-                <template #body="{ data }">
-                    {{ formatCurrency(data.current_cash) }}
                 </template>
             </Column>
 

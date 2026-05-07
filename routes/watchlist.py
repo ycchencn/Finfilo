@@ -6,10 +6,9 @@
 
 from flask import jsonify, Blueprint, request
 from app import api_prefix, cache  # 假设这些在你的 app __init__ 中已定义
-from service.user_watchlist_service import UserWatchlistService # 引入刚才写的 Service
+from service.user_watchlist_service import UserWatchlistService  # 引入刚才写的 Service
 from service import StockService, FactorValueService, MarketFearGreedService
 from utils.common import logger
-from config import cache_setting
 
 # 创建蓝图
 watchlist_bp = Blueprint('watchlist', __name__)
@@ -33,11 +32,12 @@ def get_main_force_behavior_phase(code):
             "fear_greed": 0
         }
     # 获取 main_force_behavior_phase
-    main_force_behavior_phase = FactorValueService.get_latest_factor_value(ticker=code, factor_name='main_force_behavior_phase')
+    main_force_behavior_phase = FactorValueService.get_latest_factor_value(ticker=code,
+                                                                           factor_name='main_force_behavior_phase')
     return greed_data, main_force_behavior_phase
 
+
 @watchlist_bp.route(f'{api_prefix}/watchlist', methods=['GET'])
-@cache.cached(timeout=60, query_string=True)
 def get_watchlist():
     """
     获取自选股列表
@@ -52,11 +52,16 @@ def get_watchlist():
         stock_list = []
 
         for item in watchlist:
-            _stock = StockService.get_stock_by_symbol(item['stock_code'])
+            _stock = StockService.get_stock_by_symbol(item['stock_code'], fields=[
+                'symbol',
+                'name',
+                'market',
+                'concepts',
+                'ohlc_last'
+            ])
             _stock['greed_data'], _stock['main_force_behavior_phase'] = get_main_force_behavior_phase(_stock['symbol'])
             _stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_low')
             _stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_high')
-            del _stock['llm_analysis']
             stock_list.append(_stock)
 
         return jsonify(stock_list)
@@ -100,7 +105,7 @@ def add_stock():
         return make_response_json(msg="Missing required fields: stock_code, stock_name", code=400)
     try:
         success = UserWatchlistService.add({
-            "stock_code": json_data.get('stock_code') ,
+            "stock_code": json_data.get('stock_code'),
             "stock_name": "",
             "topic": "",
             "desc": "",

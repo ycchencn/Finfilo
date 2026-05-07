@@ -22,10 +22,31 @@ class StockService:
         return stock.to_dict() if stock else None
 
     @staticmethod
-    def get_stock_by_symbol(symbol: str) -> Optional[Dict[str, Any]]:
-        """根据 symbol 获取股票信息"""
+    def get_stock_by_symbol(
+        symbol: str,
+        fields: Optional[List[str]] = None
+    ) -> Optional[Dict[str, Any]]:
+        """
+        根据 symbol 获取股票信息，并支持筛选返回字段
+
+        Args:
+            symbol: 股票代码
+            fields: 指定返回的字段列表（如 ["symbol", "name"]），为 None 时返回全部字段
+
+        Returns:
+            包含指定字段的字典，或 None（如果股票不存在）
+        """
         stock = db_session.query(Stock).filter_by(symbol=symbol).first()
-        return stock.to_dict() if stock else None
+        if not stock:
+            return None
+
+        stock_dict = stock.to_dict()  # 假设 to_dict() 返回所有字段的字典
+
+        if fields is not None:
+            # 筛选字段，忽略不存在的字段
+            return {field: stock_dict.get(field) for field in fields if field in stock_dict}
+        else:
+            return stock_dict
 
     @staticmethod
     def get_all_stocks(page: int = None, per_page: int = None) -> List[Dict[str, Any]]:

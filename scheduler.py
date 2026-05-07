@@ -1,0 +1,59 @@
+"""
+ * @author Yc
+ * Chaos isn't a pit. Chaos is a ladder. - Littlefinger
+ * Copyright (c) 2025 yccheni@163.com. All rights reserved.
+"""
+
+import pytz
+
+from utils.common import logger
+from apscheduler.schedulers.blocking import BlockingScheduler
+from job import job_market_digging_daily, job_update_stock_factor_daily
+from job.job_position_plan_daily import job_position_plan_daily_all
+from job.job_data_fix import job_update_stock_beta_all
+from job.job_update_stock_greedy_data import job_update_stock_greedy_data_daily
+
+if __name__ == '__main__':
+
+    # 创建调度器实例
+    scheduler = BlockingScheduler()
+
+    # 指定时区为北京时间
+    beijing_tz = pytz.timezone('Asia/Shanghai')
+
+    # 量化回测任务执行
+    # scheduler.add_job(run_daily_strategy_all, 'cron', hour=16, minute=15, timezone=beijing_tz)
+
+    # 量化回测任务执行，运算调仓计划
+    # scheduler.add_job(job_position_plan_daily_all, 'cron', hour=16, minute=30, timezone=beijing_tz)
+
+    # 新增：每周日 20:30 执行运算调仓计划
+    scheduler.add_job(
+        job_position_plan_daily_all,
+        'cron',
+        day_of_week='sun',
+        hour=20,
+        minute=30,
+        timezone=beijing_tz,
+        kwargs={'trade_day_override': True}
+    )
+
+    # 个股因子计算任务
+    scheduler.add_job(job_update_stock_factor_daily, 'cron', hour=20, minute=10, timezone=beijing_tz)
+
+    # 量化回测任务执行，运算个股beta数据
+    scheduler.add_job(job_update_stock_beta_all, 'cron', hour=20, minute=15, timezone=beijing_tz)
+
+    # 个股大模型数据分析任务 【每天八点半】
+    scheduler.add_job(job_market_digging_daily, 'cron', hour=20, minute=30, timezone=beijing_tz)
+
+    # 更新个股恐贪数据
+    scheduler.add_job(job_update_stock_greedy_data_daily, 'cron', hour=20, minute=55, timezone=beijing_tz)
+
+    try:
+        # 开始执行计划任务
+        logger.info(f"running scheduler service")
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        # 当用户按下Ctrl+C 或者发生系统退出异常时，捕获异常并结束程序
+        pass

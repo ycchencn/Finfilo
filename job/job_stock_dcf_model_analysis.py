@@ -118,8 +118,7 @@ def send_job(_stock_code, send_notification=False, sync_history=False):
 
 if __name__ == '__main__':
 
-    stock_code = '002812'
+    # stock_code = '002812'
+    # job_stock_dcf_model_analysis(stock_code)
 
-    job_stock_dcf_model_analysis(stock_code)
-
-    # job_stock_dcf_model_analysis_daily(override=True)
+    job_stock_dcf_model_analysis_daily(override=True)

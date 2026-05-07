@@ -73,7 +73,7 @@ def job_check_signal(_stock_code):
 
     content = staff.ask(question=prompt)
 
-    logger.info(content)
+    # logger.info(content)
 
     # 1. 单条插入
     data = {

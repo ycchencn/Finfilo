@@ -8,12 +8,6 @@ const model = ref([
         label: '市场监控',
         items: [
             {
-                label: '市场温度',
-                icon: 'pi pi-fw pi-chart-scatter',
-                url: 'https://quant.finfilo.com/grafana/d/adgnlqn/ae882a1-e5b882-e59cba-e6b8a9-e5baa6-e79c8b-e69dbf?orgId=1&from=now-90d&to=now&timezone=browser/**/',
-                target: '_blank'
-            },
-            {
                 label: '事件驱动',
                 icon: 'pi pi-fw pi-wave-pulse',
                 to: '/market/news_flow'

@@ -475,35 +475,6 @@ onUnmounted(() => {
         <!-- 左侧 -->
         <div class="w-full md:w-1/2 flex flex-col min-h-0">
             <div class="font-semibold text-lg">
-                <i class="pi pi-discord text-blue-300"></i> 特定买卖建议
-            </div>
-            <Divider />
-            <div class="overflow-y-auto flex-1" v-if="tech_report">
-                <MarkdownRenderer
-                    :markdown="dictToMarkdownRecursive(tech_report.content_json['特定买卖建议'])"
-                />
-            </div>
-        </div>
-
-        <!-- 右侧 -->
-        <div class="w-full md:w-1/2 flex flex-col min-h-0">
-            <div class="font-semibold text-lg">
-                <i class="pi pi-discord text-blue-300"></i> 机会与风险
-            </div>
-            <Divider />
-            <div class="overflow-y-auto flex-1" v-if="tech_report">
-                <MarkdownRenderer
-                    :markdown="dictToMarkdownRecursive(tech_report.content_json['机会与风险'])"
-                />
-            </div>
-        </div>
-    </div>
-
-    <div class="pd-2-0 mt-5 flex flex-col md:flex-row gap-6">
-
-        <!-- 左侧 -->
-        <div class="w-full md:w-1/2 flex flex-col min-h-0">
-            <div class="font-semibold text-lg">
                 <i class="pi pi-chart-line text-green-500"></i> 技术面分析
             </div>
             <Divider />

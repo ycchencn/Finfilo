@@ -1,1 +1,1 @@
-docker build -t finfilo-base --file DockerfileBase .
+docker build -t finfilo-base --file ./docker/DockerfileBase .

@@ -41,5 +41,5 @@ if __name__ == '__main__':
     #         continue
     #     job_stock_analysis(item['stock_code'], sync_history=False)
 
-    stock_code = '688777'
+    stock_code = '002230'
     job_stock_analysis(stock_code, sync_history=False)

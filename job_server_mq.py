@@ -23,7 +23,6 @@ from pika.adapters.select_connection import SelectConnection
 from backtest.strategy.run_portfolio_daily import run_daily_strategy
 from job.job_stock_llm_analysis import job_market_digging
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data
-# from job.job_update_stock_market_data import job_update_stock_market_data, job_update_market_data_all
 from job.job_update_factors import job_update_stock_factor
 from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
 from job.job_stock_analysis import job_stock_analysis

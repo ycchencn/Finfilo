@@ -59,10 +59,12 @@ python run.py
 docker-compose up -d
 ```
 
-## API 接口
+![SNI (4).png](public/readme/SNI%20%284%29.png)
 
-### 股票接口
+![SNI (3).png](public/readme/SNI%20%283%29.png)
 
-| 接口 | 方法 | 说明 |
-|------|------|------|
-| `/api/v
+![SNI (5).png](public/readme/SNI%20%285%29.png)
+
+![SNI (2).png](public/readme/SNI%20%282%29.png)
+
+![SNI (1).png](public/readme/SNI%20%281%29.png)

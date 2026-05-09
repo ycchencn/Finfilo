@@ -408,6 +408,24 @@ class FactorValueService:
             return []
 
     @staticmethod
+    def delete_by_ticker(stock_code: str):
+        """
+        :param stock_code:
+        :return:
+        """
+        try:
+            deleted_count = db_session.query(FactorValue).filter(
+                FactorValue.ticker == stock_code,
+            ).delete(synchronize_session=False)
+            db_session.commit()
+            logger.info(f"Deleted {deleted_count} records for symbol: {stock_code}")
+            return True
+        except Exception as e:
+            db_session.rollback()
+            logger.error(f"Failed to delete data for symbol {stock_code}: {e}")
+            return False
+
+    @staticmethod
     def delete_by_factor_and_date(factor_name: str, trade_date: date) -> bool:
         """
         删除某因子在某日的所有记录（用于重算覆盖）。

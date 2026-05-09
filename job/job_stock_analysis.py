@@ -31,15 +31,15 @@ def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
 
 if __name__ == '__main__':
 
-    # items = UserWatchlistService.get_all()
-    # # 将对象转换为字典列表
-    # watchlist = [item.to_dict() for item in items] if items else []
-    # for item in watchlist:
-    #     # print(item['stock_code'])
-    #     stock_info = StockService.get_stock_by_symbol(symbol=item['stock_code'])
-    #     if stock_info['llm_analysis'] is not None:
-    #         continue
-    #     job_stock_analysis(item['stock_code'], sync_history=False)
+    items = UserWatchlistService.get_all()
+    # 将对象转换为字典列表
+    watchlist = [item.to_dict() for item in items] if items else []
+    for item in watchlist:
+        # print(item['stock_code'])
+        stock_info = StockService.get_stock_by_symbol(symbol=item['stock_code'])
+        if stock_info['llm_analysis'] is not None:
+            continue
+        job_stock_analysis(item['stock_code'], sync_history=False)
 
-    stock_code = '002230'
-    job_stock_analysis(stock_code, sync_history=False)
+    # stock_code = '688182'
+    # job_stock_analysis(stock_code, sync_history=False)

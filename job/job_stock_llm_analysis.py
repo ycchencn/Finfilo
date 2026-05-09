@@ -84,7 +84,7 @@ def get_stock_detail(_stock_code):
 
 def job_market_digging(_stock_code, sync_history=False, send_notification=False):
 
-    staff = get_staff(llm_base='doubao')
+    staff = get_staff(llm_base='deepseek')
     # staff.set_model(model='qwen3.6-plus')
     staff.set_response_json()
 

@@ -99,12 +99,8 @@ def get_stocks_monitored():
     for stock in stocks:
         # 获取恐惧贪婪数据
         stock['greed_data'], stock['main_force_behavior_phase'] = get_main_force_behavior_phase(stock['symbol'])
-        stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'],
-                                                                         factor_name='52week_low')
-        stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'],
-                                                                          factor_name='52week_high')
-
-        del stock['llm_analysis']
+        stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'], factor_name='52week_low')
+        stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'], factor_name='52week_high')
 
     return jsonify(stocks)
 

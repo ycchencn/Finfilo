@@ -14,12 +14,15 @@ from staffs.llm_base_aliyun import LLMBaseAliyun
 from config import llm_model_setting
 
 
-def get_analysis_model_by_setting(_setting_name='stock_analysis'):
+def get_analysis_model_by_setting(_setting_name='stock_dcf_analysis'):
     _staff = None
     _setting = llm_model_setting.get(_setting_name)
 
     if _setting.get('platform') == 'volcengine':
         _staff = LLMBaseVolcEngine()
+
+    if _setting.get('platform') == 'siliconflow':
+        _staff = LLMBaseSiliconflow()
 
     if _setting.get('platform') == 'aliyun':
         _staff = LLMBaseAliyun()

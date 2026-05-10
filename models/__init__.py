@@ -43,7 +43,6 @@ class Stock(Base):
     monitoring = Column(Integer, default=0)
     monitor_by = Column(String(50))
     last_update_financial_data = Column(DateTime)
-    llm_analysis = Column(Text)
     last_llm_analysis = Column(DateTime)
     llm_analysis_interval = Column(Integer, default=1)
     company_desc = Column(Text)
@@ -1088,6 +1087,51 @@ class EtfComponent(Base):
             "replace_ratio": float(self.replace_ratio) if self.replace_ratio is not None else None,
             "replace_balance": float(self.replace_balance) if self.replace_balance is not None else None,
             "component_name": self.component_name,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+class TriggerType(str, Enum):
+    CRON = "cron"
+    DATE = "date"  # 一次性任务
+
+class ScheduledTask(Base):
+    __tablename__ = 'scheduled_task'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    task_name = Column(String(100), nullable=False, unique=True)
+    func_module = Column(String(255), nullable=False)
+    func_name = Column(String(100), nullable=False)
+    args = Column(JSON, default=[])
+    kwargs = Column(JSON, default={})
+
+    trigger_type = Column(Enum(), nullable=False, default=TriggerType.CRON)
+    cron_expression = Column(String(100))  # 仅当 trigger_type == 'cron' 时有效
+    run_at = Column(DateTime)  # 仅当 trigger_type == 'date' 时有效
+
+    is_active = Column(Boolean, default=True)
+    last_run_at = Column(DateTime)
+    next_run_at = Column(DateTime)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<ScheduledTask(id={self.id}, task_name='{self.task_name}', type={self.trigger_type})>"
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "task_name": self.task_name,
+            "func_module": self.func_module,
+            "func_name": self.func_name,
+            "args": self.args or [],
+            "kwargs": self.kwargs or {},
+            "trigger_type": self.trigger_type,
+            "cron_expression": self.cron_expression,
+            "run_at": self.run_at.isoformat() if self.run_at else None,
+            "is_active": self.is_active,
+            "last_run_at": self.last_run_at.isoformat() if self.last_run_at else None,
+            "next_run_at": self.next_run_at.isoformat() if self.next_run_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

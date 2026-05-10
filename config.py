@@ -81,13 +81,9 @@ llm_models = {
 
 # 大模型配置
 llm_model_setting = {
-    'stock_analysis': {
+    'stock_dcf_analysis': {
         'platform': 'aliyun',
         'model': 'qwen3.6-plus'
-    },
-    'stock_dcf_analysis': {
-        'platform': 'volcengine',
-        'model': 'doubao-seed-2-0-pro-260215'
     },
     'stock_tech_analysis': {
         'platform': 'volcengine',

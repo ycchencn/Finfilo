@@ -20,7 +20,7 @@ CURRENT_DIR = Path(__file__).parent
 
 prompt_quant_decision2 = ""
 
-prompt_template = Path(CURRENT_DIR / '../prompt_stock_tech_analysis.md').read_text(encoding='utf-8')
+prompt_template = Path(CURRENT_DIR / './prompt_stock_tech_analysis.md').read_text(encoding='utf-8')
 
 # 定义映射字典：将中文阶段映射为数字
 PHASE_MAPPING = {
@@ -89,7 +89,6 @@ def job_check_signal(_stock_code):
 
     # "吸筹阶段|洗盘阶段|拉升阶段|出货阶段"
     main_force_behavior_phase_str = content_json['技术面深度诊断'].get('主力行为阶段', '')
-    print(main_force_behavior_phase_str)
     main_force_behavior_phase_str = main_force_behavior_phase_str.replace(' ', '')
 
     # 如果匹配不到，默认设为 0 (代表未知/其他)

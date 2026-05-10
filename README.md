@@ -16,17 +16,16 @@ FinFilo 是一个金融数据分析与投资组合管理平台，提供股票、
 - **自选股**: 自选股 watchlist 管理
 
 ### 🤖 AI 智能分析
-- 基于 Qwen/Doubao/VolcEngine/Zhipu 等大语言模型
+- 基于 同义千问/Doubao/DeepSeek/Minimax 等大语言模型
 - 财务分析报告自动生成
 - 金融新闻智能解读
 - 量化策略代码生成
-- 智能交易建议
 
 ## 技术栈
 
 - **后端**: Python Flask
 - **缓存**: Flask-Caching
-- **LLM 集成**: 阿里云 Qwen、字节跳动 Doubao、火山引擎、智谱 AI
+- **LLM 集成**: 阿里云、火山引擎、硅基流动、智谱
 
 ## 快速开始
 

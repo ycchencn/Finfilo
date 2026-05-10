@@ -266,11 +266,11 @@ export function getTradeSeverity(tradeString) {
 
 // 定义常量，方便维护
 const FEAR_GREED_LEVELS = {
-    EXTREME_FEAR: { range: [0, 20], text: '极度恐惧', color: '#b3132b', advice: '市场过度恐慌，可能是买入机会' },
+    EXTREME_FEAR: { range: [0, 20], text: '极度恐惧', color: '#b3132b', advice: '市场过度恐慌' },
     FEAR: { range: [20, 50], text: '恐惧', color: '#ef4444', advice: '市场情绪偏谨慎' },
     NEUTRAL: { range: [50, 50], text: '中立', color: '#3b82f6', advice: '市场情绪中性' },
     GREED: { range: [50, 80], text: '贪婪', color: '#22c55e', advice: '市场情绪偏向乐观' },
-    EXTREME_GREED: { range: [80, 100], text: '极度贪婪', color: '#15803d', advice: '市场过度狂热，警惕回调风险' }
+    EXTREME_GREED: { range: [80, 100], text: '极度贪婪', color: '#15803d', advice: '市场过度狂热，警惕风险' }
 };
 
 /**

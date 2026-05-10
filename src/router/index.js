@@ -54,13 +54,13 @@ const router = createRouter({
                 {
                     path: '/quant/stock_monitor',
                     name: 'stock-monitor',
-                    component: () => import('@/views/quant/StockMonitor.vue'),
+                    component: () => import('@/views/stock/StockMonitor.vue'),
                     meta: { title: '个股监控', requiresAuth: true }
                 },
                 {
                     path: '/quant/stock_monitor_detail/:symbol',
                     name: 'stock-monitor-detail',
-                    component: () => import('@/views/quant/StockMonitorDetail.vue'),
+                    component: () => import('@/views/stock/StockMonitorDetail.vue'),
                     meta: { title: '个股监控详情', requiresAuth: true }
                 },
                 {

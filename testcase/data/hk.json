@@ -1,0 +1,912 @@
+{
+    "QueryID": "4064564068",
+    "ResultCode": "0",
+    "Result": {
+        "ResultCode": "0",
+        "ResultNum": "1",
+        "QueryID": "4064564068",
+        "Result": [
+            {
+                "ResultURL": "",
+                "Weight": "3",
+                "SrcID": "47485",
+                "ClickNeed": "1",
+                "SubResult": [],
+                "SubResNum": "0",
+                "Sort": "1",
+                "RecoverCacheTime": "0",
+                "DisplayData": {
+                    "StdStg": "47485",
+                    "StdStl": "0",
+                    "strategy": {
+                        "tempName": "",
+                        "precharge": "0",
+                        "ctplOrPhp": "1",
+                        "hilightWord": ""
+                    },
+                    "resultData": {
+                        "tplData": {
+                            "cardName": "",
+                            "templateName": "",
+                            "StdStg": "47485",
+                            "StdStl": "0",
+                            "title": "",
+                            "result": {
+                                "tabs": [
+                                    "全部",
+                                    "蓝筹股",
+                                    "红筹股",
+                                    "国企股",
+                                    "港股通(沪)",
+                                    "沪股通",
+                                    "港股通(深)",
+                                    "深股通"
+                                ],
+                                "intro": [
+                                    "HKM.ES,HKG.ES",
+                                    "LC0001.XBHK",
+                                    "HC0001.XBHK",
+                                    "GQ0001.XBHK",
+                                    "HGTGGT.XBHK",
+                                    "HGTHGT.XBHK",
+                                    "SGTGGT.XBHK",
+                                    "SGTSGT.XBHK"
+                                ],
+                                "rank": [
+                                    {
+                                        "code": "09939",
+                                        "name": "开拓药业-B",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "1.720"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+50.88%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+13.34%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "9413万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "5968万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+42.98%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "7.70亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=09939&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%BC%80%E6%8B%93%E8%8D%AF%E4%B8%9A-B&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%BC%80%E6%8B%93%E8%8D%AF%E4%B8%9A-B&code=09939&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "08286",
+                                        "name": "长城微光",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.110"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+48.65%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.2%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "2.31万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "22.00万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+14.86%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "3397万"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=08286&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E9%95%BF%E5%9F%8E%E5%BE%AE%E5%85%89&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E9%95%BF%E5%9F%8E%E5%BE%AE%E5%85%89&code=08286&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "06163",
+                                        "name": "彭顺国际",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.250"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+45.35%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.04%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "2.13万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "9.80万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+29.07%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "6909万"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=06163&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%BD%AD%E9%A1%BA%E5%9B%BD%E9%99%85&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%BD%AD%E9%A1%BA%E5%9B%BD%E9%99%85&code=06163&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "06128",
+                                        "name": "烯石电车新材料",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.075"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+33.93%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+8.61%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "691.18万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "1.01亿"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+30.36%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "8804万"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=06128&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E7%83%AF%E7%9F%B3%E7%94%B5%E8%BD%A6%E6%96%B0%E6%9D%90%E6%96%99&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E7%83%AF%E7%9F%B3%E7%94%B5%E8%BD%A6%E6%96%B0%E6%9D%90%E6%96%99&code=06128&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "08340",
+                                        "name": "紫荆国际金融",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.265"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+32.50%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.07%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "1.00万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "4.00万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "0%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "1472万"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=08340&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E7%B4%AB%E8%8D%86%E5%9B%BD%E9%99%85%E9%87%91%E8%9E%8D&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E7%B4%AB%E8%8D%86%E5%9B%BD%E9%99%85%E9%87%91%E8%9E%8D&code=08340&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "00970",
+                                        "name": "新耀莱",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.630"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+31.25%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.58%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "234.66万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "273.50万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+162.5%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "2.95亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=00970&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E6%96%B0%E8%80%80%E8%8E%B1&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E6%96%B0%E8%80%80%E8%8E%B1&code=00970&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "01354",
+                                        "name": "经发物业",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "26.200"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+26.88%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+1.12%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "512.00万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "18.75万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+24.21%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "17.47亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=01354&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E7%BB%8F%E5%8F%91%E7%89%A9%E4%B8%9A&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E7%BB%8F%E5%8F%91%E7%89%A9%E4%B8%9A&code=01354&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "01629",
+                                        "name": "冠均国际控股",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.164"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+26.15%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+1.05%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "74.86万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "575.60万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+37.69%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "8956万"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=01629&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%86%A0%E5%9D%87%E5%9B%BD%E9%99%85%E6%8E%A7%E8%82%A1&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%86%A0%E5%9D%87%E5%9B%BD%E9%99%85%E6%8E%A7%E8%82%A1&code=01629&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "01872",
+                                        "name": "冠轈控股",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "1.750"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+25.90%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+1.07%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "951.54万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "575.60万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+25.9%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "9.45亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=01872&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%86%A0%E8%BD%88%E6%8E%A7%E8%82%A1&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%86%A0%E8%BD%88%E6%8E%A7%E8%82%A1&code=01872&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "08232",
+                                        "name": "CLASSIFIED GP",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.800"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+25.00%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.13%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "5.17万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "7.23万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+25%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "4460万"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=08232&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=CLASSIFIED%20GP&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=CLASSIFIED%20GP&code=08232&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "00326",
+                                        "name": "中国星集团",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "1.240"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+24.00%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.56%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "1461万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "1348万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+36%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "30.11亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=00326&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E4%B8%AD%E5%9B%BD%E6%98%9F%E9%9B%86%E5%9B%A2&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E4%B8%AD%E5%9B%BD%E6%98%9F%E9%9B%86%E5%9B%A2&code=00326&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "02078",
+                                        "name": "荣阳实业",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.146"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+23.73%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.1%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "16.00万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "115.40万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+22.88%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "1.75亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=02078&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E8%8D%A3%E9%98%B3%E5%AE%9E%E4%B8%9A&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E8%8D%A3%E9%98%B3%E5%AE%9E%E4%B8%9A&code=02078&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "01025",
+                                        "name": "嘉艺控股",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.415"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+18.57%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.85%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "67.62万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "172.16万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+24.29%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "8391万"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=01025&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%98%89%E8%89%BA%E6%8E%A7%E8%82%A1&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%98%89%E8%89%BA%E6%8E%A7%E8%82%A1&code=01025&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "01370",
+                                        "name": "奥威控股",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.920"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+17.95%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "0%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "920.00"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "1000.00"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "0%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "15.05亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=01370&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%A5%A5%E5%A8%81%E6%8E%A7%E8%82%A1&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%A5%A5%E5%A8%81%E6%8E%A7%E8%82%A1&code=01370&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "02587",
+                                        "name": "健康之路",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "29.200"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+17.51%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+1.27%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "3.26亿"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "1119万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+27.57%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "256.29亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=02587&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%81%A5%E5%BA%B7%E4%B9%8B%E8%B7%AF&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%81%A5%E5%BA%B7%E4%B9%8B%E8%B7%AF&code=02587&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "00185",
+                                        "name": "正商实业",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.109"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+17.20%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.07%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "18.46万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "127.10万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+98.92%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "2.09亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=00185&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E6%AD%A3%E5%95%86%E5%AE%9E%E4%B8%9A&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E6%AD%A3%E5%95%86%E5%AE%9E%E4%B8%9A&code=00185&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "06628",
+                                        "name": "创胜集团-B",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "2.000"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+16.96%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+1.5%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "1273万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "650.95万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+25.73%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "8.68亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=06628&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%88%9B%E8%83%9C%E9%9B%86%E5%9B%A2-B&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%88%9B%E8%83%9C%E9%9B%86%E5%9B%A2-B&code=06628&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "00499",
+                                        "name": "青岛控股",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.156"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+16.42%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "0%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "-"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "-"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "0%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "1.56亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=00499&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E9%9D%92%E5%B2%9B%E6%8E%A7%E8%82%A1&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E9%9D%92%E5%B2%9B%E6%8E%A7%E8%82%A1&code=00499&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "00397",
+                                        "name": "嬴集团",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.101"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+16.09%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+1.75%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "458.61万"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "4387万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+29.89%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "2.53亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=00397&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E5%AC%B4%E9%9B%86%E5%9B%A2&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E5%AC%B4%E9%9B%86%E5%9B%A2&code=00397&market=hk&ma_ver=4"
+                                    },
+                                    {
+                                        "code": "08481",
+                                        "name": "盛龙锦秀国际",
+                                        "market": "hk",
+                                        "financeType": "stock",
+                                        "is_warrants": "",
+                                        "expire_date": "--",
+                                        "status": "1",
+                                        "list": [
+                                            {
+                                                "text": "最新价",
+                                                "value": "0.300"
+                                            },
+                                            {
+                                                "text": "涨跌幅",
+                                                "value": "+15.38%"
+                                            },
+                                            {
+                                                "text": "换手率",
+                                                "value": "+0.01%"
+                                            },
+                                            {
+                                                "text": "成交额",
+                                                "value": "8800.00"
+                                            },
+                                            {
+                                                "text": "成交量",
+                                                "value": "3.00万"
+                                            },
+                                            {
+                                                "text": "振幅",
+                                                "value": "+5.77%"
+                                            },
+                                            {
+                                                "text": "总市值",
+                                                "value": "1.47亿"
+                                            }
+                                        ],
+                                        "exchange": "HK",
+                                        "sf_url": "/sf?resource_id=5430&word=08481&ext=%7B%22sf_tab_name%22%3A%22%5Cu6982%5Cu89c8%22%7D&title=%E7%9B%9B%E9%BE%99%E9%94%A6%E7%A7%80%E5%9B%BD%E9%99%85&pd=new_stock&openapi=1&from_sf=1&dspName=iphone&name=%E7%9B%9B%E9%BE%99%E9%94%A6%E7%A7%80%E5%9B%BD%E9%99%85&code=08481&market=hk&ma_ver=4"
+                                    }
+                                ],
+                                "brief": [
+                                    "12",
+                                    "14",
+                                    "15",
+                                    "16",
+                                    "29",
+                                    "19",
+                                    "24"
+                                ],
+                                "async_url": "http://finance.pae.baidu.com/selfselect/getmarketrank?srcid=5384&tn=wisexmlnew&dsp=iphone&query="
+                            },
+                            "ResultURL": "",
+                            "sigma_use": "1",
+                            "normal_use": "1",
+                            "weak_use": "1",
+                            "strong_use": "1",
+                            "pk": [],
+                            "encoding": "gbk",
+                            "card_order": "2",
+                            "disp_data_url_ex": {
+                                "aesplitid": "5384_47485"
+                            },
+                            "data_source": "AE"
+                        },
+                        "extData": {
+                            "OriginQuery": "",
+                            "resourceid": "47485",
+                            "tplt": ""
+                        }
+                    }
+                },
+                "OriginSrcID": "5384"
+            }
+        ]
+    }
+}

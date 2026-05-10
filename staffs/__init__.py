@@ -8,6 +8,7 @@ from staffs.qianwen_trader import QianWenTrader
 from staffs.llm_base_doubao import LLMBaseDoubao
 from staffs.llm_base_volcengine import LLMBaseVolcEngine
 from staffs.llm_base_zhipu import LLMBaseZhipu
+from staffs.llm_base_siliconflow import LLMBaseSiliconflow
 
 def get_staff(llm_base='doubao', model=None):
 
@@ -21,6 +22,9 @@ def get_staff(llm_base='doubao', model=None):
 
     if llm_base == 'zhipu':
         _staff = LLMBaseZhipu()
+
+    if llm_base == 'siliconflow':
+        _staff = LLMBaseSiliconflow()
 
     if llm_base == 'deepseek':
         _staff = LLMBaseVolcEngine()

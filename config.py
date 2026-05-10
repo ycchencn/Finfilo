@@ -38,6 +38,9 @@ aliyun_bailian_apikey = os.getenv('ALIYUN_BAILIAN_APIKEY')
 # 豆包API
 ark_apikey = os.getenv('DOUBAO_APIKEY')
 
+# siliconflow
+siliconflow_apikey = os.getenv('SILICONFLOW_APIKEY')
+
 # 腾讯API
 tencent_api = os.getenv('TENCENT_APIKEY')
 

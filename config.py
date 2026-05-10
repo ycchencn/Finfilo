@@ -79,5 +79,21 @@ llm_models = {
     'qwen': os.getenv('LLM_MODEL_QWEN')
 }
 
+# 大模型配置
+llm_model_setting = {
+    'stock_analysis': {
+        'platform': 'aliyun',
+        'model': 'qwen3.6-plus'
+    },
+    'stock_dcf_analysis': {
+        'platform': 'volcengine',
+        'model': 'doubao-seed-2-0-pro-260215'
+    },
+    'stock_tech_analysis': {
+        'platform': 'volcengine',
+        'model': 'deepseek-v3-2-251201'
+    }
+}
+
 # 数据接口地址
 datajiji_host = os.getenv('DATAJIJI_HOST')

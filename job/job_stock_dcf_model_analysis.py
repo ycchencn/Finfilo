@@ -4,7 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from staffs import get_staff
+from staffs import get_analysis_model_by_setting
 from utils.common import logger
 from utils.common import get_today, get_date_by_n
 from service import StockService, FactorValueService, MarketNewsService
@@ -16,8 +16,6 @@ from string import Template
 # 获取当前 Python 文件所在目录
 CURRENT_DIR = Path(__file__).parent
 
-prompt_quant_decision2 = ""
-
 prompt_template = Path(CURRENT_DIR / './prompt_stock_analysis_v2.md').read_text(encoding='utf-8')
 
 
@@ -25,23 +23,15 @@ def get_stock_detail(_stock_code):
     stock_detail = CompanyProfileService.get_by_stock_code(stock_code=_stock_code)
     return stock_detail
 
-def job_stock_dcf_model_analysis(_stock_code, model_override='qwen', send_notification=False):
 
-    if model_override == 'qwen':
-        staff = get_staff(llm_base='qwen')
-        staff.set_model(model='qwen3.6-plus')
-    else:
-        staff = get_staff(llm_base='doubao')
-        staff.set_model(model='doubao-seed-2-0-pro-260215')
-
+def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
+    staff = get_analysis_model_by_setting(_setting_name='stock_dcf_analysis')
     staff.set_response_text()
 
     trade_date = FactorValueService.get_latest_trading_date()
-    staff.role_base = prompt_quant_decision2
-
     stock_info = StockService.get_stock_by_symbol(symbol=_stock_code)
     stock_name = stock_info.get('name')
-    start_date = get_date_by_n(-120, _format='%Y%m%d') # 获取120天的行情
+    start_date = get_date_by_n(-120, _format='%Y%m%d')  # 获取120天的行情
     end_date = FactorValueService.get_latest_trading_date().strftime('%Y%m%d')
 
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
@@ -96,8 +86,8 @@ def job_stock_dcf_model_analysis(_stock_code, model_override='qwen', send_notifi
 
     return True
 
-def job_stock_dcf_model_analysis_daily(override=False):
 
+def job_stock_dcf_model_analysis_daily(override=False):
     stocks = StockService.search_stocks(securities_type='stock', monitoring=1, per_page=10000)
 
     # 循环对个股进行每日挖掘
@@ -106,19 +96,19 @@ def job_stock_dcf_model_analysis_daily(override=False):
         send_job(_stock_code=stock['symbol'])
         logger.info(f"send analysis of {stock['symbol']}")
 
+
 def send_job(_stock_code, send_notification=False, sync_history=False):
     JobService.send_job({
         'job_func': 'job_stock_dcf_model_analysis',
         'job_args': {
             '_stock_code': _stock_code,
-            'send_notification': send_notification,
-            'model_override': 'qwen'
+            'send_notification': send_notification
         }
     })
 
+
 if __name__ == '__main__':
+    stock_code = '002812'
+    job_stock_dcf_model_analysis(stock_code)
 
-    # stock_code = '002812'
-    # job_stock_dcf_model_analysis(stock_code)
-
-    job_stock_dcf_model_analysis_daily(override=True)
+    # job_stock_dcf_model_analysis_daily(override=True)

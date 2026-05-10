@@ -5,7 +5,7 @@
 """
 
 import json
-from staffs import get_staff
+from staffs import get_analysis_model_by_setting
 from utils.data_loader import datajiji
 from utils.common import logger, send_feishu_markdown_message, dict_to_markdown_recursive, get_now
 from utils.common import get_today, get_date_by_n
@@ -84,13 +84,10 @@ def get_stock_detail(_stock_code):
 
 def job_market_digging(_stock_code, sync_history=False, send_notification=False):
 
-    staff = get_staff(llm_base='deepseek')
-    # staff.set_model(model='qwen3.6-plus')
-    staff.set_response_json()
-
-    trade_date = FactorValueService.get_latest_trading_date()
+    staff = get_analysis_model_by_setting()
     staff.role_base = prompt_quant_decision2
 
+    trade_date = FactorValueService.get_latest_trading_date()
     stock_info = StockService.get_stock_by_symbol(symbol=_stock_code)
     assert stock_info is not None
 
@@ -205,5 +202,5 @@ if __name__ == '__main__':
 
     # job_market_digging_daily(override=True)
 
-    stock_code = '600150'
+    stock_code = '603459'
     job_market_digging(stock_code, sync_history=False, send_notification=False)

@@ -14,6 +14,36 @@ class DataJiji:
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
 
+    def get_stock_info(
+        self,
+        symbol: str,
+        market: str = "cn"
+    ) -> pandas.DataFrame:
+        """
+        获取股票历史数据
+
+        :param symbol: 股票代码，如 "000001"
+        :param start_date: 开始日期，格式 YYYYMMDD，如 "20260101"
+        :param end_date: 结束日期，格式 YYYYMMDD，如 "20260115"
+        :param market: 市场代码，默认 "cn"（中国）
+        :return: API 返回的原始文本（JSON 字符串），失败时返回 None
+        """
+        url = f"{self.BASE_URL}/{market}/stock/info"
+        params = {
+            "symbol": symbol
+        }
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",  # 如果你的 API 需要 token 鉴权
+            # 或者用其他方式，如 "X-API-Key": self.api_key
+        }
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            response.raise_for_status()  # 抛出 HTTP 错误
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"请求失败: {e}")
+            return pd.DataFrame()
+
     def get_history(
         self,
         symbol: str,

@@ -442,7 +442,7 @@ onUnmounted(() => {
                 地址：{{ stock_profile?.office_address || '加载中...' }}
             </div>
 
-            <div class="text-sm text-gray-500 mb-2">
+            <div class="text-sm text-gray-500 mb-2" v-if="stock_info?.market === 'cn'">
                 流通市值：{{ formatMarketCapToBillions(stock_info?.instrument_detail?.FloatVolume * ohlc_last['close']) }}
             </div>
 

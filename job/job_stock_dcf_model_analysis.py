@@ -8,7 +8,7 @@ from staffs import get_analysis_model_by_setting
 from utils.common import logger
 from utils.common import get_today, get_date_by_n
 from service import StockService, FactorValueService, MarketNewsService
-from service import CompanyProfileService, ResearchReportService, JobService
+from service import ResearchReportService, JobService
 from utils.data_loader import datajiji
 from pathlib import Path
 from string import Template
@@ -19,9 +19,10 @@ CURRENT_DIR = Path(__file__).parent
 prompt_template = Path(CURRENT_DIR / './prompt_stock_analysis_v2.md').read_text(encoding='utf-8')
 
 
-def get_stock_detail(_stock_code):
-    stock_detail = CompanyProfileService.get_by_stock_code(stock_code=_stock_code)
-    return stock_detail
+def get_stock_detail(_stock_code, market):
+    stock = datajiji.get_stock_info(_stock_code, market)
+    profile = stock.get('profile', {})
+    return profile
 
 
 def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
@@ -46,7 +47,7 @@ def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
         raise f"数据获取失败: {e}"
 
     # 2 获取股票基础信息
-    stock_detail = get_stock_detail(_stock_code=_stock_code)
+    stock_detail = get_stock_detail(_stock_code=_stock_code, market=stock_info.get('market'))
 
     # 3 获取关联新闻供LLM分析
     relative_news = MarketNewsService.search(stock_code=_stock_code, page_size=30)

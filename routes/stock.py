@@ -4,12 +4,11 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from models import Stock, db
 from flask import request, jsonify, Blueprint
 from config import cache_setting
 from app import api_prefix, cache
 from service import StockService, FactorValueService
-from service import JobService, MarketFearGreedService, ResearchReportService, CompanyProfileService
+from service import JobService, MarketFearGreedService, ResearchReportService
 from utils.data_loader import datajiji
 from utils.common import get_today, get_date_by_years
 
@@ -110,12 +109,10 @@ def get_etfs():
     """
     获取ETF监控列表
     """
-
     page = request.args.get('page', default=1, type=int)
     market = request.args.get('market', default='cn', type=str)
     page_size = request.args.get('page_size', default=300, type=int)
     stocks = StockService.get_etfs(per_page=page_size, market=market)
-
     return jsonify(stocks)
 
 
@@ -131,6 +128,7 @@ def get_stocks_greed_data(stock_code):
 @stock_bp.route(f'{api_prefix}/stocks/<string:symbol>', methods=['GET'])
 def get_stock(symbol):
     stock = StockService.get_stock_by_symbol(symbol)
+    # stock = datajiji.get_stock_info(symbol)
     stock['tech_indicator'] = {
         '52week_low': FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='52week_low'),
         '52week_high': FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='52week_high'),
@@ -175,10 +173,12 @@ def stock_re_analysis_dcf(symbol):
     return jsonify({'code': 0, 'message': 'Stock updated successfully!'})
 
 
-@stock_bp.route(f'{api_prefix}/stocks/get_stock_profile/<string:symbol>', methods=['GET'])
+@stock_bp.route(f'{api_prefix}/stocks/profile/<string:symbol>', methods=['GET'])
+@cache.cached(timeout=cache_setting.get('stock_list'), query_string=True)
 def get_stock_profile(symbol):
-    profile = CompanyProfileService.get_by_stock_code(stock_code=symbol)
-    profile = profile.to_dict()
+    stock_info = StockService.get_stock_by_symbol(symbol)
+    stock_info_api = datajiji.get_stock_info(symbol, market=stock_info.get('market'))
+    profile = stock_info_api.get('profile', {})
     beta = FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='beta')
     profile['beta'] = beta
     return jsonify(profile)

@@ -159,7 +159,7 @@ export const fetchStockInfo = async (stockCode) => {
 
 export const fetchStockProfile = async (stockCode) => {
     try {
-        let response = await fetch(`/api/v1/stocks/get_stock_profile/${stockCode}`);
+        let response = await fetch(`/api/v1/stocks/profile/${stockCode}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

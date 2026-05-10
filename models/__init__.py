@@ -77,7 +77,6 @@ class Stock(Base):
             'monitoring': self.monitoring,
             'monitor_by': self.monitor_by,
             'last_update_financial_data': self.last_update_financial_data,
-            'llm_analysis': self.llm_analysis,
             'last_llm_analysis': self.last_llm_analysis.strftime(
                 '%Y-%m-%d %H:%M:%S') if self.last_llm_analysis else None,
             'llm_analysis_interval': self.llm_analysis_interval,

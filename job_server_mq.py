@@ -21,7 +21,6 @@ from pika.adapters.select_connection import SelectConnection
 
 # Import your specific modules
 from backtest.strategy.run_portfolio_daily import run_daily_strategy
-from job.job_stock_llm_analysis import job_market_digging
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data
 from job.job_update_factors import job_update_stock_factor
 from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
@@ -56,7 +55,6 @@ class MarketJobConsumer:
         # Registry for job functions: maps 'job_func' string to actual function
         self._job_registry: Dict[str, JobFunc] = {
             'job_update_stock_greedy_data': job_update_stock_greedy_data,
-            'job_market_digging': job_market_digging,
             'run_daily_strategy': run_daily_strategy,
             'job_update_stock_factor': job_update_stock_factor,
             'job_stock_dcf_model_analysis': job_stock_dcf_model_analysis,

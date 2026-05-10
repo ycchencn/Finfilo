@@ -1,10 +1,10 @@
 <script setup>
 
-import { onMounted, onUnmounted, watch } from 'vue';
-import { init, dispose } from 'klinecharts';
-import { ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { chartConfigs } from '@/utils/constants.js';
+import {onMounted, onUnmounted, watch} from 'vue';
+import {init, dispose} from 'klinecharts';
+import {ref} from 'vue';
+import {useRoute} from 'vue-router';
+import {chartConfigs} from '@/utils/constants.js';
 import {
     fetchStockMarketData,
     fetchStockInfo,
@@ -18,8 +18,8 @@ import {
 } from '@/utils/function.js';
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue';
 import axios from 'axios';
-import { useToast } from 'primevue/usetoast';
-import { useNotification } from '@/composables/useNotification';
+import {useToast} from 'primevue/usetoast';
+import {useNotification} from '@/composables/useNotification';
 import PriceRange52Week from '@/components/PriceRange52Week.vue';
 import router from '@/router'
 
@@ -32,12 +32,11 @@ const ohlc_data = ref([]);
 const lineData = ref(null);
 const loading = ref(false);
 const lineOptions = ref(null);
-const { showSuccess, showError } = useNotification();
+const {showSuccess, showError} = useNotification();
 const stock_code = route.params.symbol;
 const stock_profile = ref(null);
 const stock_info = ref({
     name: '',
-    llm_analysis: '',
     concepts: ''
 });
 const watched = ref(false)
@@ -61,15 +60,13 @@ const items = [
         label: '重新分析',
         command: () => {
             try {
-                axios.put(`/api/v1/stock/re_analysis/${stock_code}`, {
-
-                });
+                axios.put(`/api/v1/stock/re_analysis/${stock_code}`, {});
                 showSuccess('已提交重新分析任务');
             } catch (error) {
                 let message = '操作失败，请重试';
                 if (axios.isAxiosError(error)) {
                     if (error.response) {
-                        const { status, data } = error.response;
+                        const {status, data} = error.response;
                         console.error('HTTP 错误:', status, data);
 
                         if (status === 404) {
@@ -95,7 +92,7 @@ const items = [
     {
         label: '设置分组',
         command: () => {
-            toast.add({ severity: 'success', summary: 'Updated', detail: 'Data Updated', life: 3000 });
+            toast.add({severity: 'success', summary: 'Updated', detail: 'Data Updated', life: 3000});
         }
     },
     {
@@ -107,13 +104,13 @@ const items = [
                     monitoring: 0,
                     monitor_by: 'user',
                 });
-                router.push({ path: '/quant/stock_monitor' });
+                router.push({path: '/quant/stock_monitor'});
                 showSuccess('操作成功，个股监控已关闭');
             } catch (error) {
                 let message = '操作失败，请重试';
                 if (axios.isAxiosError(error)) {
                     if (error.response) {
-                        const { status, data } = error.response;
+                        const {status, data} = error.response;
                         console.error('HTTP 错误:', status, data);
 
                         if (status === 404) {
@@ -143,12 +140,6 @@ onMounted(async () => {
     lineOptions.value = getLineChartOptions();
     stock_info.value = await fetchStockInfo(stock_code);
     stock_profile.value = await fetchStockProfile(stock_code)
-    // stock_profile.value.website = 'https://' + stock_profile.value.website;
-    // 修复旧数据
-    if (stock_info.value.llm_analysis['投资前景'] === undefined) {
-        stock_info.value.llm_analysis['投资前景'] = stock_info.value.llm_analysis['炒作原因']
-    }
-    // const stock_data = await fetchStockMarketData(stock_code);
     ohlc_data.value = await fetchStockMarketData(stock_code);
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
@@ -157,17 +148,17 @@ onMounted(async () => {
     });
     // 触发一次k线设置
     changeChartType()
-    chart.setSymbol({ ticker: stock_code });
-    chart.setPeriod({ span: 1, type: 'day' });
+    chart.setSymbol({ticker: stock_code});
+    chart.setPeriod({span: 1, type: 'day'});
     chart.setDataLoader({
-        getBars: async ({ callback, range }) => {
+        getBars: async ({callback, range}) => {
             callback(ohlc_data.value);
         }
     });
 
     // 设置技术指标
-    chart.createIndicator(chart_indicator.value, true, { id: 'candle_pane_vol' });
-    chart.createIndicator('EMA', true, { id: 'candle_pane' });
+    chart.createIndicator(chart_indicator.value, true, {id: 'candle_pane_vol'});
+    chart.createIndicator('EMA', true, {id: 'candle_pane'});
 
     // 加载新闻关联数据
     axios.get('/api/v1/market/search_news?c=1&stock_code=' + stock_code).then(response => {
@@ -181,7 +172,7 @@ onMounted(async () => {
 
     // 获取自选股数据
     axios.get(`/api/v1/watchlist/${stock_code}`).then(response => {
-        if (response.data.code === 404){
+        if (response.data.code === 404) {
             watched.value = false;
         } else {
             watched.value = true;
@@ -195,7 +186,7 @@ onMounted(async () => {
 
         // 按 date 排序（确保时间顺序）
         const sortedData = [...greed_data.value].sort(
-        (a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime()
+            (a, b) => new Date(a.trade_date).getTime() - new Date(b.trade_date).getTime()
         );
 
         const labels = sortedData.map(item => item.trade_date);
@@ -223,22 +214,22 @@ onMounted(async () => {
 });
 
 const chartFilterOptions = [
-    { label: 'K线', value: 'candle_solid' },
-    { label: '美国线', value: 'ohlc' },
-    { label: '面积图', value: 'area' },
+    {label: 'K线', value: 'candle_solid'},
+    {label: '美国线', value: 'ohlc'},
+    {label: '面积图', value: 'area'},
 ];
 
 const chartIndicatorOptions = [
-    { label: 'VOL', value: 'VOL' },
-    { label: 'MACD', value: 'MACD' },
-    { label: 'RSI', value: 'RSI' },
-    { label: 'CCI', value: 'CCI' },
-    { label: 'BBI', value: 'BBI' },
-    { label: 'BOLL', value: 'BOLL' },
-    { label: 'KDJ', value: 'KDJ' },
+    {label: 'VOL', value: 'VOL'},
+    {label: 'MACD', value: 'MACD'},
+    {label: 'RSI', value: 'RSI'},
+    {label: 'CCI', value: 'CCI'},
+    {label: 'BBI', value: 'BBI'},
+    {label: 'BOLL', value: 'BOLL'},
+    {label: 'KDJ', value: 'KDJ'},
 ];
 
-const changeChartType = function(){
+const changeChartType = function () {
     chart.setStyles({
         // 蜡烛图
         candle: {
@@ -251,13 +242,13 @@ const changeChartType = function(){
     localStorage.setItem(CHART_TYPE_STORAGE_KEY, chart_type.value);
 }
 
-const showDcfDrawer = function(){
+const showDcfDrawer = function () {
     // 分析数据
     loading.value = true;
     axios.get(`/api/v1/stock/dcf_research_report/${stock_code}`).then(response => {
         loading.value = false;
         dcf_research_report.value = response.data
-        if (dcf_research_report.value === null){
+        if (dcf_research_report.value === null) {
             showError("获取数据失败，DCF估值分析数据为空")
             return
         }
@@ -265,8 +256,8 @@ const showDcfDrawer = function(){
     });
 }
 
-const toggleLike = function(){
-    if (watched.value === true){
+const toggleLike = function () {
+    if (watched.value === true) {
         axios.delete(`/api/v1/watchlist/${stock_code}`).then(response => {
             watched.value = false;
         });
@@ -279,24 +270,22 @@ const toggleLike = function(){
     }
 }
 
-const changeChartIndicator = function(){
+const changeChartIndicator = function () {
     chart.removeIndicator('candle_pane_vol')
-    chart.createIndicator(chart_indicator.value, true, { id: 'candle_pane_vol' });
+    chart.createIndicator(chart_indicator.value, true, {id: 'candle_pane_vol'});
     // 关键：将当前选择的类型保存到本地存储
     localStorage.setItem(CHART_INDICATOR_STORAGE_KEY, chart_indicator.value);
 }
 
-const reanalysisDcf = function(){
+const reanalysisDcf = function () {
     try {
-        axios.put(`/api/v1/stock/re_analysis_dcf/${stock_code}`, {
-
-        });
+        axios.put(`/api/v1/stock/re_analysis_dcf/${stock_code}`, {});
         showSuccess('已提交重新分析任务');
     } catch (error) {
         let message = '操作失败，请重试';
         if (axios.isAxiosError(error)) {
             if (error.response) {
-                const { status, data } = error.response;
+                const {status, data} = error.response;
                 console.error('HTTP 错误:', status, data);
 
                 if (status === 404) {
@@ -327,7 +316,7 @@ onUnmounted(() => {
 
 <template>
 
-    <Toast />
+    <Toast/>
 
     <Drawer
         v-model:visible="dcf_research_report_drawer"
@@ -344,7 +333,7 @@ onUnmounted(() => {
             <div class="flex-1 overflow-y-auto p-3">
                 <!-- Markdown 内容 -->
                 <!-- 注意：如果内容很长，确保 MarkdownRenderer 内部没有设置固定高度 -->
-                <MarkdownRenderer :markdown="dcf_research_report?.content_text || '暂无报告内容'" />
+                <MarkdownRenderer :markdown="dcf_research_report?.content_text || '暂无报告内容'"/>
                 <!-- 底部占位符，防止内容被底部按钮栏遮挡 (如果按钮栏是 absolute/fixed) -->
                 <div class="h-4"></div>
             </div>
@@ -361,7 +350,8 @@ onUnmounted(() => {
                         variant="solid"
                         class="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                         size="small"
-                    >重新分析</Button>
+                    >重新分析
+                    </Button>
                 </div>
             </div>
         </div>
@@ -378,34 +368,37 @@ onUnmounted(() => {
                               'text-red-500': ohlc_data[ohlc_data.length-1]['chg_pct'] > 0,
                               'text-green-600': ohlc_data[ohlc_data.length-1]['chg_pct'] < 0,
                               }">
-            <span class="text-3xl font-bold">{{ formatCurrency(ohlc_data[ohlc_data.length-1]['close']) }}</span>&nbsp;
-            <span class="text-lg">{{ formatCurrency(ohlc_data[ohlc_data.length-1]['change_amount'], true) }}</span>&nbsp;
-            <span class="text-lg">{{ formatPercentage(ohlc_data[ohlc_data.length-1]['chg_pct'].toFixed(2), true) }}%</span>
+            <span class="text-3xl font-bold">{{ formatCurrency(ohlc_data[ohlc_data.length - 1]['close']) }}</span>&nbsp;
+            <span class="text-lg">{{ formatCurrency(ohlc_data[ohlc_data.length - 1]['change_amount'], true) }}</span>&nbsp;
+            <span class="text-lg">{{
+                    formatPercentage(ohlc_data[ohlc_data.length - 1]['chg_pct'].toFixed(2), true)
+                }}%</span>
         </h1>
 
         <SelectButton
-          v-model="chart_type"
-          :options="chartFilterOptions"
-          optionLabel="label"
-          optionValue="value"
-          @change="changeChartType"
-          size="small"
+            v-model="chart_type"
+            :options="chartFilterOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="changeChartType"
+            size="small"
         />
         <SelectButton
-          v-model="chart_indicator"
-          :options="chartIndicatorOptions"
-          optionLabel="label"
-          optionValue="value"
-          @change="changeChartIndicator"
-          data-testid="market-filter"
-          size="small"
-          class="ml-3"
+            v-model="chart_indicator"
+            :options="chartIndicatorOptions"
+            optionLabel="label"
+            optionValue="value"
+            @change="changeChartIndicator"
+            data-testid="market-filter"
+            size="small"
+            class="ml-3"
         />
 
         <div class="absolute top-8 right-8">
             <Button label="DCF估值分析" size="small" class="mr-2" @click="showDcfDrawer()" :loading="loading"></Button>
-            <Button :label="watched ? '已关注' : '关注'"  size="small" class="mr-2" @click="toggleLike()" :severity="watched ? '' : 'secondary'"></Button>
-            <SplitButton label="操作" :model="items" size="small" severity="secondary" />
+            <Button :label="watched ? '已关注' : '关注'" size="small" class="mr-2" @click="toggleLike()"
+                    :severity="watched ? '' : 'secondary'"></Button>
+            <SplitButton label="操作" :model="items" size="small" severity="secondary"/>
         </div>
     </div>
 
@@ -455,15 +448,17 @@ onUnmounted(() => {
 
             <div class="text-sm text-gray-500 mb-2" v-if="stock_profile?.beta">
                 Beta：{{ stock_profile?.beta }}
-                <i class="pi pi-info-circle info-icon" v-tooltip.top="'Beta是衡量该股票价格波动相对于整个市场（如大盘指数）波动幅度的系数'"></i>
+                <i class="pi pi-info-circle info-icon"
+                   v-tooltip.top="'Beta是衡量该股票价格波动相对于整个市场（如大盘指数）波动幅度的系数'"></i>
             </div>
 
             <div class="text-sm text-gray-500 mb-2" v-if="stock_profile?.website">
-                网站：<a :href="'https://' + stock_profile?.website" target="_blank">{{ stock_profile?.website || '加载中...' }}</a>
+                网站：<a :href="'https://' + stock_profile?.website"
+                        target="_blank">{{ stock_profile?.website || '加载中...' }}</a>
             </div>
 
             <div class="text-sm text-gray-500 mb-2">
-                最近更新：{{ formatDaysAgo(stock_info?.last_llm_analysis) || '加载中...' }}
+                最近更新：{{ formatDaysAgo(stock_info?.last_update) || '加载中...' }}
             </div>
 
         </div>
@@ -477,7 +472,7 @@ onUnmounted(() => {
             <div class="font-semibold text-lg">
                 <i class="pi pi-chart-line text-green-500"></i> 技术面分析
             </div>
-            <Divider />
+            <Divider/>
             <div class="mb-4 markdown-content" v-if="tech_report">
                 <MarkdownRenderer
                     :markdown="dictToMarkdownRecursive(tech_report.content_json['技术面深度诊断'])">
@@ -493,7 +488,7 @@ onUnmounted(() => {
                     【{{ fearGreedToText(greed_data?.[0]['fear_greed'])['advice'] }}】
                 </span>
             </div>
-            <Divider />
+            <Divider/>
             <div class="overflow-y-auto flex-1" v-if="greed_data">
                 <Chart type="line" :data="lineData" :options="lineOptions" style="height: 250px"></Chart>
             </div>
@@ -520,7 +515,9 @@ onUnmounted(() => {
                     <template #body="{ data }">
                         <div class="news-item">
 
-                            <div class="news-time">{{ formatDaysAgo(data.news_time) }} <a v-if="data.url !== null" :href="data.url" target="_blank"><i
+                            <div class="news-time">{{ formatDaysAgo(data.news_time) }} <a v-if="data.url !== null"
+                                                                                          :href="data.url"
+                                                                                          target="_blank"><i
                                 class="pi pi-link"></i></a></div>
                             <p class="news-digest font-semibold text-md" style="padding: 5px 0;">
                                 <Tag v-if="data.news_type === 'report'" severity="danger" class="stock-tag">研</Tag>
@@ -555,7 +552,7 @@ onUnmounted(() => {
                             <div class="tags">
                                 <span v-if="data.bullish_level > 0">利多</span>
                                 <span v-if="data.bullish_level < 0">利空</span>：
-                                <Rating :modelValue="data.bullish_level / 2" readonly />
+                                <Rating :modelValue="data.bullish_level / 2" readonly/>
                             </div>
                         </div>
                     </template>
@@ -622,10 +619,10 @@ onUnmounted(() => {
 }
 
 .info-icon {
-  font-size: 12px;
+    font-size: 12px;
 }
 
-.stock-price{
+.stock-price {
     font-family: "Sans Serif Collection";
 }
 

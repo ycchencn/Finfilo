@@ -22,6 +22,17 @@ prompt_quant_decision2 = ""
 
 prompt_template = Path(CURRENT_DIR / '../prompt_stock_tech_analysis.md').read_text(encoding='utf-8')
 
+# 定义映射字典：将中文阶段映射为数字
+PHASE_MAPPING = {
+    "吸筹阶段": 1,
+    "洗盘阶段": 2,
+    "拉升阶段": 3,
+    "出货阶段(初期)": 5,
+    "出货阶段 (初期)": 5,
+    "出货阶段(末期)": 6,
+    "出货阶段 (末期)": 6
+}
+
 def job_check_signal(_stock_code):
 
     stock_info = StockService.get_stock_by_symbol(symbol=_stock_code)
@@ -72,8 +83,25 @@ def job_check_signal(_stock_code):
     logger.info(f"传入大模型进行分析：{stock_name}【{_stock_code}】，大模型版本：{staff.model}")
 
     content = staff.ask(question=prompt)
+    content_json = json.loads(content)
 
-    # logger.info(content)
+    logger.info(content)
+
+    # "吸筹阶段|洗盘阶段|拉升阶段|出货阶段"
+    main_force_behavior_phase_str = content_json['技术面深度诊断'].get('主力行为阶段', '')
+    print(main_force_behavior_phase_str)
+    main_force_behavior_phase_str = main_force_behavior_phase_str.replace(' ', '')
+
+    # 如果匹配不到，默认设为 0 (代表未知/其他)
+    main_force_behavior_phase_int = PHASE_MAPPING.get(main_force_behavior_phase_str, 0)
+
+    # 主力行为阶段写入因子库
+    FactorValueService.create(
+        trade_date,
+        ticker=_stock_code,
+        factor_name='main_force_behavior_phase',
+        value=main_force_behavior_phase_int
+    )
 
     # 1. 单条插入
     data = {
@@ -84,7 +112,7 @@ def job_check_signal(_stock_code):
         "broker_name": staff.model,
         "analyst_name": "llm",
         "publish_time": get_today(),
-        "content_json": json.loads(content),
+        "content_json": content_json,
         "rating": "-",
     }
 
@@ -105,7 +133,7 @@ def job_check_signal_daily(override=False):
 
 if __name__ == '__main__':
 
-    stock_code = '688322'
+    stock_code = '688727'
     job_check_signal(_stock_code=stock_code)
 
     # job_check_signal_daily()

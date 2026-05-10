@@ -8,8 +8,8 @@ import pytz
 
 from utils.common import logger
 from apscheduler.schedulers.blocking import BlockingScheduler
-from job import job_market_digging_daily, job_update_stock_factor_daily
-from job.job_position_plan_daily import job_position_plan_daily_all
+from job import job_update_stock_factor_daily
+from backtest.strategy.ai_position_plan_daily import job_position_plan_daily_all
 from job.job_data_fix import job_update_stock_beta_all
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data_daily
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     scheduler.add_job(job_update_stock_beta_all, 'cron', hour=20, minute=15, timezone=beijing_tz)
 
     # 个股大模型数据分析任务 【每天八点半】
-    scheduler.add_job(job_market_digging_daily, 'cron', hour=20, minute=30, timezone=beijing_tz)
+    # scheduler.add_job(job_market_digging_daily, 'cron', hour=20, minute=30, timezone=beijing_tz)
 
     # 更新个股恐贪数据
     scheduler.add_job(job_update_stock_greedy_data_daily, 'cron', hour=20, minute=55, timezone=beijing_tz)

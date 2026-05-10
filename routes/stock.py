@@ -4,7 +4,6 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-import json
 from models import Stock, db
 from flask import request, jsonify, Blueprint
 from config import cache_setting
@@ -12,7 +11,7 @@ from app import api_prefix, cache
 from service import StockService, FactorValueService
 from service import JobService, MarketFearGreedService, ResearchReportService, CompanyProfileService
 from utils.data_loader import datajiji
-from utils.common import get_today, dict_to_markdown_recursive, get_date_by_years
+from utils.common import get_today, get_date_by_years
 
 stock_bp = Blueprint('stock', __name__)
 
@@ -32,8 +31,6 @@ def get_tech_analysis_report(stock_code):
     获取个股研报数据
     """
     report = ResearchReportService.get_by_code(stock_code=stock_code, report_type=2)
-    # report['content_json'] = json.loads(report.get('content_text'))
-    # del report['content_text']
     return jsonify(report)
 
 
@@ -102,8 +99,10 @@ def get_stocks_monitored():
     for stock in stocks:
         # 获取恐惧贪婪数据
         stock['greed_data'], stock['main_force_behavior_phase'] = get_main_force_behavior_phase(stock['symbol'])
-        stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'], factor_name='52week_low')
-        stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'], factor_name='52week_high')
+        stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'],
+                                                                         factor_name='52week_low')
+        stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'],
+                                                                          factor_name='52week_high')
 
         del stock['llm_analysis']
 
@@ -145,9 +144,6 @@ def add_stock():
 @stock_bp.route(f'{api_prefix}/stocks/<string:symbol>', methods=['GET'])
 def get_stock(symbol):
     stock = StockService.get_stock_by_symbol(symbol)
-    if stock['llm_analysis'] != "":
-        stock['llm_analysis'] = json.loads(stock['llm_analysis'])
-        stock['llm_analysis_markdown'] = dict_to_markdown_recursive(stock['llm_analysis'])
     stock['tech_indicator'] = {
         '52week_low': FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='52week_low'),
         '52week_high': FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='52week_high'),
@@ -158,7 +154,6 @@ def get_stock(symbol):
 @stock_bp.route('/api/v1/stock_history_db/<string:stock_code>', methods=['GET'])
 @cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
 def get_stock_history_db(stock_code):
-
     # 获取查询参数
     start_date = request.args.get('start_date', default=get_date_by_years(years=-3))
     end_date = request.args.get('end_date', default=get_today())

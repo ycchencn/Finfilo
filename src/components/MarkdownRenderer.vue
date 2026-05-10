@@ -77,7 +77,6 @@ export default {
     margin-top: 1em;
     margin-bottom: 0.5em;
     color: #2c3e50;
-    font-size: 14px; /* 统一标题字号或按需调整 */
     line-height: 1.3;
     border-bottom: none; /* 移除下划线 */
     padding: 0;
@@ -147,7 +146,7 @@ export default {
 .markdownContent ol {
     padding-left: 1.5em; /* 适当缩进 */
     margin: 0 0 0.8em 0;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .markdownContent li {

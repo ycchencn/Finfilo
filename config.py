@@ -101,3 +101,11 @@ llm_model_setting = {
 
 # 数据接口地址
 datajiji_host = os.getenv('DATAJIJI_HOST')
+
+# 策略设置
+strategy_setting = {
+    'news_limit': 100,
+    'stock_pool': 300,
+    'stock_position_limit': 10,
+    'max_market_limit': 120
+}

@@ -26,7 +26,7 @@ def get_analysis_model_by_setting(_setting_name='stock_analysis'):
 
     assert _staff is not None
 
-    if type(_setting) == str:
+    if isinstance(_setting.get('model'), str):
         _staff.set_model(model=_setting.get('model'))
     else:
         # 支持随机选模型

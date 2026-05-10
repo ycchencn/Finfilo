@@ -67,7 +67,7 @@ def job_market_digging_daily(override=False):
             continue
 
         # 分析间隔
-        llm_analysis_interval = stock.get('llm_analysis_interval')
+        llm_analysis_interval = stock.get('llm_analysis_interval', 1)
 
         days_diff = (date.today() - last_analysis_date).days
 
@@ -202,5 +202,5 @@ if __name__ == '__main__':
 
     # job_market_digging_daily(override=True)
 
-    stock_code = '603459'
+    stock_code = '002156'
     job_market_digging(stock_code, sync_history=False, send_notification=False)

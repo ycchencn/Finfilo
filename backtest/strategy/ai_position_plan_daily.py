@@ -14,6 +14,7 @@ from utils.common import df_to_compact_csv, send_feishu_markdown_message
 from typing import List, Dict
 from utils.gen_feishu_report import generate_feishu_report
 from prompts.prompt_generator import load_prompt_template_by_name
+from config import strategy_setting
 
 prompt_quant_decision = """
 '你现在是一名金融分析师，你对股票市场、金融市场、投资策略和财务规划有深厚的理解。'
@@ -23,18 +24,51 @@ prompt_quant_decision = """
 
 doubao_model = 'doubao-seed-1-8-251228'
 
+def adjust_position_plan(position_plan, holding_assets_dict):
+
+    assert 'actions' in position_plan
+
+    for action in position_plan['actions']:
+
+        # {'action': 'sell', 'reason': '持仓亏损，技术形态偏弱，且行业竞争加剧，为控制风险分批减仓。', 'quantity': 10, 'stock_code': '688256', 'stock_name': '寒武纪'}
+        if action['quantity'] == 0:
+            continue
+
+        lot_size = get_lot_size(action['stock_code'])
+
+        # 获取当前持仓数量
+        if action['stock_code'] in holding_assets_dict:
+            current_qty = holding_assets_dict[action['stock_code']]['position_size']
+        else:
+            current_qty = 0
+
+        # 计算调整后数量（向下取整到最接近的LOT_SIZE）
+        adjusted_qty = (action['quantity'] // lot_size) * lot_size
+
+        # 对于卖出操作，不能超过当前持仓
+        if action['action'] == 'sell':
+            adjusted_qty = min(adjusted_qty, current_qty)
+
+        # 确保至少为1手（除非清仓）
+        if adjusted_qty <= 0 and current_qty > 0:
+            adjusted_qty = lot_size if current_qty >= lot_size else current_qty
+
+        # 修正操作手数
+        action['quantity'] = adjusted_qty
+
+    return position_plan
+
+def get_lot_size(stock_code):
+    """根据股票代码获取市场手数"""
+    if stock_code.startswith('688'): return 200    # 沪市
+    if stock_code.startswith(('6', '9')): return 100    # 沪市
+    elif stock_code.startswith(('0', '3')): return 100  # 深市
+    else: return 100  # 默认
+
 def job_position_plan_daily(portfolio_id=None, send_feishu=False):
 
     if portfolio_id is None:
         return False
-
-    # 策略设置
-    strategy_setting = {
-        'news_limit': 100,
-        'stock_pool': 300,
-        'stock_position_limit': 10,
-        'max_market_limit': 120
-    }
 
     # 获取大盘数据
     market_data = IndexDailyDataService.get_history(
@@ -46,9 +80,10 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     # 获取持仓信息
     investment_info = InvestmentPortfolioService.get_by_portfolio_id(portfolio_id)
     holding_assets = PortfolioAssetsService.get_all_by_portfolio_id(portfolio_id)
+    holding_assets_dict = {ass['stock_code']: ass for ass in holding_assets}
 
     # 调仓计划
-    position_plan = investment_info.get('position_plan')
+    position_plan_old = investment_info.get('position_plan')
 
     # 根据策略获取大模型对象
     llm_base = investment_info.get('llm_base', 'doubao')
@@ -71,13 +106,6 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     # 近期新闻
     recent_news = MarketNewsService.get_by_time_range(limit=strategy_setting.get('news_limit'))
 
-    # 股指期货收盘分析报告todo
-
-    # print(stocks)
-    # print(investment_info)
-    # print(start_date)
-    # print(end_date)
-
     market_csv = df_to_compact_csv(market_data, max_rows=strategy_setting.get('max_market_limit', 120))
     template = Template(llm_prompt_str)
     template_sys = load_prompt_template_by_name('prompt_strategy_template')
@@ -85,16 +113,16 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     stock_pool_text = format_stock_pool_text(stock_pool)
 
     # 系统预设 prompt
-    prompt_sys = template_sys.safe_substitute(
-        current_date=get_today(),
-        market_data_csv=market_csv,
-        holdings_text=holdings_text,
-        stock_pool_text=stock_pool_text,
-        available_money=available_money,
-        stock_position_limit=strategy_setting.get('stock_position_limit', 8),
-        position_plan=position_plan,
-        recent_news=json.dumps(recent_news, ensure_ascii=False)
-    )
+    # prompt_sys = template_sys.safe_substitute(
+    #     current_date=get_today(),
+    #     market_data_csv=market_csv,
+    #     holdings_text=holdings_text,
+    #     stock_pool_text=stock_pool_text,
+    #     available_money=available_money,
+    #     stock_position_limit=strategy_setting.get('stock_position_limit', 8),
+    #     position_plan=position_plan,
+    #     recent_news=json.dumps(recent_news, ensure_ascii=False)
+    # )
 
     # 用户预设 prompt
     prompt = template.safe_substitute(
@@ -104,7 +132,7 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
         stock_pool_text=stock_pool_text,
         available_money=available_money,
         stock_position_limit=strategy_setting.get('stock_position_limit', 8),
-        position_plan=position_plan,
+        position_plan=position_plan_old,
         recent_news=json.dumps(recent_news, ensure_ascii=False)
     )
 
@@ -119,13 +147,15 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
 
     logger.info(f"#{portfolio_id}, 分析完成，调仓建议写入数据库，模型版本：{staff.model}")
 
+    position_plan = adjust_position_plan(answer_json, holding_assets_dict)
+
     InvestmentPortfolioService.update_by_portfolio_id(portfolio_id, {
-        'position_plan': answer_json,
-        'desc': answer_json.get('position_style'),
+        'position_plan': position_plan,
+        'desc': position_plan.get('position_style'),
     })
 
     if send_feishu:
-        report_md = generate_feishu_report(answer_json)
+        report_md = generate_feishu_report(position_plan)
         send_feishu_markdown_message(f"{investment_info.get('name')} - 交易复盘与策略", markdown_text=report_md)
 
     return True
@@ -170,6 +200,6 @@ def job_position_plan_daily_all(trade_day_override=False):
 
 if __name__ == '__main__':
 
-    job_position_plan_daily_all(trade_day_override=True)
+    # job_position_plan_daily_all(trade_day_override=True)
 
-    # job_position_plan_daily(portfolio_id=14, send_feishu=False)
+    job_position_plan_daily(portfolio_id=9, send_feishu=False)

@@ -4,6 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
+import random
 from staffs.qianwen_trader import QianWenTrader
 from staffs.llm_base_doubao import LLMBaseDoubao
 from staffs.llm_base_volcengine import LLMBaseVolcEngine
@@ -25,7 +26,12 @@ def get_analysis_model_by_setting(_setting_name='stock_analysis'):
 
     assert _staff is not None
 
-    _staff.set_model(model=_setting.get('model'))
+    if type(_setting) == str:
+        _staff.set_model(model=_setting.get('model'))
+    else:
+        # 支持随机选模型
+        _staff.set_model(model=random.choice(_setting.get('model')))
+
     return _staff
 
 

@@ -4,8 +4,8 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-import finfilo, json, time, random
-from staffs.llm_base_doubao import LLMBaseDoubao
+import finfilo, json, time
+from staffs import get_analysis_model_by_setting
 from service import MarketNewsService
 from service.stock_star_news import StockStarNewsScraper
 from service.wallstreet_fetcher import WallStreetCNFetcher
@@ -20,9 +20,7 @@ CURRENT_DIR = Path(__file__).parent
 AI 汇总每日盘前新闻
 """
 
-staff_analysis = LLMBaseDoubao()
-_model = random.choice(['doubao-seed-1-6-flash-250828', 'glm-4-7-251222'])
-staff_analysis.set_model(_model)
+staff_analysis = get_analysis_model_by_setting('news_analysis')
 staff_analysis.set_response_json()
 
 # template = load_prompt_template_by_name(template_name="prompt_news_analysis")
@@ -39,8 +37,6 @@ def llm_news_summarize(
     使用大模型对新闻进行归类
     """
 
-    time.sleep(5)
-
     news_md5 = string_to_md5(new)
 
     # 唯一性处理
@@ -52,7 +48,6 @@ def llm_news_summarize(
         news_content=str(new),
         prompt_155th=prompt_155th
     )
-    # logger.info(answer)
 
     answer = staff_analysis.ask(question_prompt)
 

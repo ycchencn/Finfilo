@@ -92,6 +92,10 @@ llm_model_setting = {
     'stock_tech_analysis': {
         'platform': 'volcengine',
         'model': 'deepseek-v3-2-251201'
+    },
+    'news_analysis': {
+        'platform': 'volcengine',
+        'model': ['doubao-seed-1-6-flash-250828', 'glm-4-7-251222']
     }
 }
 

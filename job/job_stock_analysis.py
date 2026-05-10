@@ -38,5 +38,5 @@ if __name__ == '__main__':
 
     # manual_analysis()
 
-    stock_code = '300567'
+    stock_code = '688260'
     job_stock_analysis(stock_code, sync_history=False)

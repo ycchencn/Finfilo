@@ -128,15 +128,6 @@ def get_stocks_greed_data(stock_code):
     return jsonify(greed_data)
 
 
-@stock_bp.route(f'/{api_prefix}/stocks', methods=['POST'])
-def add_stock():
-    data = request.get_json()
-    new_stock = Stock(**data)
-    db.session.add(new_stock)
-    db.session.commit()
-    return jsonify({'message': 'Stock added successfully!'}), 201
-
-
 @stock_bp.route(f'{api_prefix}/stocks/<string:symbol>', methods=['GET'])
 def get_stock(symbol):
     stock = StockService.get_stock_by_symbol(symbol)
@@ -195,10 +186,8 @@ def get_stock_profile(symbol):
 
 def _stock_reanalysis(symbol, sync_history=False, send_notification=False):
     stock = StockService.get_stock_by_symbol(symbol)
-
     if stock is None:
         return
-
     # 重新计算恐惧贪婪指标
     JobService.send_job({
         'job_func': 'job_stock_analysis',

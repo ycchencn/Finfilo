@@ -14,7 +14,8 @@ import {
     fearGreedToText,
     getLineChartOptions,
     formatCurrency,
-    formatPercentage
+    formatPercentage,
+    formatMarketCapToBillions
 } from '@/utils/function.js';
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue';
 import axios from 'axios';
@@ -29,6 +30,7 @@ const route = useRoute();
 const news = ref(null);
 const greed_data = ref([]);
 const ohlc_data = ref([]);
+const ohlc_last = ref({})
 const lineData = ref(null);
 const loading = ref(false);
 const lineOptions = ref(null);
@@ -139,6 +141,7 @@ onMounted(async () => {
 
     lineOptions.value = getLineChartOptions();
     stock_info.value = await fetchStockInfo(stock_code);
+    ohlc_last.value = stock_info.value.ohlc_last;
     stock_profile.value = await fetchStockProfile(stock_code)
     ohlc_data.value = await fetchStockMarketData(stock_code);
     chart = init('chart');
@@ -365,34 +368,15 @@ onUnmounted(() => {
         </h1>
 
         <h1 class="mb-3 stock-price" v-if="ohlc_data.length > 0" :class="{
-                              'text-red-500': ohlc_data[ohlc_data.length-1]['chg_pct'] > 0,
-                              'text-green-600': ohlc_data[ohlc_data.length-1]['chg_pct'] < 0,
+                              'text-red-500': ohlc_last['chg_pct'] > 0,
+                              'text-green-600': ohlc_last['chg_pct'] < 0,
                               }">
-            <span class="text-3xl font-bold">{{ formatCurrency(ohlc_data[ohlc_data.length - 1]['close']) }}</span>&nbsp;
-            <span class="text-lg">{{ formatCurrency(ohlc_data[ohlc_data.length - 1]['change_amount'], true) }}</span>&nbsp;
+            <span class="text-3xl font-bold">{{ formatCurrency(ohlc_last['close']) }}</span>&nbsp;
+            <span class="text-lg">{{ formatCurrency(ohlc_last['change_amount'], true) }}</span>&nbsp;
             <span class="text-lg">{{
-                    formatPercentage(ohlc_data[ohlc_data.length - 1]['chg_pct'].toFixed(2), true)
+                    formatPercentage(ohlc_last['chg_pct'].toFixed(2), true)
                 }}%</span>
         </h1>
-
-        <SelectButton
-            v-model="chart_type"
-            :options="chartFilterOptions"
-            optionLabel="label"
-            optionValue="value"
-            @change="changeChartType"
-            size="small"
-        />
-        <SelectButton
-            v-model="chart_indicator"
-            :options="chartIndicatorOptions"
-            optionLabel="label"
-            optionValue="value"
-            @change="changeChartIndicator"
-            data-testid="market-filter"
-            size="small"
-            class="ml-3"
-        />
 
         <div class="absolute top-8 right-8">
             <Button label="DCF估值分析" size="small" class="mr-2" @click="showDcfDrawer()" :loading="loading"></Button>
@@ -405,6 +389,26 @@ onUnmounted(() => {
     <div class="pd-2-0 mt-5 flex flex-col md:flex-row gap-6">
 
         <div class="w-full md:w-2/3 flex flex-col min-h-0">
+            <div class="card p-0 mb-3">
+                <SelectButton
+                    v-model="chart_type"
+                    :options="chartFilterOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    @change="changeChartType"
+                    size="small"
+                />
+                <SelectButton
+                    v-model="chart_indicator"
+                    :options="chartIndicatorOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    @change="changeChartIndicator"
+                    data-testid="market-filter"
+                    size="small"
+                    class="ml-3"
+                />
+            </div>
             <div id="chart"></div>
         </div>
 
@@ -427,7 +431,7 @@ onUnmounted(() => {
             <hr class="mt-2 mb-2"/>
 
             <div class="text-sm text-gray-500 mb-2">
-                题材概念：{{ stock_info?.concepts || '加载中...' }}
+                {{ stock_info?.concepts || '加载中...' }}
             </div>
 
             <div class="text-sm text-gray-500 mb-2">
@@ -436,6 +440,10 @@ onUnmounted(() => {
 
             <div class="text-sm text-gray-500 mb-2" v-if="stock_profile?.office_address">
                 地址：{{ stock_profile?.office_address || '加载中...' }}
+            </div>
+
+            <div class="text-sm text-gray-500 mb-2">
+                流通市值：{{ formatMarketCapToBillions(stock_info?.instrument_detail?.FloatVolume * ohlc_last['close']) }}
             </div>
 
             <div class="text-sm text-gray-500 mb-2">

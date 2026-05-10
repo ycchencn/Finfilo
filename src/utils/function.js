@@ -274,6 +274,18 @@ const FEAR_GREED_LEVELS = {
 };
 
 /**
+ * 格式化股票流通市值为亿单位
+ * @param {Number} value - 原始市值（单位：元）
+ * @returns {String} 格式化后的字符串，如"15.00亿"
+ */
+export function formatMarketCapToBillions(value) {
+  if (value >= 100000000) {
+    return (value / 100000000).toFixed(2) + ' 亿';
+  }
+  return value.toString();
+}
+
+/**
  * 将恐惧贪婪数值转换为文字描述
  * @param {number} value - 恐惧贪婪指数值 (0-100)
  * @returns {Object} 包含文字、颜色和建议的描述对象

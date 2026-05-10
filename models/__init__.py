@@ -49,6 +49,7 @@ class Stock(Base):
     setting = Column(JSON, default={})
     ohlc_count = Column(Integer, default=0)
     ohlc_last = Column(JSON, default={})
+    instrument_detail = Column(JSON, default={})
 
     def __repr__(self):
         return f"<Stock(ts_code='{self.ts_code}', name='{self.name}')>"
@@ -82,7 +83,8 @@ class Stock(Base):
             'company_desc': self.company_desc,
             'setting': self.setting,
             'ohlc_count': self.ohlc_count,
-            'ohlc_last': self.ohlc_last
+            'ohlc_last': self.ohlc_last,
+            'instrument_detail': self.instrument_detail
         }
 
 

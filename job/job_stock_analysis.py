@@ -29,17 +29,18 @@ def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
     # 旧版分析
     job_market_digging(stock_code, sync_history=False, send_notification=send_notification)
 
-if __name__ == '__main__':
-
+def manual_analysis():
     items = UserWatchlistService.get_all()
     # 将对象转换为字典列表
     watchlist = [item.to_dict() for item in items] if items else []
     for item in watchlist:
         # print(item['stock_code'])
-        stock_info = StockService.get_stock_by_symbol(symbol=item['stock_code'])
-        if stock_info['llm_analysis'] is not None:
-            continue
+        # stock_info = StockService.get_stock_by_symbol(symbol=item['stock_code'])
+        # if stock_info['llm_analysis'] is not None:
+        #     continue
         job_stock_analysis(item['stock_code'], sync_history=False)
 
-    # stock_code = '688182'
-    # job_stock_analysis(stock_code, sync_history=False)
+if __name__ == '__main__':
+
+    stock_code = '688307'
+    job_stock_analysis(stock_code, sync_history=False)

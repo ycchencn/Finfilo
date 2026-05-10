@@ -9,7 +9,7 @@ from staffs.llm_base_doubao import LLMBaseDoubao
 from staffs.llm_base_volcengine import LLMBaseVolcEngine
 from staffs.llm_base_zhipu import LLMBaseZhipu
 
-def get_staff(llm_base='doubao'):
+def get_staff(llm_base='doubao', model=None):
 
     _staff = None
 
@@ -25,5 +25,10 @@ def get_staff(llm_base='doubao'):
     if llm_base == 'deepseek':
         _staff = LLMBaseVolcEngine()
         _staff.set_model(model='deepseek-v3-2-251201')
+
+    assert _staff is not None
+
+    if model is not None:
+        _staff.set_model(model=model)
 
     return _staff

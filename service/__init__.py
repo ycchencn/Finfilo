@@ -11,7 +11,8 @@ from service.market_daily_limit_service import MarketDailyLimitService
 from service.portfolio_assets_service import PortfolioAssetsService
 from service.investment_portfolio import InvestmentPortfolioService
 from service.market_news_service import MarketNewsService
-from service.factor_service import FactorValueService, FactorSelectorService
+from service.factor_service import FactorValueService
+from service.factor_selector_service import FactorSelectorService
 from service.index_constituents_service import IndexConstituentsService
 from service.future_basis_service import FuturesBasisWideService
 from service.factor_cal_service import FactorCalService

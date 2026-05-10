@@ -23,3 +23,5 @@ testcase/symbols_*.json
 .pyc
 .env.dev
 .vscode
+service/cache
+service/df_cache

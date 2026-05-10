@@ -16,12 +16,6 @@ from sqlalchemy import or_, asc, desc
 class StockService:
 
     @staticmethod
-    def get_stock_by_ts_code(ts_code: str) -> Optional[Dict[str, Any]]:
-        """根据 ts_code 获取股票信息"""
-        stock = db_session.query(Stock).filter_by(ts_code=ts_code).first()
-        return stock.to_dict() if stock else None
-
-    @staticmethod
     def get_stock_by_symbol(
         symbol: str,
         fields: Optional[List[str]] = None
@@ -133,92 +127,6 @@ class StockService:
             query = query.filter(Stock.monitoring == monitoring)
         if save_history:
             query = query.filter(Stock.save_history == save_history)
-
-        # --- 2. 字段选择 ---
-        # 注意：如果指定了 order_by，建议确保排序字段包含在查询字段中，或者 SQLAlchemy 能够处理
-        if fields:
-            column_attributes = [getattr(Stock, field) for field in fields if hasattr(Stock, field)]
-            if column_attributes:
-                query = query.with_entities(*column_attributes)
-
-        # --- 3. 应用排序逻辑 (新增部分) ---
-        if order_by and hasattr(Stock, order_by):
-            # 获取排序列属性
-            sort_column = getattr(Stock, order_by)
-
-            # 根据方向应用排序
-            if order_direction.lower() == 'desc':
-                query = query.order_by(desc(sort_column))
-            else:
-                # 默认为升序
-                query = query.order_by(asc(sort_column))
-        # 如果没有指定 order_by，或者指定的字段不存在于模型中，则保持默认顺序（通常是主键顺序或数据库物理顺序）
-
-        # --- 4. 分页 ---
-        offset = (page - 1) * per_page
-        results = query.offset(offset).limit(per_page).all()
-
-        # --- 5. 结果处理 ---
-        if fields:
-            # 如果指定了字段，需要手动构建字典
-            # 注意：这里假设 results 中的元组顺序与 fields 列表顺序一致
-            return [dict(zip(fields, result)) for result in results]
-        else:
-            # 未指定字段，使用原有的 to_dict() 方法
-            return [stock.to_dict() for stock in results]
-
-    @staticmethod
-    def search_stocks_v2(
-        keyword: str = None,
-        market: str = None,
-        concepts: str = None,
-        securities_type: str = None,
-        monitoring: int = None,
-        save_history: int = None,
-        ohlc_count: int = None,
-        page: int = 1,
-        per_page: int = 50,
-        fields: Optional[List[str]] = None,
-        order_by: str = None,  # 新增：排序字段
-        order_direction: str = 'asc'  # 新增：排序方向 ('asc' 或 'desc')
-    ) -> List[Dict[str, Any]]:
-        """
-        多条件组合查询股票，支持字段筛选和排序。
-
-        :param keyword: 在 name 或 ts_code 中模糊匹配
-        :param market: 市场（如 'SZ', 'SH'）
-        :param concepts: 概念
-        :param securities_type: 证券类型
-        :param monitoring: 个股监控标记
-        :param save_history: 个股历史数据标记
-        :param ohlc_count: 个股历史数据数量
-        :param page: 分页页码
-        :param per_page: 每页数量
-        :param fields: 指定返回的字段列表。如果为 None，返回所有字段。
-        :param order_by: 指定排序的字段名 (例如 'name', 'market')
-        :param order_direction: 排序方向，'asc' (升序) 或 'desc' (降序)，默认 'asc'
-        :return: 股票字典列表
-        """
-        query = db_session.query(Stock)
-
-        # --- 1. 应用过滤条件 ---
-        if keyword:
-            keyword = f"%{keyword}%"
-            query = query.filter(or_(
-                Stock.name.like(keyword)
-            ))
-        if market:
-            query = query.filter(Stock.market == market)
-        if concepts:
-            query = query.filter(Stock.concepts == concepts)
-        if securities_type:
-            query = query.filter(Stock.securities_type == securities_type)
-        if monitoring:
-            query = query.filter(Stock.monitoring == monitoring)
-        if save_history:
-            query = query.filter(Stock.save_history == save_history)
-        if ohlc_count:
-            query = query.filter(Stock.ohlc_count <= ohlc_count)
 
         # --- 2. 字段选择 ---
         # 注意：如果指定了 order_by，建议确保排序字段包含在查询字段中，或者 SQLAlchemy 能够处理

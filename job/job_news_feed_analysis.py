@@ -77,33 +77,7 @@ def llm_news_summarize(
         url=url
     )
 
-    relations_stocks = answer_json.get("relations_stocks")
-
-    # 个股关联入库
-    # if relations_stocks and len(relations_stocks) > 0 and answer_json.get("bullish_level") >= 6 and answer_json.get(
-    #     "relation_level") >= 5:
-    #
-    #     for stock in relations_stocks:
-    #         _stock = StockService.get_stock_by_symbol(symbol=stock["code"])
-    #         if _stock is None or _stock.get('monitoring') == 1:
-    #             continue
-    #         # 跳过港股
-    #         if _stock.get('market') != 'cn':
-    #             continue
-    #         logger.info(f"自动添加个股到监控列表，{stock['code']}")
-    #         StockService.upsert_stock({
-    #             "symbol": stock["code"],
-    #             "monitoring": 1,
-    #             "monitor_by": 'ai'
-    #         })
-    #         # 提交更新个股历史行情数据
-    #         JobService.send_job({
-    #             'job_func': 'job_update_market_data_all',
-    #             'job_args': {
-    #                 'stock_code_override': stock["code"],
-    #                 'delete_old_data': True,
-    #             }
-    #         })
+    # relations_stocks = answer_json.get("relations_stocks")
 
     logger.info(f"market news imported, {news_md5}")
 

@@ -75,11 +75,6 @@ cache_setting = {
 }
 
 # 大模型配置
-llm_models = {
-    'qwen': os.getenv('LLM_MODEL_QWEN')
-}
-
-# 大模型配置
 llm_model_setting = {
     'stock_dcf_analysis': {
         'platform': 'aliyun',

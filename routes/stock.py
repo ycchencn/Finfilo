@@ -51,14 +51,20 @@ def update_stock(symbol):
     if not symbol or not isinstance(symbol, str):
         return jsonify({'message': 'Invalid symbol'}), 400
 
-    # 获取个股信息
-    stock = StockService.get_stock_by_symbol(symbol)
-
-    if not stock:
-        return jsonify({'message': 'No stock found!'}), 404
-
-    if stock.get('securities_type') != 'stock':
-        return jsonify({'code': 0, 'message': '该代码不属于股票类型'}), 404
+    if not StockService.exists(symbol):
+        # 个股不在数据库，查询api获取
+        stock = datajiji.get_stock_info(symbol, market=data.get('market', 'cn'))
+        # 自动添加
+        StockService.upsert_stock({
+            'symbol': symbol,
+            'ts_code': stock.get('ts_code'),
+            'name': stock.get('name'),
+            'market': 'cn',
+            'securities_type': 'stock',
+        })
+    else:
+        # 获取个股信息
+        stock = StockService.get_stock_by_symbol(symbol)
 
     data['symbol'] = symbol
     StockService.upsert_stock(data)

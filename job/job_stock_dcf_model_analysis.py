@@ -16,7 +16,7 @@ from string import Template
 # 获取当前 Python 文件所在目录
 CURRENT_DIR = Path(__file__).parent
 
-prompt_template = Path(CURRENT_DIR / './prompt_stock_analysis_v2.md').read_text(encoding='utf-8')
+prompt_template = Path(CURRENT_DIR / './prompt_stock_dcf_analysis.md').read_text(encoding='utf-8')
 
 
 def get_stock_detail(_stock_code, market):
@@ -26,7 +26,9 @@ def get_stock_detail(_stock_code, market):
 
 
 def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
+
     staff = get_analysis_model_by_setting(_setting_name='stock_dcf_analysis')
+    staff.role_base = '你需要根据客户提供的资料对股票进行DCF估值分析，请使用Markdown输出'
     staff.set_response_text()
 
     trade_date = FactorValueService.get_latest_trading_date()
@@ -109,7 +111,7 @@ def send_job(_stock_code, send_notification=False, sync_history=False):
 
 
 if __name__ == '__main__':
-    stock_code = '002812'
+    stock_code = '300450'
     job_stock_dcf_model_analysis(stock_code)
 
     # job_stock_dcf_model_analysis_daily(override=True)

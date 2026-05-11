@@ -23,13 +23,14 @@ def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
             'name': stock.get('name'),
             'market': 'cn',
             'securities_type': 'stock',
+            'monitoring': 1
         })
 
     # 计算走势指标
     job_update_stock_greedy_data(index_code=stock_code, override_all=True)
 
     # 计算因子
-    job_update_stock_factor(stock_code=stock_code, save_last=False, time_period=-360)
+    job_update_stock_factor(stock_code=stock_code, save_last=False, time_period=-1200)
 
     # DCF模型分析
     job_stock_dcf_model_analysis(stock_code, send_notification=send_notification)
@@ -51,5 +52,5 @@ def manual_analysis():
 if __name__ == '__main__':
     # manual_analysis()
 
-    stock_code = '603881'
+    stock_code = '300450'
     job_stock_analysis(stock_code, sync_history=False)

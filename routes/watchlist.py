@@ -5,8 +5,8 @@
 """
 
 from flask import jsonify, Blueprint, request
-from app import api_prefix, cache  # 假设这些在你的 app __init__ 中已定义
-from service.user_watchlist_service import UserWatchlistService  # 引入刚才写的 Service
+from app import api_prefix, cache
+from service.user_watchlist_service import UserWatchlistService
 from service import StockService, FactorValueService, MarketFearGreedService
 from utils.common import logger
 
@@ -59,6 +59,8 @@ def get_watchlist():
                 'concepts',
                 'ohlc_last'
             ])
+            if _stock is None:
+                continue
             _stock['greed_data'], _stock['main_force_behavior_phase'] = get_main_force_behavior_phase(_stock['symbol'])
             _stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_low')
             _stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_high')

@@ -161,7 +161,10 @@ class StrategyRunner:
             try:
 
                 # 从数据库获取行情数据
-                df = datajiji.get_history(code, trading_date, trading_date)
+                if is_etf(code):
+                    df = datajiji.get_etf_history(code, trading_date, trading_date)
+                else:
+                    df = datajiji.get_history(code, trading_date, trading_date)
 
                 if df is None or df.empty:
                     logger.warning(f"⚠️ 行情缺失: {code} 在 {trading_date} 无数据")

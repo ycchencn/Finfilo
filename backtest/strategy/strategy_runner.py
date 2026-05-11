@@ -234,6 +234,8 @@ class DailyStrategySimulator:
     def _get_stock_name(self, code: str) -> str:
         """简易股票名称映射（实际可从 holdings 或外部字典获取）"""
         stock = StockService.get_stock_by_symbol(symbol=code)
+        if stock is None:
+            return '-'
         return stock.get('name')
 
     def save_daily_pnl_to_db(self, trading_date: str, total_value: float, daily_pnl_change:float, overwrite: bool = False):

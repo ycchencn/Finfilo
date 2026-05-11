@@ -10,8 +10,20 @@ from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data
 from job.job_check_signal import job_check_signal
 from job.job_update_factors import job_update_stock_factor
+from utils.data_loader import datajiji
+
 
 def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
+
+    stock = datajiji.get_stock_info(stock_code)
+    if not StockService.exists(stock_code):
+        StockService.upsert_stock({
+            'symbol': stock_code,
+            'ts_code': stock.get('ts_code'),
+            'name': stock.get('name'),
+            'market': 'cn',
+            'securities_type': 'stock',
+        })
 
     # 计算走势指标
     job_update_stock_greedy_data(index_code=stock_code, override_all=True)
@@ -25,6 +37,7 @@ def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
     # 技术分析
     job_check_signal(stock_code)
 
+
 def manual_analysis():
     items = UserWatchlistService.get_all()
     # 将对象转换为字典列表
@@ -34,9 +47,9 @@ def manual_analysis():
         # stock_info = StockService.get_stock_by_symbol(symbol=item['stock_code'])
         job_stock_analysis(item['stock_code'], sync_history=False)
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     # manual_analysis()
 
-    stock_code = '688260'
+    stock_code = '603881'
     job_stock_analysis(stock_code, sync_history=False)

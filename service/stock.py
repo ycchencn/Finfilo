@@ -162,9 +162,9 @@ class StockService:
             return [stock.to_dict() for stock in results]
 
     @staticmethod
-    def exists(ts_code: str) -> bool:
+    def exists(symbol: str) -> bool:
         """判断股票是否已存在"""
-        return db_session.query(Stock).filter_by(ts_code=ts_code).first() is not None
+        return db_session.query(Stock).filter_by(symbol=symbol).first() is not None
 
     @staticmethod
     def count() -> int:

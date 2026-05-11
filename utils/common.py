@@ -4,6 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
+import re
 import pytz
 import hashlib
 import logging, requests, json
@@ -16,6 +17,106 @@ from functools import wraps
 from datetime import datetime, timedelta, date
 from config import feishu_webhook_url
 from typing import Any, Callable
+from typing import Optional
+
+
+def validate_stock_code(code: str) -> bool:
+    """
+    @brief 校验股票代码是否符合 A股、港股或美股的常见格式规范
+
+    @param code: 待校验的股票代码字符串（如 '600519', '00700', 'AAPL'）
+    @type code: str
+
+    @return: 若代码格式有效则返回 True，否则返回 False
+    @rtype: bool
+
+    @throws: 无（不会抛出异常，输入非字符串将返回 False）
+
+    @example:
+        # A股
+        assert validate_stock_code("600519") is True
+        assert validate_stock_code("000001") is True
+        assert validate_stock_code("300750") is True
+
+        # 港股
+        assert validate_stock_code("00700") is True
+        assert validate_stock_code("700") is True   # 自动补零后为 '00700'
+        assert validate_stock_code("9988") is True  # 视为 '09988'
+
+        # 美股
+        assert validate_stock_code("AAPL") is True
+        assert validate_stock_code("BRK.B") is True
+        assert validate_stock_code("TSLA") is True
+
+        # 无效
+        assert validate_stock_code("1234567") is False  # 超长
+        assert validate_stock_code("abc!") is False     # 含非法字符
+        assert validate_stock_code("") is False
+    """
+    if not isinstance(code, str):
+        return False
+
+    code = code.strip().upper()
+    if not code:
+        return False
+
+    # === 1. 美股：1~5个大写字母，可含一个点（如 BRK.B）
+    if re.fullmatch(r'^[A-Z]{1,5}(\.[A-Z]{1,5})?$', code):
+        # 确保最多只有一个点（re 已保证），且总长度 <= 6（如 BRK.B 是5字符）
+        if code.count('.') <= 1 and len(code) <= 6:
+            return True
+
+    # === 2. A股：6位数字，首字符为 0/3/6
+    if re.fullmatch(r'^\d{6}$', code):
+        if code[0] in {'0', '3', '6'}:
+            return True
+
+    # === 3. 港股：原始为1~5位数字，允许用户输入时不补零（如 "700"）
+    if code.isdigit() and 1 <= len(code) <= 5:
+        # 补零到5位后应在 00001 ~ 99999 范围内（排除全0）
+        num = int(code)
+        if 1 <= num <= 99999:
+            return True
+
+    return False
+
+
+def normalize_stock_code(code: str, market_hint: Optional[str] = None) -> Optional[str]:
+    """
+    @brief 将股票代码标准化为统一格式（可选市场提示）
+
+    @param code: 原始股票代码
+    @type code: str
+    @param market_hint: 可选市场提示，如 'HK', 'US', 'CN'
+    @type market_hint: str or None
+
+    @return: 标准化后的代码（如港股补零为5位，美股大写），若无效则返回 None
+    @rtype: str or None
+
+    @example:
+        assert normalize_stock_code("700") == "00700"
+        assert normalize_stock_code("aapl") == "AAPL"
+        assert normalize_stock_code("600519") == "600519"
+    """
+    if not validate_stock_code(code):
+        return None
+
+    code = code.strip().upper()
+
+    # 美股：直接返回大写
+    if re.fullmatch(r'^[A-Z]{1,5}(\.[A-Z]{1,5})?$', code):
+        return code
+
+    # A股：6位数字，直接返回
+    if re.fullmatch(r'^\d{6}$', code):
+        return code
+
+    # 港股：补零至5位
+    if code.isdigit():
+        return code.zfill(5)
+
+    return None
+
 
 def get_date_by_n(n, format='%Y%m%d'):
     """
@@ -58,7 +159,8 @@ def get_date_by_years(date=None, years=1, format='%Y%m%d'):
         # 如果遇到闰年的2月29日且目标年不是闰年，调整到2月28日
         if date.month == 2 and date.day == 29:
             if (date.year % 4 == 0 and (date.year % 100 != 0 or date.year % 400 == 0)) and \
-                ((date.year + years) % 4 != 0 or ((date.year + years) % 100 == 0 and (date.year + years) % 400 != 0)):
+                    ((date.year + years) % 4 != 0 or (
+                            (date.year + years) % 100 == 0 and (date.year + years) % 400 != 0)):
                 adjusted_date = date.replace(month=2, day=28, year=date.year + years)
             else:
                 raise
@@ -69,6 +171,7 @@ def get_date_by_years(date=None, years=1, format='%Y%m%d'):
     formatted_date = adjusted_date.strftime(format)
 
     return formatted_date
+
 
 def df_to_compact_csv(df: pd.DataFrame, max_rows: int = 120) -> str:
     """
@@ -543,7 +646,7 @@ def calculate_market_temperature(data, weighted_turnover_ratios, market_limit_da
 
     # 涨跌幅比率
     rw_ratio = (market_limit_data['rising'] - market_limit_data['falling']) / (
-        market_limit_data['rising'] + market_limit_data['falling'])
+            market_limit_data['rising'] + market_limit_data['falling'])
 
     # 根据市场变化调整基础温度
     temperature_base += (market_change * 0.75)
@@ -771,9 +874,9 @@ def fix_stock_symbol(symbol):
     # 4. 兜底
     return code
 
+
 # 初始化日志
 logger = initialize_logging()
-
 
 # --- 测试示例 ---
 if __name__ == "__main__":

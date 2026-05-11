@@ -10,9 +10,23 @@ from app import api_prefix, cache
 from service import StockService, FactorValueService
 from service import JobService, MarketFearGreedService, ResearchReportService
 from utils.data_loader import datajiji
-from utils.common import get_today, get_date_by_years
+from utils.common import get_today, get_date_by_years, validate_stock_code
 
 stock_bp = Blueprint('stock', __name__)
+
+
+def get_main_force_behavior_phase(code):
+    greed_data = MarketFearGreedService.get_latest_by_index(index_code=code)
+    if greed_data is None:
+        greed_data = {
+            "fear_greed": 0
+        }
+    # 获取 main_force_behavior_phase
+    main_force_behavior_phase = FactorValueService.get_latest_factor_value(
+        ticker=code,
+        factor_name='main_force_behavior_phase'
+    )
+    return greed_data, main_force_behavior_phase
 
 
 @stock_bp.route(f'{api_prefix}/stock/dcf_research_report/<string:stock_code>', methods=['GET'])
@@ -41,9 +55,13 @@ def update_stock(symbol):
 
     data = request.get_json(silent=True)
 
+    if not validate_stock_code(symbol):
+        return jsonify({'message': 'Invalid symbol'}), 500
+
     # 1. 检查请求体是否为有效 JSON
     if not request.is_json:
         return jsonify({'message': 'Request must be JSON'}), 400
+
     if data is None:
         return jsonify({'message': 'Invalid JSON'}), 400
 
@@ -53,41 +71,31 @@ def update_stock(symbol):
 
     if not StockService.exists(symbol):
         # 个股不在数据库，查询api获取
-        stock = datajiji.get_stock_info(symbol, market=data.get('market', 'cn'))
+        stock_api = datajiji.get_stock_info(symbol, market=data.get('market', 'cn'))
         # 自动添加
         StockService.upsert_stock({
             'symbol': symbol,
-            'ts_code': stock.get('ts_code'),
-            'name': stock.get('name'),
-            'market': 'cn',
+            'ts_code': stock_api.get('ts_code'),
+            'name': stock_api.get('name'),
+            'market': data.get('market', 'cn'),
             'securities_type': 'stock',
+            'monitoring': 1
         })
     else:
         # 获取个股信息
-        stock = StockService.get_stock_by_symbol(symbol)
-
-    data['symbol'] = symbol
-    StockService.upsert_stock(data)
-    is_update_history = request.args.get('is_update_history', type=int, default=1)
+        # stock = StockService.get_stock_by_symbol(symbol)
+        data['symbol'] = symbol
+        StockService.upsert_stock({
+            'symbol': symbol,
+            'market': data.get('market', 'cn'),
+            'monitoring': data.get('monitoring', 1)
+        })
 
     # 提交个股分析任务
-    if is_update_history:
+    if request.args.get('is_update_history', type=int, default=1):
         _stock_reanalysis(symbol, sync_history=False, send_notification=True)
 
     return jsonify({'code': 0, 'message': 'Stock updated successfully!'})
-
-
-# @lru_redis_cache()
-def get_main_force_behavior_phase(code):
-    greed_data = MarketFearGreedService.get_latest_by_index(index_code=code)
-    if greed_data is None:
-        greed_data = {
-            "fear_greed": 0
-        }
-    # 获取 main_force_behavior_phase
-    main_force_behavior_phase = FactorValueService.get_latest_factor_value(ticker=code,
-                                                                           factor_name='main_force_behavior_phase')
-    return greed_data, main_force_behavior_phase
 
 
 @stock_bp.route(f'{api_prefix}/stocks_monitored', methods=['GET'])
@@ -104,8 +112,14 @@ def get_stocks_monitored():
     for stock in stocks:
         # 获取恐惧贪婪数据
         stock['greed_data'], stock['main_force_behavior_phase'] = get_main_force_behavior_phase(stock['symbol'])
-        stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'], factor_name='52week_low')
-        stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=stock['symbol'], factor_name='52week_high')
+        stock['52week_low'] = FactorValueService.get_latest_factor_value(
+            ticker=stock['symbol'],
+            factor_name='52week_low'
+        )
+        stock['52week_high'] = FactorValueService.get_latest_factor_value(
+            ticker=stock['symbol'],
+            factor_name='52week_high'
+        )
 
     return jsonify(stocks)
 
@@ -131,13 +145,16 @@ def get_stocks_greed_data(stock_code):
     return jsonify(greed_data)
 
 
-@stock_bp.route(f'{api_prefix}/stocks/<string:symbol>', methods=['GET'])
-def get_stock(symbol):
-    stock = StockService.get_stock_by_symbol(symbol)
-    # stock = datajiji.get_stock_info(symbol)
+@stock_bp.route(f'{api_prefix}/stocks/<string:stock_code>', methods=['GET'])
+def get_stock(stock_code):
+    if not validate_stock_code(stock_code):
+        return jsonify({'code': -1, 'message': 'invalid stock code!'}), 500
+
+    stock = StockService.get_stock_by_symbol(stock_code)
+    # stock = datajiji.get_stock_info(stock_code)
     stock['tech_indicator'] = {
-        '52week_low': FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='52week_low'),
-        '52week_high': FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='52week_high'),
+        '52week_low': FactorValueService.get_latest_factor_value(ticker=stock_code, factor_name='52week_low'),
+        '52week_high': FactorValueService.get_latest_factor_value(ticker=stock_code, factor_name='52week_high'),
     }
     return jsonify(stock)
 
@@ -145,6 +162,9 @@ def get_stock(symbol):
 @stock_bp.route('/api/v1/stock_history_db/<string:stock_code>', methods=['GET'])
 @cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
 def get_stock_history_db(stock_code):
+    if not validate_stock_code(stock_code):
+        return jsonify({'code': -1, 'message': 'invalid stock code!'}), 500
+
     # 获取查询参数
     start_date = request.args.get('start_date', default=get_date_by_years(years=-3))
     end_date = request.args.get('end_date', default=get_today())
@@ -164,8 +184,11 @@ def stock_re_analysis(symbol):
 
 @stock_bp.route(f'{api_prefix}/stock/re_analysis_dcf/<string:symbol>', methods=['PUT'])
 def stock_re_analysis_dcf(symbol):
+    if not validate_stock_code(symbol):
+        return jsonify({'code': -1, 'message': 'invalid stock code!'}), 500
+
     if StockService.get_stock_by_symbol(symbol) is None:
-        return jsonify({'code': -1, 'message': 'Stock not found!'})
+        return jsonify({'code': -1, 'message': 'Stock not found!'}), 404
 
     # 提交任务
     JobService.send_job({
@@ -182,6 +205,8 @@ def stock_re_analysis_dcf(symbol):
 @stock_bp.route(f'{api_prefix}/stocks/profile/<string:symbol>', methods=['GET'])
 @cache.cached(timeout=cache_setting.get('stock_list'), query_string=True)
 def get_stock_profile(symbol):
+    if not validate_stock_code(symbol):
+        return jsonify({}), 500
     stock_info = StockService.get_stock_by_symbol(symbol)
     stock_info_api = datajiji.get_stock_info(symbol, market=stock_info.get('market'))
     profile = stock_info_api.get('profile', {})

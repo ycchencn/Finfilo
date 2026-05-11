@@ -814,82 +814,6 @@ class PortfolioTransaction(Base):
         }
 
 
-class CompanyProfile(Base):
-    __tablename__ = 'company_profiles'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    stock_code = Column(String(20), index=True, comment="股票代码")
-    company_name = Column(String(255), nullable=False, comment="公司中文名称")
-
-    # --- 新增/修正字段 ---
-    establish_date = Column(String(20), comment="成立日期 (格式如 1985-07-04)")
-    # 注意：这里用 String 而不是 Date，因为解析数据可能包含非标准格式，或者为了兼容“1985年7月4日”等格式
-    registered_capital = Column(String(50), comment="注册资本 (如 157168.05)")
-    legal_representative = Column(String(100), comment="法人代表")
-
-    # 行业与业务
-    industry = Column(String(100), comment="所属行业")
-    main_business = Column(Text, comment="主营业务介绍")
-    business_scope = Column(Text, comment="经营范围")
-    company_introduction = Column(Text, comment="公司简介")
-
-    # 地址与联系方式
-    province = Column(String(50), comment="省份")
-    city = Column(String(50), comment="城市")
-    district = Column(String(50), comment="区县")
-    registered_address = Column(Text, comment="注册地址")
-    office_address = Column(Text, comment="办公地址")
-    company_phone = Column(String(100), comment="公司电话")
-    company_fax = Column(String(100), comment="公司传真")
-    email = Column(String(100), comment="公司邮箱")
-    website = Column(String(100), comment="公司网址")
-
-    # 关键人员与机构
-    actual_controller = Column(String(100), comment="实际控制人")
-    information_disclosure_person = Column(String(100), comment="信息披露人")
-    board_secretary_phone = Column(String(50), comment="董秘电话")
-    securities_representative = Column(String(100), comment="证券代表")
-    independent_directors = Column(Text, comment="独立董事 (多个人员用逗号分隔)")
-    auditor = Column(String(255), comment="会计师事务所")
-    law_firm = Column(String(255), comment="律师事务所")
-
-    # 时间戳
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "id": self.id,
-            "stock_code": self.stock_code,
-            "company_name": self.company_name,
-            "establish_date": self.establish_date,
-            "registered_capital": self.registered_capital,
-            "legal_representative": self.legal_representative,
-            "industry": self.industry,
-            "main_business": self.main_business,
-            "business_scope": self.business_scope,
-            "company_introduction": self.company_introduction,
-            "province": self.province,
-            "city": self.city,
-            "district": self.district,
-            "registered_address": self.registered_address,
-            "office_address": self.office_address,
-            "company_phone": self.company_phone,
-            "company_fax": self.company_fax,
-            "email": self.email,
-            "website": self.website,
-            "actual_controller": self.actual_controller,
-            "information_disclosure_person": self.information_disclosure_person,
-            "board_secretary_phone": self.board_secretary_phone,
-            "securities_representative": self.securities_representative,
-            "independent_directors": self.independent_directors,
-            "auditor": self.auditor,
-            "law_firm": self.law_firm,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-        }
-
-
 class SystemLog(Base):
     __tablename__ = 'system_logs'
 
@@ -1093,9 +1017,11 @@ class EtfComponent(Base):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
 
+
 class TriggerType(str, Enum):
     CRON = "cron"
     DATE = "date"  # 一次性任务
+
 
 class ScheduledTask(Base):
     __tablename__ = 'scheduled_task'

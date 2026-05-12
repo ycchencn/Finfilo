@@ -23,8 +23,6 @@ from prompts.prompt_generator import load_prompt_template
 from backtest.text_embedding import get_embedding
 from config import elasticsearch_setting
 
-CURRENT_DIR = Path(__file__).parent
-
 # ================= 配置常量 =================
 INDEX_NAME = 'news_feed_v1'
 VECTOR_FIELD = 'vector'
@@ -38,7 +36,7 @@ es_client = Elasticsearch(
 )
 analysis_model = get_analysis_model_by_setting('news_analysis')
 analysis_model.set_response_json()
-prompt_template = load_prompt_template(template_path=CURRENT_DIR / "prompt_news_analysis.md")
+prompt_template = load_prompt_template(template_path=Path(__file__).parent / "prompt_news_analysis.md")
 
 
 def sanitize_es_doc(raw_doc: dict) -> dict:
@@ -71,6 +69,7 @@ def sanitize_es_doc(raw_doc: dict) -> dict:
 
     return raw_doc
 
+
 def safe_bulk_write(client, actions):
     """
     @brief 安全执行 ES bulk 写入，并抛出携带原始错误的异常
@@ -96,6 +95,7 @@ def safe_bulk_write(client, actions):
         return success_count, errors
     except Exception as e:
         raise RuntimeError(f"ES Bulk failed: {str(e)}") from e
+
 
 def _ensure_es_index() -> None:
     """确保Elasticsearch索引及Mapping已存在"""
@@ -142,6 +142,7 @@ def _safe_extract_json(llm_response: str) -> Dict[str, Any]:
     except json.JSONDecodeError as e:
         logger.error(f"❌ JSON解析失败: {e}\n原始片段: {llm_response[:200]}")
         raise ValueError("无法从大模型响应中提取有效的JSON数据")
+
 
 def llm_news_summarize(
         news_content: str,
@@ -273,6 +274,62 @@ def _process_batch_articles(articles: List[Dict[str, Any]], sources: str, news_t
             continue  # 单条失败不阻断整体流程
 
 
+def vector_search_optimized(query_text: str, top_k: int = 5) -> None:
+    """
+    @brief 优化版向量检索接口，修正KNN参数与输入对齐问题
+
+    @param query_text: [用户搜索关键词或自然语言问句]
+    @type query_text: str
+
+    @param top_k: [期望返回的最相似文档数量]
+    @type top_k: int
+
+    @return: None
+    @rtype: None
+
+    @throws: RuntimeError: 当向量生成失败或ES连接异常时抛出
+
+    @example:
+        vector_search_optimized(" NVIDIA财报超预期", top_k=3)
+    """
+    logger.info(f"\n🔍 启动优化版向量检索: '{query_text}' (Top-K={top_k})")
+    try:
+        # 1. 保持与索引端完全一致的输入格式
+        query_vector = get_embedding(query_text)
+
+        # 2. 验证维度一致性，防止ES静默截断
+        expected_dim = DEFAULT_VECTOR_DIMS
+        if len(query_vector) != expected_dim:
+            raise ValueError(f"Vector dim mismatch: expect {expected_dim}, got {len(query_vector)}")
+
+        # 3. 放大 num_candidates 至 top_k 的 5~10 倍，突破HNSW近邻瓶颈
+        num_candidates = max(top_k * 5, 50)
+
+        search_query = {
+            "knn": {
+                "field": VECTOR_FIELD,
+                "query_vector": query_vector,
+                "k": top_k,
+                "num_candidates": num_candidates,
+                # 可选：明确指定算法以启用更稳定的评分函数
+                # "filter": {"term": {"news_type": "normal"}}
+            }
+        }
+
+        response = es_client.search(index=INDEX_NAME, body=search_query)
+        hits = response["hits"]["hits"]
+
+        print("📊 检索结果:")
+        for hit in hits:
+            score = hit["_score"]
+            digest = hit["_source"].get("digest", "")
+            logger.info(f"- [得分: {score:.4f}] {digest}")
+
+    except Exception as e:
+        logger.error(f"❌ 优化检索失败: {e}")
+        raise RuntimeError(f"Vector search failed: {str(e)}") from e
+
+
 def vector_search(query_text: str, top_k: int = 3) -> None:
     """简单的向量搜索测试接口"""
     logger.info(f"\n🔍 启动向量检索测试: '{query_text}'")
@@ -292,7 +349,7 @@ def vector_search(query_text: str, top_k: int = 3) -> None:
         if hits:
             print("📊 检索结果:")
             for hit in hits:
-                print(f"- [得分: {hit['_score']:.4f}] {hit['_source'].get('title')}")
+                print(f"- [得分: {hit['_score']:.4f}] {hit['_source'].get('digest')}")
         else:
             print("⚪ 未匹配到相关数据。")
     except Exception as e:
@@ -337,6 +394,7 @@ def job_news_feed_analysis_stock_star(is_roll: bool = False) -> None:
 
     _process_batch_articles(all_articles, sources='stock_star', news_type='report' if is_roll else 'normal')
 
+
 def job_research_report_from_stock_star() -> None:
     """
     @brief 定向采集证券之星研究员专栏研报
@@ -363,5 +421,9 @@ def job_news_scrape_all() -> None:
 
 if __name__ == '__main__':
 
+    res = vector_search_optimized(query_text='美国能源信息署', top_k=10)
+
+    print(res)
+
     # 推荐在生产环境使用 schedule 或 Celery/APScheduler 接管
-    job_news_feed_analysis_wallstreet()
+    # job_news_feed_analysis_wallstreet()

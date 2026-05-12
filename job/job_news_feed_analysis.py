@@ -5,6 +5,7 @@
 """
 
 import finfilo, json, time
+from elasticsearch import Elasticsearch, helpers
 from staffs import get_analysis_model_by_setting
 from service import MarketNewsService
 from service.stock_star_news import StockStarNewsScraper
@@ -13,6 +14,8 @@ from utils.common import string_to_md5, logger, timestamp_to_date
 from staffs.prompts import prompt_155th
 from prompts.prompt_generator import load_prompt_template
 from pathlib import Path
+from backtest.text_embedding import get_embedding
+from config import elasticsearch_setting
 
 CURRENT_DIR = Path(__file__).parent
 
@@ -25,6 +28,127 @@ staff_analysis.set_response_json()
 
 # template = load_prompt_template_by_name(template_name="prompt_news_analysis")
 template = load_prompt_template(template_path=f"{CURRENT_DIR}/prompt_news_analysis.md")
+
+index_name = 'news_feed'
+
+# 初始化 ES 客户端
+es = Elasticsearch(elasticsearch_setting['host'], basic_auth=(elasticsearch_setting['username'], elasticsearch_setting['password']) )
+
+def vector_search(query_text):
+    """简单的向量搜索测试"""
+    print(f"\n🔍 正在进行向量搜索测试: '{query_text}'")
+
+    try:
+        # 7. 同样需要使用 API 将查询词向量化
+        query_vector = get_embedding(query_text)
+
+        search_query = {
+            "knn": {
+                "field": "vector",
+                "query_vector": query_vector,
+                "k": 3,
+                "num_candidates": 10
+            }
+        }
+
+        response = es.search(index=index_name, body=search_query)
+        hits = response['hits']['hits']
+
+        if hits:
+            print("找到相关研报：")
+            for hit in hits:
+                score = hit['_score']
+                title = hit['_source']['title']
+                print(hit['_source'])
+                print(f"- [得分: {score:.4f}] {title}")
+        else:
+            print("未找到结果。")
+
+    except Exception as e:
+        print(f"❌ 搜索失败: {e}")
+
+def ingest_data_to_es():
+
+    # 4.1 检查 ES 索引是否存在，不存在则创建
+    if not es.indices.exists(index=index_name):
+        print(f"🔨 正在创建索引: {index_name}")
+
+        # 3. 获取模型维度 (演示如何动态获取，或者直接写死)
+        # 这里为了简单，text-embedding-v4 默认通常是 1024 维
+        sample_text = "Hello"
+        sample_vector = get_embedding(sample_text)
+        vector_dims = len(sample_vector)
+        print(f"ℹ️  检测到向量维度: {vector_dims}")
+
+        mapping = {
+            "mappings": {
+                "properties": {
+                    "title": {"type": "text"},
+                    "author": {"type": "keyword"},
+                    "publish_date": {"type": "date"},
+                    "content": {"type": "text"},
+                    "sector": {"type": "keyword"},
+                    # 4. 修改 Mapping 维度 (注意：如果是 text-embedding-v4，通常是 1024)
+                    "vector": {
+                        "type": "dense_vector",
+                        "dims": vector_dims,
+                        "index": True,
+                        "similarity": "cosine"
+                    }
+                }
+            }
+        }
+        try:
+            es.indices.create(index=index_name, body=mapping)
+        except Exception as e:
+            print(f"❌ 创建索引失败: {e}")
+            return
+    else:
+        print(f"ℹ️  索引 {index_name} 已存在。")
+
+    # 4.2 获取 Mock 数据并开始处理
+    # reports = list(mock_report_generator(count=5))
+    actions = []
+
+    print("🚀 开始调用 API 进行向量化并构建写入请求...")
+
+    try:
+
+        # --- 核心步骤：调用 API 向量化 ---
+        # text_to_embed = f"{report['title']} {report['content']}"
+        #
+        # # 5. 调用函数获取向量
+        # vector_embedding = get_embedding(text_to_embed)
+        #
+        # # 构建 ES 写入动作
+        # action = {
+        #     "_index": index_name,
+        #     "_source": {
+        #         "title": report['title'],
+        #         "author": report['author'],
+        #         "publish_date": report['publish_date'],
+        #         "content": report['content'],
+        #         "sector": report['sector'],
+        #         "vector": vector_embedding
+        #     }
+        # }
+        # actions.append(action)
+
+        # 6. 简单的速率限制 (避免触发 API 频率限制)
+
+        pass
+
+    except Exception as e:
+        print(f"❌ 向量化失败: {e}")
+
+    # 4.3 批量写入 ES
+    try:
+        success, _ = helpers.bulk(es, actions)
+        print(f"✅ 成功写入 {success} 条研报数据到 Elasticsearch！")
+        # es.indices.refresh(index=index_name)
+
+    except Exception as e:
+        print(f"❌ 写入数据时发生错误: {e}")
 
 def llm_news_summarize(
     new,

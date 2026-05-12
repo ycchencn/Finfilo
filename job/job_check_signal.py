@@ -54,6 +54,10 @@ def job_check_signal(_stock_code):
     start_date = get_date_by_n(-360, _format='%Y%m%d') # 获取120天的行情
     end_date = FactorValueService.get_latest_trading_date().strftime('%Y%m%d')
 
+    # 公司基本信息
+    stock = datajiji.get_stock_info(_stock_code, stock_info.get('market'))
+    profile = stock.get('profile', {})
+
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
     try:
         market_data = datajiji.get_history(
@@ -77,7 +81,8 @@ def job_check_signal(_stock_code):
         market_data=market_data.to_csv(),
         tech_factors=factors,
         factor_descriptions=factor_descriptions,
-        dcf_report=dcf_report
+        dcf_report=dcf_report,
+        profile=profile
     )
 
     logger.info(f"传入大模型进行分析：{stock_name}【{_stock_code}】，大模型版本：{staff.model}")
@@ -101,6 +106,12 @@ def job_check_signal(_stock_code):
         factor_name='main_force_behavior_phase',
         value=main_force_behavior_phase_int
     )
+
+    # 刷新概念
+    StockService.upsert_stock({
+        'symbol': _stock_code,
+        'concepts': content_json.get('股票概念', {}),
+    })
 
     # 1. 单条插入
     data = {
@@ -132,7 +143,7 @@ def job_check_signal_daily(override=False):
 
 if __name__ == '__main__':
 
-    stock_code = '688727'
+    stock_code = '002015'
     job_check_signal(_stock_code=stock_code)
 
     # job_check_signal_daily()

@@ -54,3 +54,4 @@ massive
 eodhd
 tushare
 python-dotenv
+elasticsearch

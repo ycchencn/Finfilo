@@ -100,3 +100,10 @@ strategy_setting = {
     'stock_position_limit': 10,
     'max_market_limit': 120
 }
+
+# elasticsearch
+elasticsearch_setting = {
+    'host': os.getenv( 'ES_HOST'),
+    'username': os.getenv( 'ES_USER'),
+    'password': os.getenv( 'ES_PASSWORD'),
+}

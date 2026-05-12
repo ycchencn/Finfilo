@@ -274,6 +274,97 @@ def _process_batch_articles(articles: List[Dict[str, Any]], sources: str, news_t
             continue  # 单条失败不阻断整体流程
 
 
+def search_digest_keyword(keywords: str, top_k: int = 10, sort_field: str = "_id", sort_order: str = "desc") -> dict:
+    """
+    @brief 基于Elasticsearch的digest字段关键字检索接口
+
+    @param keywords: [搜索关键词，支持中文分词与实体模糊匹配]
+    @type keywords: str
+
+    @param top_k: [返回结果数量上限]
+    @type top_k: int
+
+    @param sort_field: [排序字段名称，必须为keyword/date/_id类型。严禁直接传入text字段]
+    @type sort_field: str
+
+    @param sort_order: [排序方向 asc升序 / desc降序]
+    @type sort_order: str
+
+    @return: [包含命中记录列表、总数及耗时统计的结构化字典]
+    @rtype: dict
+
+    @throws: ValueError: [当关键词为空字符串或top_k非正整数时抛出]
+
+    @example:
+        # 基础用法（默认按文档ID倒序，索引内聚，性能最优）
+        results = search_digest_keyword("深圳", top_k=5)
+        for hit in results["hits"]:
+            print(hit["digest"])
+
+        # 时间排序注意：需显式传递 .keyword 后缀或使用正确的 date 字段
+        res = search_digest_keyword("深圳", top_k=3, sort_field="news_time.keyword", sort_order="desc")
+    """
+    # 1. 参数合法性校验
+    if not isinstance(keywords, str) or not keywords.strip():
+        raise ValueError("keywords must be a non-empty string")
+    if not isinstance(top_k, int) or top_k <= 0:
+        raise ValueError("top_k must be a positive integer")
+    if sort_order.lower() not in ("asc", "desc"):
+        raise ValueError("sort_order must be 'asc' or 'desc'")
+
+    cleaned_keywords = keywords.strip()
+
+    # 2. 构建高效查询体（仅拉取必要字段，减少网络IO）
+    query_body = {
+        "size": top_k,
+        "sort": [{sort_field: {"order": sort_order}}],
+        "_source": ["digest", "news_time", "relations_stocks", "tags", "sources", "url"],
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "match": {
+                            "digest": {
+                                "query": cleaned_keywords,
+                                "operator": "or",
+                                "minimum_should_match": "75%",
+                                "zero_terms_query": "none"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    }
+
+    # 3. 执行检索并安全解析响应
+    try:
+        response = es_client.search(index=INDEX_NAME, body=query_body)
+        hits_meta = response["hits"]["hits"]
+        total_raw = response["hits"]["total"]
+
+        # 兼容 ES 7.x (~) 与 8.x (object) 的 total 结构差异
+        total_count = total_raw["value"] if isinstance(total_raw, dict) else total_raw
+
+        formatted_hits = []
+        for hit in hits_meta:
+            src = hit["_source"]
+            formatted_hits.append({
+                "rank_score": hit.get("_score"),
+                "doc_id": hit.get("_id"),
+                **src
+            })
+
+        return {
+            "total": total_count,
+            "took_ms": response["took"],
+            "hits": formatted_hits
+        }
+
+    except Exception as e:
+        logger.error(f"❌ Digest关键字检索失败: {e}")
+        raise ConnectionError(f"ES search execution failed: {str(e)}") from e
+
 def vector_search_optimized(query_text: str, top_k: int = 5) -> None:
     """
     @brief 优化版向量检索接口，修正KNN参数与输入对齐问题
@@ -421,7 +512,8 @@ def job_news_scrape_all() -> None:
 
 if __name__ == '__main__':
 
-    res = vector_search_optimized(query_text='美国能源信息署', top_k=10)
+    # res = vector_search_optimized(query_text='美国能源信息署', top_k=10)
+    res = search_digest_keyword("美股", top_k=10, sort_field="news_time.keyword", sort_order="desc")
 
     print(res)
 

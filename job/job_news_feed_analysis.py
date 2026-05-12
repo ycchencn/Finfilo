@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import List, Dict, Any
 
 import finfilo
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
 from staffs import get_analysis_model_by_setting
 from service import MarketNewsService
 from service.stock_star_news import StockStarNewsScraper
@@ -39,6 +40,62 @@ analysis_model = get_analysis_model_by_setting('news_analysis')
 analysis_model.set_response_json()
 prompt_template = load_prompt_template(template_path=CURRENT_DIR / "prompt_news_analysis.md")
 
+
+def sanitize_es_doc(raw_doc: dict) -> dict:
+    """
+    @brief 清理非文本复杂结构，适配 ES 写入与向量化分离架构
+
+    @param raw_doc: [原始舆情文档字典]
+    @type raw_doc: dict
+
+    @return: [清洗后的兼容文档]
+    @rtype: dict
+
+    @throws: TypeError: 当输入非字典类型时抛出
+
+    @example:
+        clean_doc = sanitize_es_doc(bad_stock_doc)
+        es_client.index(index="news_q3", document=clean_doc)
+    """
+    if not isinstance(raw_doc, dict):
+        raise TypeError("Expected dict input")
+
+    # 2. 展平股票关系字段，避免 nested 映射冲突
+    stocks = raw_doc.get("relations_stocks", [])
+    clean_stocks = [{"code": s["code"], "name": s["name"]} for s in stocks if isinstance(s, dict)]
+    raw_doc["relations_stocks"] = clean_stocks
+
+    # 3. 统一时间格式（防御空格报错）
+    if "news_time" in raw_doc and isinstance(raw_doc["news_time"], str):
+        raw_doc["news_time"] = raw_doc["news_time"].replace(" ", "T") + ".000Z"
+
+    return raw_doc
+
+def safe_bulk_write(client, actions):
+    """
+    @brief 安全执行 ES bulk 写入，并抛出携带原始错误的异常
+
+    @param client: [Elasticsearch 客户端实例]
+    @param actions: [待写入的操作列表，格式同 helpers.parallel_bulk]
+    @type client: elasticsearch.Elasticsearch
+    @type actions: list[dict]
+
+    @return: [成功数量, 失败错误详情列表]
+    @rtype: tuple[int, list[dict]]
+
+    @throws: RuntimeError: 当存在写入失败且未提供 ignore_errors=False 时抛出
+
+    @example:
+        success, errors = safe_bulk_write(es_client, [op1, op2])
+        if errors:
+            print(json.dumps(errors[0], ensure_ascii=False, indent=2))
+    """
+    ok, errs = [], []
+    try:
+        success_count, errors = bulk(client, actions, raise_on_error=False, request_timeout=30)
+        return success_count, errors
+    except Exception as e:
+        raise RuntimeError(f"ES Bulk failed: {str(e)}") from e
 
 def _ensure_es_index() -> None:
     """确保Elasticsearch索引及Mapping已存在"""
@@ -85,7 +142,6 @@ def _safe_extract_json(llm_response: str) -> Dict[str, Any]:
     except json.JSONDecodeError as e:
         logger.error(f"❌ JSON解析失败: {e}\n原始片段: {llm_response[:200]}")
         raise ValueError("无法从大模型响应中提取有效的JSON数据")
-
 
 def llm_news_summarize(
         news_content: str,
@@ -158,18 +214,21 @@ def llm_news_summarize(
         "url": url
     }
 
+    es_payload = sanitize_es_doc(db_payload)
+
     # 5. 向量化并写入ES
     embedding_text = f"{db_payload['digest']}{EMBEDDING_TEXT_SEP}{news_content}"
     try:
         vector = get_embedding(embedding_text)
         action = {
             "_index": INDEX_NAME,
-            "_source": {**db_payload, "author": "", VECTOR_FIELD: vector}
+            "_source": {**es_payload, "author": "", VECTOR_FIELD: vector}
         }
-        helpers.bulk(es_client, [action])
-        logger.info(f"✅ 向量数据已写入ES，标题: {db_payload['digest']}")
+        safe_bulk_write(es_client, [action])
+        logger.info(f"✅ 向量数据已写入ES，标题: {db_payload['digest']}, {db_payload}")
     except Exception as e:
-        logger.error(f"❌ 向量化或ES写入失败: {e}")
+        logger.error(f"❌ 向量化或ES写入失败: {e}， {db_payload}")
+        return False
 
     # 6. 持久化至业务库
     try:
@@ -257,7 +316,7 @@ def job_news_feed_analysis_ths() -> None:
     @brief 采集同花顺实时快讯并推送至AI分析管线
     @throws [Exception: 网络请求或解析异常]
     """
-    news_list = finfilo.get_realtime_news_from_ths_short(pagesize=30)
+    news_list = finfilo.get_realtime_news_from_ths_short(pagesize=20)
     _process_batch_articles(news_list, sources='tonghuashun')
 
 
@@ -266,15 +325,17 @@ def job_news_feed_analysis_stock_star(is_roll: bool = False) -> None:
     @brief 采集证券之星新闻/研报/滚动资讯并推送至AI分析管线
     @throws [Exception: 网络请求或解析异常]
     """
-    scraper = StockStarNewsScraper(list_url='https://stock.stockstar.com/list/2_1.shtml')
-    time.sleep(5)
-    scraper2 = StockStarNewsScraper(list_url='https://stock.stockstar.com/list/5921.shtml')
+    base_url = 'https://roll.stockstar.com/finance.shtml' if is_roll else \
+        'https://stock.stockstar.com/list/2_1.shtml'
 
-    # 1. 抓新闻列表
-    all_articles = scraper.scrape_list() + scraper2.scrape_list()
+    # 混合抓取自选列表与特定栏目
+    list_urls = [base_url, 'https://stock.stockstar.com/list/5921.shtml'] if not is_roll else [base_url]
+
+    scrapers = [StockStarNewsScraper(list_url=url) for url in list_urls]
+    time.sleep(2)  # 错开请求间隔
+    all_articles = [item for s in scrapers for item in s.scrape_list()]
 
     _process_batch_articles(all_articles, sources='stock_star', news_type='report' if is_roll else 'normal')
-
 
 def job_research_report_from_stock_star() -> None:
     """
@@ -301,5 +362,6 @@ def job_news_scrape_all() -> None:
 
 
 if __name__ == '__main__':
+
     # 推荐在生产环境使用 schedule 或 Celery/APScheduler 接管
-    job_news_feed_analysis_stock_star(is_roll=False)
+    job_news_feed_analysis_wallstreet()

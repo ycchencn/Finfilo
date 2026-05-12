@@ -10,13 +10,13 @@ import pika
 import logging
 import json
 
-from config import RABBITMQ_CONFIG
+from config import rabbitmq_config
 
 logger = logging.getLogger(__name__)
 
 class RabbitMQPublisher:
     def __init__(self, config=None):
-        self.config = config or RABBITMQ_CONFIG
+        self.config = config or rabbitmq_config
         self._connection = None
         self._channel = None
 

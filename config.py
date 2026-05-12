@@ -59,7 +59,7 @@ redis_port = int(os.getenv('REDIS_PORT', 6379))
 eodhd_api_key = os.getenv('EODHD_API_KEY')
 
 # RabbitMQ配置
-RABBITMQ_CONFIG = {
+rabbitmq_config = {
     'host': os.getenv('RABBITMQ_HOST'),
     'port': int(os.getenv('RABBITMQ_PORT', 5672)),
     'username': os.getenv('RABBITMQ_USERNAME'),

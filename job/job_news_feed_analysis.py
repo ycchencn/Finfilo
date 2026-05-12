@@ -67,19 +67,43 @@ def vector_search(query_text):
     except Exception as e:
         print(f"❌ 搜索失败: {e}")
 
-def ingest_data_to_es():
+def llm_news_summarize(
+    news_content,
+    news_time='',
+    news_type='normal',
+    sources='ths',
+    url='',
+    debug=False):
+    """
+    使用大模型对新闻进行归类
+    """
 
+    news_md5 = string_to_md5(news_content)
+
+    # 唯一性处理
+    if MarketNewsService.get_by_md5(news_md5) is not None:
+        return False
+
+    question_prompt = template.safe_substitute(
+        news_time=news_time,
+        news_content=news_content,
+        prompt_155th=prompt_155th
+    )
+
+    answer = staff_analysis.ask(question_prompt)
+
+    ai_ans = answer.replace("```json", "")
+    ai_ans = ai_ans.replace("```", "")
+    answer_json = json.loads(ai_ans)
+
+    # 新闻数据向量到ES
+    # ingest_data_to_es(title=answer_json.get("digest"), news_content=news_content)
     # 4.1 检查 ES 索引是否存在，不存在则创建
     if not es.indices.exists(index=index_name):
         print(f"🔨 正在创建索引: {index_name}")
-
-        # 3. 获取模型维度 (演示如何动态获取，或者直接写死)
-        # 这里为了简单，text-embedding-v4 默认通常是 1024 维
-        sample_text = "Hello"
-        sample_vector = get_embedding(sample_text)
+        sample_vector = get_embedding(news_content)
         vector_dims = len(sample_vector)
         print(f"ℹ️  检测到向量维度: {vector_dims}")
-
         mapping = {
             "mappings": {
                 "properties": {
@@ -115,28 +139,23 @@ def ingest_data_to_es():
     try:
 
         # --- 核心步骤：调用 API 向量化 ---
-        # text_to_embed = f"{report['title']} {report['content']}"
-        #
-        # # 5. 调用函数获取向量
-        # vector_embedding = get_embedding(text_to_embed)
-        #
-        # # 构建 ES 写入动作
-        # action = {
-        #     "_index": index_name,
-        #     "_source": {
-        #         "title": report['title'],
-        #         "author": report['author'],
-        #         "publish_date": report['publish_date'],
-        #         "content": report['content'],
-        #         "sector": report['sector'],
-        #         "vector": vector_embedding
-        #     }
-        # }
-        # actions.append(action)
+        text_to_embed = f"{answer_json.get("digest")} {news_content}"
 
-        # 6. 简单的速率限制 (避免触发 API 频率限制)
+        # 5. 调用函数获取向量
+        vector_embedding = get_embedding(text_to_embed)
 
-        pass
+        # 构建 ES 写入动作
+        action = {
+            "_index": index_name,
+            "_source": {
+                "title": answer_json.get("digest"),
+                "author": '',
+                "publish_date": news_time,
+                "content": news_content,
+                "vector": vector_embedding
+            }
+        }
+        actions.append(action)
 
     except Exception as e:
         print(f"❌ 向量化失败: {e}")
@@ -149,35 +168,6 @@ def ingest_data_to_es():
 
     except Exception as e:
         print(f"❌ 写入数据时发生错误: {e}")
-
-def llm_news_summarize(
-    new,
-    news_time='',
-    news_type='normal',
-    sources='ths',
-    url='',
-    debug=False):
-    """
-    使用大模型对新闻进行归类
-    """
-
-    news_md5 = string_to_md5(new)
-
-    # 唯一性处理
-    if MarketNewsService.get_by_md5(news_md5) is not None:
-        return False
-
-    question_prompt = template.safe_substitute(
-        news_time=news_time,
-        news_content=str(new),
-        prompt_155th=prompt_155th
-    )
-
-    answer = staff_analysis.ask(question_prompt)
-
-    ai_ans = answer.replace("```json", "")
-    ai_ans = ai_ans.replace("```", "")
-    answer_json = json.loads(ai_ans)
 
     if debug:
         print(answer_json)
@@ -199,6 +189,8 @@ def llm_news_summarize(
     # relations_stocks = answer_json.get("relations_stocks")
 
     logger.info(f"market news imported, {news_md5}")
+
+    return True
 
 
 def job_news_feed_analysis_wallstreet():

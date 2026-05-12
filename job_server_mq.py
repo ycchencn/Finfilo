@@ -26,7 +26,7 @@ from job.job_update_factors import job_update_stock_factor
 from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
 from job.job_stock_analysis import job_stock_analysis
 from job.signal.job_check_signal import job_check_signal
-from models.rabbitmq import RABBITMQ_CONFIG
+from models.rabbitmq import rabbitmq_config
 from models.database import db_session
 
 # Configure logging
@@ -46,7 +46,7 @@ class MarketJobConsumer:
     """
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        self.config = config or RABBITMQ_CONFIG
+        self.config = config or rabbitmq_config
         self._connection: Optional[SelectConnection] = None
         self._channel: Optional[pika.channel.Channel] = None
         self._closing = False

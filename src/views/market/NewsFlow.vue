@@ -1,182 +1,333 @@
 <script setup>
-
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { onBeforeMount, reactive, ref } from 'vue';
-import Dialog from 'primevue/dialog';
+import {ref, reactive, onMounted} from 'vue';
 import axios from 'axios';
-import BullishBearishIndicator from '@/components/BullishBearishIndicator.vue'
-import { fetchStockMarketData, fetchStockInfo, dictToMarkdownRecursive, formatDaysAgo } from '@/utils/function.js';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+import InputText from 'primevue/inputtext';
+import BullishBearishIndicator from '@/components/BullishBearishIndicator.vue';
+import {formatDaysAgo} from '@/utils/function.js';
 
-const news = ref(null);
-const filters1 = ref(null);
-const loading1 = ref(null);
-const filters_topic = ref('*');
+// ================= 状态管理 =================
+const news = ref([]);
+const loading1 = ref(false);
 
-function initFilters1() {
-    filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    };
-}
+// 话题相关状态
+const topics = ref([]);
+const activeTopic = ref('');
+const showTopicDialog = ref(false);
+const topicForm = reactive({id: null, name: '', oldName: ''});
+const isEditing = ref(false);
 
-// 封装获取数据的逻辑
-const loadNewsData = () => {
-    loading1.value = true; // 开启加载状态
-    let _filters = filters_topic.value
-    if (_filters === '*'){
-        _filters = ''
-    }
-    axios.get('/api/v1/market/search_news', {
-        params: {
-            page: 1,
-            page_size: 500,
-            keyword: _filters // 使用当前的 filters_topic 值
-        }
-    }).then(response => {
-        news.value = response.data.items;
-        loading1.value = false; // 关闭加载状态
-    }).catch(() => {
-        loading1.value = false; // 出错也要关闭加载状态
-    });
-};
-
-onBeforeMount(() => {
-    loadNewsData();
-    initFilters1();
-});
-
-const marketFilterOptions = [
-    { label: '全部新闻', value: '*' },
-    { label: '特朗普', value: '特朗普' },
-    { label: '马斯克', value: '马斯克' },
-    { label: '美联储', value: '美联储' },
-    { label: '央行', value: '央行' },
-    { label: '证监会', value: '证监会' },
-    { label: '货币政策', value: '货币政策' },
-    { label: '业绩披露', value: '业绩' },
-    { label: '商业航天', value: '商业航天' },
-    { label: '机器人', value: '机器人' },
-    { label: 'CPO', value: 'CPO' },
-    { label: 'PCB', value: 'PCB' },
-    { label: '芯片', value: '芯片' },
-    { label: '创新药', value: '创新药' },
-    { label: '黄金', value: '黄金' },
+// 🟢 MOCK 测试数据（对接后端前请保持开启）
+const MOCK_TOPICS = [
+    {id: 1, name: '全部新闻'},
+    {id: 2, name: '特朗普'},
+    {id: 3, name: '马斯克'},
+    {id: 4, name: '美联储'},
+    {id: 5, name: '央行'},
+    {id: 6, name: '证监会'},
+    {id: 7, name: '货币政策'},
+    {id: 8, name: '业绩披露'},
+    {id: 9, name: '商业航天'},
+    {id: 10, name: '机器人'},
+    {id: 11, name: 'CPO'},
+    {id: 12, name: 'PCB'},
+    {id: 13, name: '芯片'},
+    {id: 14, name: '创新药'},
+    {id: 15, name: '黄金'},
 ];
 
+// ================= 数据加载 =================
+const loadTopics = async () => {
+    // ⬇️ 此处使用 Mock 数据，切换真实接口时注释掉下一行即可
+    topics.value = MOCK_TOPICS;
+
+    /* 🔵 真实接口示例（开发完成后可取消注释）
+    try {
+      const res = await axios.get('/api/v1/market/topics');
+      topics.value = res.data || [];
+    } catch (e) {
+      console.error('加载话题列表失败:', e);
+      // 失败可降级使用 Mock
+      // topics.value = MOCK_TOPICS;
+    }
+    */
+
+    // 如果未选中任何话题，自动选中第一个
+    if (topics.value.length > 0 && !activeTopic.value) {
+        activeTopic.value = topics.value[0].name;
+    }
+};
+
+const loadNewsData = async () => {
+    if (!activeTopic.value) {
+        news.value = [];
+        loading1.value = false;
+        return;
+    }
+    loading1.value = true;
+    try {
+        const keyword = activeTopic.value === '全部新闻' ? '' : activeTopic.value;
+        const res = await axios.get('/api/v1/market/search_news', {
+            params: {page: 1, page_size: 500, keyword}
+        });
+        news.value = res.data?.items || [];
+    } catch (e) {
+        news.value = [];
+    } finally {
+        loading1.value = false;
+    }
+};
+
+// 监听话题切换，自动刷新右侧表格
+import {watch} from 'vue';
+
+watch(activeTopic, () => {
+    loadNewsData();
+});
+
+// ================= 话题 CRUD =================
+const openAddDialog = () => {
+    isEditing.value = false;
+    topicForm.id = null;
+    topicForm.name = '';
+    topicForm.oldName = '';
+    showTopicDialog.value = true;
+};
+
+const openEditDialog = (topic) => {
+    isEditing.value = true;
+    topicForm.id = topic.id;
+    topicForm.name = topic.name;
+    topicForm.oldName = topic.name;
+    showTopicDialog.value = true;
+};
+
+const saveTopic = async () => {
+    if (!topicForm.name.trim()) {
+        alert('话题名称不能为空');
+        return;
+    }
+
+    try {
+        if (isEditing.value) {
+            // 模拟 PUT 请求（实际对接时取消注释 axios.put）
+            // await axios.put(`/api/v1/market/topics/${topicForm.id}`, { name: topicForm.name });
+
+            const idx = topics.value.findIndex(t => t.id === topicForm.id);
+            if (idx !== -1) {
+                topics.value[idx].name = topicForm.name;
+                if (activeTopic.value === topicForm.oldName) activeTopic.value = topicForm.name;
+            }
+        } else {
+            // 模拟 POST 请求
+            // const res = await axios.post('/api/v1/market/topics', { name: topicForm.name });
+            // const newTopic = res.data;
+            const newId = Math.max(...topics.value.map(t => t.id), 0) + 1;
+            const newTopic = {id: newId, name: topicForm.name};
+            topics.value.push(newTopic);
+            if (!activeTopic.value) activeTopic.value = newTopic.name;
+        }
+        showTopicDialog.value = false;
+    } catch (e) {
+        alert('保存失败');
+    }
+};
+
+const deleteTopic = async (topic) => {
+    if (!confirm(`确定要删除话题「${topic.name}」吗？该操作不可恢复。`)) return;
+
+    try {
+        // await axios.delete(`/api/v1/market/topics/${topic.id}`);
+        const newTopics = topics.value.filter(t => t.id !== topic.id);
+        topics.value = newTopics;
+
+        if (activeTopic.value === topic.name) {
+            activeTopic.value = newTopics.length > 0 ? newTopics[0].name : '';
+        }
+    } catch (e) {
+        alert('删除失败');
+    }
+};
+
+// ================= 生命周期 =================
+onMounted(async () => {
+    await loadTopics();
+    loadNewsData(); // 主动触发一次数据加载，解决 watch 不触发初次渲染的问题
+});
 </script>
 
 <template>
-    <div class="card">
-        <div class="font-semibold text-xl mb-4">事件驱动</div>
-        <DataTable
-            tableStyle="font-size:12px"
-            :value="news"
-            :paginator="true"
-            :rows="50"
-            dataKey="id"
-            :rowHover="true"
-            filterDisplay="menu"
-            :loading="loading1"
-            :globalFilterFields="['stock_code']"
-            :showGridlines="false"
-        >
-            <template #header>
-                <div class="flex flex-col md:flex-row items-center justify-between gap-3 w-full">
-                  <!-- 左侧：下拉框 -->
-                  <div class="w-full md:w-auto">
-                    <SelectButton
-                      v-model="filters_topic"
-                      :options="marketFilterOptions"
-                      optionLabel="label"
-                      optionValue="value"
-                      @change="loadNewsData"
-                      data-testid="market-filter"
-                      size="small"
-                    />
-                  </div>
+    <div class="flex bg-gray-50 overflow-hidden">
+        <!-- 左侧：话题导航面板 -->
+        <div class="w-64 min-w-[16rem] border-r border-gray-200 bg-white flex flex-col shadow-sm z-10">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="font-semibold text-base text-gray-700">话题列表</h3>
+                <Button icon="pi pi-plus" @click="openAddDialog" rounded text severity="primary"
+                        aria-label="Add Topic"/>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-2 space-y-1">
+                <div
+                    v-for="topic in topics"
+                    :key="topic.id"
+                    class="px-3 py-2.5 rounded-md cursor-pointer flex justify-between items-center transition-all duration-200 hover:bg-blue-50 group"
+                    :class="{ 'bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-500': activeTopic === topic.name }"
+                    @click="activeTopic = topic.name"
+                >
+                    <span class="truncate">{{ topic.name }}</span>
+
+                    <!-- 悬停显示的操作按钮 -->
+                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                            icon="pi pi-pencil"
+                            size="small"
+                            text
+                            severity="secondary"
+                            @click.stop="openEditDialog(topic)"
+                            class="!p-1 !min-w-0 !h-6"
+                        />
+                        <Button
+                            icon="pi pi-trash"
+                            size="small"
+                            text
+                            severity="danger"
+                            @click.stop="deleteTopic(topic)"
+                            class="!p-1 !min-w-0 !h-6"
+                        />
+                    </div>
                 </div>
+
+                <div v-if="topics.length === 0" class="text-center text-gray-400 text-sm py-8">
+                    暂无话题<br/>点击右上角 "+" 添加
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：新闻数据表格 -->
+        <div class="flex-1 p-4 overflow-y-auto flex flex-col bg-white">
+
+            <DataTable
+                tableStyle="width: 100%; border-collapse: separate; border-spacing: 0;"
+                :value="news"
+                :paginator="true"
+                :rows="50"
+                dataKey="id"
+                :rowHover="true"
+                :loading="loading1"
+                :showGridlines="false"
+                paginatorPosition="bottom"
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                currentPageReportTemplate="当前 {currentPage} / {totalPages} 页，每页 {rows} 条"
+            >
+                <Column field="stock_name" header="新闻详情">
+                    <template #body="{ data }">
+                        <div class="news-item">
+                            <div class="news-time text-gray-500 text-xs mb-1">
+                                {{ formatDaysAgo(data.news_time) }}
+                                <a v-if="data.url" :href="data.url" target="_blank"
+                                   class="text-blue-500 hover:underline ml-2">
+                                    <i class="pi pi-external-link"></i> 原文
+                                </a>
+                            </div>
+                            <p class="news-digest font-semibold text-sm leading-relaxed">{{ data.digest }}</p>
+
+                            <div v-if="data.relations_stocks?.length" class="mt-2 text-sm">
+                                <strong class="text-gray-600">关联股票：</strong>
+                                <span class="ml-1 inline-flex flex-wrap gap-x-2">
+                  <a
+                      v-for="(stock, i) in data.relations_stocks"
+                      :key="stock.code"
+                      class="text-blue-600 hover:underline cursor-pointer"
+                      :href="'https://gushitong.baidu.com/stock/ab-' + stock.code"
+                      target="_blank"
+                  >
+                    {{ stock.code }}({{ stock.name }})
+                  </a>
+                </span>
+                            </div>
+
+                            <div v-if="data.tags?.length" class="mt-1.5 text-sm">
+                                <strong class="text-gray-600">标签：</strong>
+                                <span v-for="tag in data.tags" :key="tag" class="tag-badge ml-1">{{ tag }}</span>
+                            </div>
+
+                            <div v-if="data.bullish_level != 0" class="mt-2">
+                                <BullishBearishIndicator :value="data.bullish_level" :max-segments="10"/>
+                            </div>
+                        </div>
+                    </template>
+                </Column>
+            </DataTable>
+        </div>
+
+        <!-- 新增/编辑话题弹窗 -->
+        <Dialog
+            v-model:visible="showTopicDialog"
+            modal
+            header="话题设置"
+            :style="{ width: '320px' }"
+            :breakpoints="{ '500px': '90vw' }"
+        >
+            <div class="flex flex-col gap-3 pt-2">
+                <label for="topicName" class="text-sm font-medium text-gray-700">话题名称</label>
+                <InputText
+                    id="topicName"
+                    v-model="topicForm.name"
+                    placeholder="例如：美联储降息、芯片国产替代"
+                    autofocus
+                    class="w-full"
+                    @keyup.enter="saveTopic"
+                />
+                <p class="text-xs text-gray-500 mt-1">
+                    {{ isEditing ? '修改后若正在查看该话题，将自动刷新内容' : '新话题创建后将自动选中并加载数据' }}
+                </p>
+            </div>
+            <template #footer>
+                <Button label="取消" text @click="showTopicDialog = false" class="mr-2"/>
+                <Button label="保存" @click="saveTopic"/>
             </template>
-            <template #empty> No data found.</template>
-            <template #loading> Loading customers data. Please wait.</template>
-            <Column field="stock_name" filterField="stock_name" header="">
-                <template #body="{ data }">
-                  <div class="news-item">
-
-                    <div class="news-time">{{ formatDaysAgo(data.news_time) }} <a v-if="data.url !== ''" :href="data.url" target="_blank"><i class="pi pi-link"></i></a></div>
-                    <p class="news-digest font-semibold text-sm" style="font-size: 14px; padding: 5px 0;">{{ data.digest }}</p>
-
-                    <!-- 关联股票 -->
-                    <div v-if="data.relations_stocks && data.relations_stocks.length" class="relations-stocks text-sm">
-                      <strong>关联股票：</strong>
-                      <span
-                        v-for="(stock, index) in data.relations_stocks"
-                        :key="stock.code"
-                        class="stock-tag"
-                      >
-                        <a class="text-blue-500" :href="'https://gushitong.baidu.com/stock/ab-' + stock.code" target="_blank">
-                            {{ stock.code }} ({{ stock.name }})
-                        </a>
-                        <span v-if="index < data.relations_stocks.length - 1">、</span>
-                      </span>
-                    </div>
-
-                    <!-- 标签 -->
-                    <div v-if="data.tags && data.tags.length" class="tags text-sm">
-                      <strong>标签：</strong>
-                      <span
-                        v-for="tag in data.tags"
-                        :key="tag"
-                        class="tag-badge text-sm"
-                      >{{ tag }}</span>
-                    </div>
-
-                      <div class="tags text-sm" v-if="data.bullish_level != 0">
-                          <BullishBearishIndicator :value="data.bullish_level" :max-segments="10" />
-                      </div>
-
-                  </div>
-                </template>
-            </Column>
-        </DataTable>
+        </Dialog>
     </div>
-
 </template>
 
 <style scoped>
 .news-item {
-    font-size: 0.95rem;
-    line-height: 1.5;
+    padding: 8px 4px;
+    border-bottom: 1px dashed #f3f4f6;
+}
+
+.news-item:last-child {
+    border-bottom: none;
 }
 
 .news-time {
-    color: #666;
-    font-weight: bold;
+    color: #6b7280;
+    font-weight: 500;
 }
 
 .news-digest {
     margin: 4px 0;
+    color: #1f2937;
 }
 
-.relations-stocks,
-.tags {
-    margin-top: 6px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.relations-stocks .stock-tag {
-    white-space: nowrap;
-}
-
-.tags .tag-badge {
+.tag-badge {
     display: inline-block;
-    background-color: #e9ecef;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    padding: 2px 6px;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 9999px;
+    padding: 1px 8px;
+    font-size: 0.75rem;
+    color: #374151;
     margin-right: 4px;
-    margin-top: 2px;
-    font-size: 0.85rem;
-    color: #495057;
+}
+
+/* 覆盖 PrimeVue 按钮默认样式以适配紧凑布局 */
+::v-deep(.p-button.p-button-text.p-button-small) {
+    padding: 0.25rem;
+    min-width: 1.5rem;
+    height: 1.5rem;
 }
 </style>

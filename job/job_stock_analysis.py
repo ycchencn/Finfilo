@@ -16,6 +16,7 @@ from utils.data_loader import datajiji
 def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
 
     stock = datajiji.get_stock_info(stock_code)
+    assert stock is not None
     if not StockService.exists(stock_code):
         StockService.upsert_stock({
             'symbol': stock_code,
@@ -52,5 +53,5 @@ def manual_analysis():
 if __name__ == '__main__':
     # manual_analysis()
 
-    stock_code = '300576'
+    stock_code = '688820'
     job_stock_analysis(stock_code, sync_history=False)

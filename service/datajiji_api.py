@@ -42,7 +42,7 @@ class DataJiji:
             return response.json()
         except requests.exceptions.RequestException as e:
             print(f"请求失败: {e}")
-            return pd.DataFrame()
+            return None
 
     def get_history(
         self,

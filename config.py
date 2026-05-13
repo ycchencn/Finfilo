@@ -78,7 +78,11 @@ cache_setting = {
 llm_model_setting = {
     'stock_dcf_analysis': {
         'platform': 'aliyun',
-        'model': 'deepseek-v4-pro'
+        'model': 'deepseek-v4-flash'
+    },
+    'stock_dcf_analysis_extra': {
+        'platform': 'aliyun',
+        'model': 'deepseek-v4-flash'
     },
     'stock_tech_analysis': {
         'platform': 'aliyun',

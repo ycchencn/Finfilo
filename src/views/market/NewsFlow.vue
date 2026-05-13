@@ -115,7 +115,6 @@ const saveTopic = async () => {
         if (isEditing.value) {
             // 模拟 PUT 请求（实际对接时取消注释 axios.put）
             // await axios.put(`/api/v1/market/topics/${topicForm.id}`, { name: topicForm.name });
-
             const idx = topics.value.findIndex(t => t.id === topicForm.id);
             if (idx !== -1) {
                 topics.value[idx].name = topicForm.name;
@@ -227,10 +226,7 @@ onMounted(async () => {
                         <div class="news-item">
                             <div class="news-time text-gray-500 text-xs mb-1">
                                 {{ formatDaysAgo(data.news_time) }}
-                                <a v-if="data.url" :href="data.url" target="_blank"
-                                   class="text-blue-500 hover:underline ml-2">
-                                    <i class="pi pi-external-link"></i> 原文
-                                </a>
+                                <a v-if="data.url" :href="data.url" target="_blank" class="text-blue-500 hover:underline ml-2">原文</a>
                             </div>
                             <p class="news-digest font-semibold text-sm leading-relaxed">{{ data.digest }}</p>
 

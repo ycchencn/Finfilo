@@ -70,6 +70,9 @@ def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
 
     content = staff.ask(question=prompt)
 
+    # 提取报告里面的股价预测数据
+    report_extra = dcf_report_extra(_stock_code, content)
+
     # 1. 单条插入
     data = {
         "report_type": 1,
@@ -80,6 +83,7 @@ def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
         "analyst_name": "llm",
         "publish_time": get_today(),
         "content_text": content,
+        "content_json": report_extra,
         "rating": "-",
     }
 
@@ -110,8 +114,37 @@ def send_job(_stock_code, send_notification=False, sync_history=False):
     })
 
 
+def dcf_report_extra(_stock_code, report_content):
+    """
+    从dcf报告提取股价预期
+    :param _stock_code:
+    :param report_content:
+    :return:
+    """
+    staff = get_analysis_model_by_setting(_setting_name='stock_dcf_analysis_extra')
+    staff.role_base = '你需要从dcf报告提取股价预期，使用JSON输出'
+    question = f"""
+    请严格输出具体的价格，不要给35-40这样子模棱两可的数据
+    报告原文：{report_content},"""
+    question += """输出JSON格式参考！
+    {
+        "每股内在价值": {
+          "中性情景": "40",
+          "保守情景": "28",
+          "乐观情景": "55"
+        }，
+        "当前股价": "54.77",
+        "估值判断": "当前股价合理偏低，但未出现显著低估，安全边际较薄。建议逢低布局，关注回调至40-45元区间的加仓机会。"
+    }
+    """
+    staff.set_response_json()
+    res_json = staff.ask(question)
+    return res_json
+
 if __name__ == '__main__':
-    stock_code = '300450'
+
+    stock_code = '688362'
+
     job_stock_dcf_model_analysis(stock_code)
 
     # job_stock_dcf_model_analysis_daily(override=True)

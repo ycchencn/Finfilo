@@ -14,20 +14,6 @@ services:
             - redis
         restart: always
 
-    website:
-        image: finfilo-service:latest
-        ports:
-            - "8090:8080"
-        working_dir: /app
-        command: python3 /app/web_index.py
-        environment:
-            ENV: production
-            DATABASE_CONN_STR: ${DATABASE_CONN_STR}
-            REDIS_HOST: ${REDIS_HOST}
-        depends_on:
-            - redis
-        restart: always
-
     web_slave:
         image: finfilo-service:latest
         ports:

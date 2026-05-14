@@ -3,6 +3,7 @@
  * Chaos isn't a pit. Chaos is a ladder. - Littlefinger
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
+import json
 
 from staffs import get_analysis_model_by_setting
 from utils.common import logger
@@ -26,7 +27,6 @@ def get_stock_detail(_stock_code, market):
 
 
 def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
-
     staff = get_analysis_model_by_setting(_setting_name='stock_dcf_analysis')
     staff.role_base = '你需要根据客户提供的资料对股票进行DCF估值分析，请使用Markdown输出'
     staff.set_response_text()
@@ -100,18 +100,15 @@ def job_stock_dcf_model_analysis_daily(override=False):
     # 循环对个股进行每日挖掘
     for stock in stocks:
         # 发送分析任务到MQ
-        send_job(_stock_code=stock['symbol'])
-        logger.info(f"send analysis of {stock['symbol']}")
-
-
-def send_job(_stock_code, send_notification=False, sync_history=False):
-    JobService.send_job({
-        'job_func': 'job_stock_dcf_model_analysis',
-        'job_args': {
-            '_stock_code': _stock_code,
-            'send_notification': send_notification
-        }
-    })
+        # send_job(_stock_code=stock['symbol'])
+        JobService.send_job({
+            'job_func': 'job_stock_dcf_model_analysis',
+            'job_args': {
+                '_stock_code': stock['symbol'],
+                'send_notification': False
+            }
+        })
+        logger.info(f"send dcf analysis of {stock['symbol']}")
 
 
 def dcf_report_extra(_stock_code, report_content):
@@ -139,12 +136,11 @@ def dcf_report_extra(_stock_code, report_content):
     """
     staff.set_response_json()
     res_json = staff.ask(question)
-    return res_json
+    return json.loads(res_json)
+
 
 if __name__ == '__main__':
+    # stock_code = '688362'
+    # job_stock_dcf_model_analysis(stock_code)
 
-    stock_code = '688362'
-
-    job_stock_dcf_model_analysis(stock_code)
-
-    # job_stock_dcf_model_analysis_daily(override=True)
+    job_stock_dcf_model_analysis_daily(override=True)

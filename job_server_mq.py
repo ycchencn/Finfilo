@@ -25,7 +25,7 @@ from job.job_update_stock_greedy_data import job_update_stock_greedy_data
 from job.job_update_factors import job_update_stock_factor
 from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
 from job.job_stock_analysis import job_stock_analysis
-from job.signal.job_check_signal import job_check_signal
+from job.job_check_signal import job_check_signal
 from models.rabbitmq import rabbitmq_config
 from models.database import db_session
 

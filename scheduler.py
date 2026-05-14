@@ -44,9 +44,6 @@ if __name__ == '__main__':
     # 量化回测任务执行，运算个股beta数据
     scheduler.add_job(job_update_stock_beta_all, 'cron', hour=20, minute=15, timezone=beijing_tz)
 
-    # 个股大模型数据分析任务 【每天八点半】
-    # scheduler.add_job(job_market_digging_daily, 'cron', hour=20, minute=30, timezone=beijing_tz)
-
     # 更新个股恐贪数据
     scheduler.add_job(job_update_stock_greedy_data_daily, 'cron', hour=20, minute=55, timezone=beijing_tz)
 

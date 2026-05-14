@@ -13,7 +13,7 @@ from job.job_update_factors import job_update_stock_factor
 from utils.data_loader import datajiji
 
 
-def job_stock_analysis(stock_code, sync_history=False, send_notification=False):
+def job_stock_analysis(stock_code, send_notification=False):
 
     stock = datajiji.get_stock_info(stock_code)
     assert stock is not None
@@ -47,11 +47,10 @@ def manual_analysis():
     for item in watchlist:
         # print(item['stock_code'])
         # stock_info = StockService.get_stock_by_symbol(symbol=item['stock_code'])
-        job_stock_analysis(item['stock_code'], sync_history=False)
+        job_stock_analysis(item['stock_code'])
 
 
 if __name__ == '__main__':
-    # manual_analysis()
 
-    stock_code = '688820'
-    job_stock_analysis(stock_code, sync_history=False)
+    stock_code = '603601'
+    job_stock_analysis(stock_code)

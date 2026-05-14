@@ -224,8 +224,6 @@ def _stock_reanalysis(symbol, sync_history=False, send_notification=False):
     JobService.send_job({
         'job_func': 'job_stock_analysis',
         'job_args': {
-            'stock_code': symbol,
-            'sync_history': sync_history,
-            'send_notification': send_notification
+            'stock_code': symbol
         }
     })

@@ -5,6 +5,7 @@ import {init, dispose} from 'klinecharts';
 import {ref} from 'vue';
 import {useRoute} from 'vue-router';
 import {chartConfigs} from '@/utils/constants.js';
+import StockValuationChart from '@/components/StockValuationChart.vue'
 import {
     fetchStockMarketData,
     fetchStockInfo,
@@ -311,6 +312,15 @@ const reanalysisDcf = function () {
     }
 }
 
+// 你的接口返回数据
+const stockData = {
+  "估值判断": "当前股价处于明显偏低水平，具备充分安全边际。建议逢低布局，第一目标位看至50元，中长期目标看至61元。",
+  "当前股价": "36.00",
+  "每股内在价值": {"中性情景": "61.02", "乐观情景": "85.00", "保守情景": "20.00"}
+}
+// 可选：真实历史价格数据
+const realHistoryData = [15,33,31,34,60,55,32,30,34,36]
+
 onUnmounted(() => {
     dispose('chart');
 });
@@ -480,6 +490,14 @@ onUnmounted(() => {
             <div class="font-semibold text-lg">
                 <i class="pi pi-chart-line text-green-500"></i> 技术面分析
             </div>
+            <!-- 自定义配置用法 -->
+<!--            <StockValuationChart-->
+<!--              :data="stockData"-->
+<!--              title=""-->
+<!--              ratingText=""-->
+<!--              ratingColor="#f97316"-->
+<!--              :historyData="realHistoryData"-->
+<!--            />-->
             <Divider/>
             <div class="mb-4 markdown-content" v-if="tech_report">
                 <MarkdownRenderer
@@ -501,6 +519,7 @@ onUnmounted(() => {
                 <Chart type="line" :data="lineData" :options="lineOptions" style="height: 250px"></Chart>
             </div>
         </div>
+
     </div>
 
     <div class="pd-2-0 mt-5">

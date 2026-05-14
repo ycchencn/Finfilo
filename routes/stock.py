@@ -8,7 +8,8 @@ from flask import request, jsonify, Blueprint
 from config import cache_setting
 from app import api_prefix, cache
 from service import StockService, FactorValueService
-from service import JobService, MarketFearGreedService, ResearchReportService
+from service import JobService, ResearchReportService
+from service.stock_fear_greed_service import StockFearGreedService
 from utils.data_loader import datajiji
 from utils.common import get_today, get_date_by_years, validate_stock_code
 
@@ -16,7 +17,7 @@ stock_bp = Blueprint('stock', __name__)
 
 
 def get_main_force_behavior_phase(code):
-    greed_data = MarketFearGreedService.get_latest_by_index(index_code=code)
+    greed_data = StockFearGreedService.get_latest_by_index(index_code=code)
     if greed_data is None:
         greed_data = {
             "fear_greed": 0
@@ -141,7 +142,7 @@ def get_stocks_greed_data(stock_code):
     """
     获取个股恐惧贪婪数据
     """
-    greed_data = MarketFearGreedService.get_by_index_all(index_code=stock_code)
+    greed_data = StockFearGreedService.get_by_index_all(index_code=stock_code)
     return jsonify(greed_data)
 
 

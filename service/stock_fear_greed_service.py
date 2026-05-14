@@ -4,7 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from models import MarketFearGreed  # 请确保你的模型文件中已定义该类
+from models import StockFearGreed  # 请确保你的模型文件中已定义该类
 from models.database import db_session
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import and_
@@ -13,7 +13,7 @@ from datetime import date
 from typing import List, Optional, Dict, Any
 
 
-class MarketFearGreedService:
+class StockFearGreedService:
 
     @staticmethod
     def batch_create(records: List[Dict[str, Any]]) -> bool:
@@ -30,7 +30,7 @@ class MarketFearGreedService:
 
         try:
             # 使用 bulk_insert_mappings，避免逐个创建 ORM 对象
-            db_session.bulk_insert_mappings(MarketFearGreed, records)
+            db_session.bulk_insert_mappings(StockFearGreed, records)
             db_session.commit()
             logger.info(f"Successfully bulk-inserted {len(records)} fear/greed records.")
             return True
@@ -51,11 +51,11 @@ class MarketFearGreedService:
         :return: 字典形式的记录，或 None
         """
         try:
-            records = db_session.query(MarketFearGreed).filter(
+            records = db_session.query(StockFearGreed).filter(
                 and_(
-                    MarketFearGreed.index_code == index_code,
+                    StockFearGreed.index_code == index_code,
                 )
-            ).order_by(MarketFearGreed.trade_date.desc()).limit(limit).all()
+            ).order_by(StockFearGreed.trade_date.desc()).limit(limit).all()
 
             return [r.to_dict() for r in records] if records else []
         except Exception as e:
@@ -71,7 +71,7 @@ class MarketFearGreedService:
         :return: 字典形式的记录，或 None
         """
         try:
-            record = db_session.query(MarketFearGreed).filter_by(
+            record = db_session.query(StockFearGreed).filter_by(
                 index_code=index_code,
                 trade_date=trade_date
             ).first()
@@ -94,13 +94,13 @@ class MarketFearGreedService:
         :return: 记录列表（字典形式），按 trade_date 升序
         """
         try:
-            records = db_session.query(MarketFearGreed).filter(
+            records = db_session.query(StockFearGreed).filter(
                 and_(
-                    MarketFearGreed.index_code == index_code,
-                    MarketFearGreed.trade_date >= start_date,
-                    MarketFearGreed.trade_date <= end_date
+                    StockFearGreed.index_code == index_code,
+                    StockFearGreed.trade_date >= start_date,
+                    StockFearGreed.trade_date <= end_date
                 )
-            ).order_by(MarketFearGreed.trade_date.asc()).all()
+            ).order_by(StockFearGreed.trade_date.asc()).all()
 
             return [r.to_dict() for r in records] if records else []
         except Exception as e:
@@ -113,9 +113,9 @@ class MarketFearGreedService:
         获取指定指数最新的恐惧贪婪记录。
         """
         try:
-            record = db_session.query(MarketFearGreed).filter_by(
+            record = db_session.query(StockFearGreed).filter_by(
                 index_code=index_code
-            ).order_by(MarketFearGreed.trade_date.desc()).first()
+            ).order_by(StockFearGreed.trade_date.desc()).first()
             return record.to_dict() if record else None
         except Exception as e:
             logger.error(f"Error in get_latest_by_index: {e}")
@@ -127,7 +127,7 @@ class MarketFearGreedService:
         删除指定指数在指定日期的记录。
         """
         try:
-            record = db_session.query(MarketFearGreed).filter_by(
+            record = db_session.query(StockFearGreed).filter_by(
                 index_code=index_code,
                 trade_date=trade_date
             ).first()
@@ -147,8 +147,8 @@ class MarketFearGreedService:
         删除指定指数在指定日期的记录。
         """
         try:
-            deleted_count = db_session.query(MarketFearGreed).filter(
-                MarketFearGreed.index_code == index_code,
+            deleted_count = db_session.query(StockFearGreed).filter(
+                StockFearGreed.index_code == index_code,
             ).delete(synchronize_session=False)
             db_session.commit()
             logger.info(f"Deleted {deleted_count} records for symbol: {index_code}")

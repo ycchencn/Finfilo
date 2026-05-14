@@ -7,7 +7,8 @@
 from flask import jsonify, Blueprint, request
 from app import api_prefix, cache
 from service.user_watchlist_service import UserWatchlistService
-from service import StockService, FactorValueService, MarketFearGreedService
+from service import StockService, FactorValueService
+from service.stock_fear_greed_service import StockFearGreedService
 from utils.common import logger
 
 # 创建蓝图
@@ -26,7 +27,7 @@ def make_response_json(data=None, msg="success", code=200):
 
 
 def get_main_force_behavior_phase(code):
-    greed_data = MarketFearGreedService.get_latest_by_index(index_code=code)
+    greed_data = StockFearGreedService.get_latest_by_index(index_code=code)
     if greed_data is None:
         greed_data = {
             "fear_greed": 0

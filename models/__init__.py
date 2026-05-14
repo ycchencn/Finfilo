@@ -313,77 +313,6 @@ class BacktestTrade(db.Model):
         }
 
 
-class MarketTemperature(db.Model):
-    __tablename__ = 'market_temperature'
-
-    id = Column(Integer, primary_key=True)
-    temperature = Column(Float, nullable=False)
-    ai_suggestion = Column(Text)
-    created_at = Column(Date)
-
-    def to_dict(self):
-        """
-        @brief 将对象的属性转换为字典
-        @return: 包含对象所有属性的字典
-        @rtype: dict
-        @example:
-            # 示例用法
-            market_entry = MarketTemperature(...)
-            print(market_entry_dict)
-        """
-        return {
-            'id': self.id,
-            'temperature': self.temperature,
-            'ai_suggestion': self.ai_suggestion,
-            'created_at': self.created_at.strftime('%Y-%m-%d') if self.created_at else None
-        }
-
-
-class MarketWeightData(db.Model):
-    __tablename__ = 'market_weights_data'
-
-    id = Column(Integer, primary_key=True)
-    buy_signal_15D = Column(Integer, nullable=False)
-    compose = Column(JSON, nullable=False)
-    daily_change = Column(Float, nullable=False)
-    industry_name = Column(String(255), nullable=False)
-    pe_valuation = Column(Float, nullable=False)
-    sell_signal_15D = Column(Integer, nullable=False)
-    weight_percentage = Column(Float, nullable=False)
-    week_to_date = Column(Float, nullable=False)
-    month_to_date = Column(Float, nullable=False)
-    year_to_date = Column(Float, nullable=False)
-    opportunity_score = Column(Float, nullable=False)
-    created_at = Column(Date)
-
-    def to_dict(self):
-        """
-        @brief 将对象的属性转换为字典
-        @return: 包含对象所有属性的字典
-        @rtype: dict
-        @example:
-            # 示例用法
-            market_entry = MarketWeightData(...)
-            market_entry_dict = market_entry.to_dict()
-            print(market_entry_dict)
-        """
-        return {
-            'id': self.id,
-            'buy_signal_15D': self.buy_signal_15D,
-            'compose': self.compose,
-            'daily_change': self.daily_change,
-            'industry_name': self.industry_name,
-            'pe_valuation': self.pe_valuation,
-            'sell_signal_15D': self.sell_signal_15D,
-            'weight_percentage': self.weight_percentage,
-            'week_to_date': self.week_to_date,
-            'month_to_date': self.month_to_date,
-            'year_to_date': self.year_to_date,
-            'opportunity_score': self.opportunity_score,
-            'created_at': self.created_at.strftime('%Y-%m-%d') if self.created_at else None
-        }
-
-
 class MarketDailyLimit(Base):
     __tablename__ = 'market_daily_limit'
 
@@ -643,8 +572,8 @@ class FuturesBasisWide(Base):
         }
 
 
-class MarketFearGreed(Base):
-    __tablename__ = 'market_fear_greed'
+class StockFearGreed(Base):
+    __tablename__ = 'stocks_fear_greed'
 
     trade_date = Column(Date, primary_key=True, nullable=False)
     index_code = Column(String(20), nullable=False)

@@ -5,7 +5,8 @@
 """
 
 import pandas as pd
-from service import MarketFearGreedService, StockService
+from service import StockService
+from service.stock_fear_greed_service import StockFearGreedService
 from job.market_fear_greed import build_fear_greed_index
 from utils.common import get_today, logger
 from datetime import datetime
@@ -20,6 +21,8 @@ def job_update_stock_greedy_data(index_code, override_all=False):
 
     try:
         market_data = datajiji.get_history(symbol=index_code, start_date="20250101", end_date=get_today())
+        # 构建指数
+        result = build_fear_greed_index(market_data)
     except Exception as e:
         logger.info(f"{index_code}, 个股行情数据获取失败: {e}")
         return None
@@ -28,16 +31,13 @@ def job_update_stock_greedy_data(index_code, override_all=False):
         logger.warning(f"{index_code}, 个股行情数据为空，跳过处理")
         return None
 
-    # 构建指数
-    result = build_fear_greed_index(market_data)
-
     # === 新增：准备批量写入数据 ===
     records_to_insert = []
 
     if override_all:
 
         # 清空旧数据
-        MarketFearGreedService.delete_by_index(index_code=index_code)
+        StockFearGreedService.delete_by_index(index_code=index_code)
 
         for trade_date, row in result.iterrows():
             # 跳过任何关键字段为 NaN 的行
@@ -73,7 +73,7 @@ def job_update_stock_greedy_data(index_code, override_all=False):
         })
 
     # === 执行批量插入 ===
-    success = MarketFearGreedService.batch_create(records_to_insert)
+    success = StockFearGreedService.batch_create(records_to_insert)
     if success:
         logger.debug("✅ 贪婪与恐惧数据已成功写入数据库！")
     else:
@@ -85,4 +85,9 @@ if __name__ == '__main__':
 
     # job_update_stock_greedy_data_daily(override_all=True)
 
-    job_update_stock_greedy_data(index_code="301626", override_all=True)
+    stocks = StockService.search_stocks(securities_type='stock', monitoring=1, per_page=10000)
+
+    # 循环对个股进行每日挖掘
+    for stock in stocks:
+        stock_code = stock.get('symbol')
+        job_update_stock_greedy_data(index_code=stock_code, override_all=True)

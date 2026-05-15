@@ -10,8 +10,6 @@ services:
             ENV: production
             DATABASE_CONN_STR: ${DATABASE_CONN_STR}
             REDIS_HOST: ${REDIS_HOST}
-        depends_on:
-            - redis
         restart: always
 
     web_slave:
@@ -24,8 +22,6 @@ services:
             ENV: production
             DATABASE_CONN_STR: ${DATABASE_CONN_STR}
             REDIS_HOST: ${REDIS_HOST}
-        depends_on:
-            - redis
         restart: always
 
     scheduler:
@@ -36,8 +32,6 @@ services:
             ENV: production
             DATABASE_CONN_STR: ${DATABASE_CONN_STR}
             REDIS_HOST: ${REDIS_HOST}
-        depends_on:
-            - redis
         restart: always
 
     job_server:
@@ -48,8 +42,6 @@ services:
             ENV: production
             DATABASE_CONN_STR: ${DATABASE_CONN_STR}
             REDIS_HOST: ${REDIS_HOST}
-        depends_on:
-            - redis
         restart: always
 
     job_server_slave:
@@ -60,8 +52,6 @@ services:
             ENV: production
             DATABASE_CONN_STR: ${DATABASE_CONN_STR}
             REDIS_HOST: ${REDIS_HOST}
-        depends_on:
-            - redis
         restart: always
 
     news_server:
@@ -72,15 +62,4 @@ services:
             ENV: production
             DATABASE_CONN_STR: ${DATABASE_CONN_STR}
             REDIS_HOST: ${REDIS_HOST}
-        depends_on:
-            - redis
-        restart: always
-
-    redis:
-        image: registry.openanolis.cn/openanolis/redis:5.0.3-8.6
-        ports:
-            - "6379:6379"
-        command: [ "redis-server", "--appendonly", "yes", "--protected-mode", "no" ]
-        volumes:
-            - /mnt/redis-data:/data
         restart: always

@@ -1,69 +1,111 @@
 
 
-Based on the code map analysis, this is a FinTech platform providing financial data APIs and AI-powered analysis. Let me create a comprehensive README.
-
 # FinFilo
 
-FinFilo 是一个金融数据分析与投资组合管理平台，提供股票、ETF、市场行情等数据接口，并集成多种大语言模型 (LLM) 进行智能分析。
+FinFilo is a comprehensive financial data analytics and investment portfolio management platform that provides stock, ETF, and market data APIs, integrated with multiple large language models (LLMs) for intelligent analysis.
 
-## 功能特性
+## Features
 
-### 📊 数据接口
-- **市场数据**: 实时行情、ETF 信息、成分股查询
-- **股票数据**: 历史行情、股票档案、技术分析、DCF 研究报告
-- **投资组合**: 组合管理、每日统计、交易记录
-- **回测系统**: 回测任务管理、信号生成
-- **自选股**: 自选股 watchlist 管理
+### 📊 Data APIs
 
-### 🤖 AI 智能分析
-- 基于 同义千问/Doubao/DeepSeek/Minimax 等大语言模型
-- 财务分析报告自动生成
-- 金融新闻智能解读
-- 量化策略代码生成
+- **Market Data**: Real-time quotes, ETF information, index constituents
+- **Stock Data**: Historical prices, company profiles, technical indicators, DCF research reports
+- **Portfolio Management**: Investment portfolios, daily summaries, transaction records
+- **Backtesting System**: Backtest task management, signal generation
+- **Watchlist**: User watchlist management
 
-## 技术栈
+### 🤖 AI-Powered Analysis
 
-- **后端**: Python Flask
-- **缓存**: Flask-Caching
-- **LLM 集成**: 阿里云、火山引擎、硅基流动、智谱
+- **Multi-LLM Support**: Integrated with Qwen, Doubao, DeepSeek, Minimax, Zhipu, Siliconflow, and VolcEngine
+- **Financial Analysis Reports**: Auto-generated DCF valuation reports
+- **News Analysis**: Intelligent financial news parsing and sentiment analysis
+- **Technical Analysis**: AI-powered stock technical analysis and trading signals
+- **Market Overview**: AI-generated market summary reports
 
-## 快速开始
+### 🖥️ Web Interface
 
-### 环境要求
+- **Dashboard**: Portfolio performance visualization
+- **Stock Monitor**: Real-time stock monitoring with AI signals
+- **ETF Explorer**: ETF analysis and constituent tracking
+- **News Feed**: Aggregated financial news with AI summaries
+- **Market Temperature**: Market sentiment indicators
+
+## Technology Stack
+
+- **Backend**: Python 3.11 + Flask
+- **Database**: MySQL + SQLAlchemy ORM
+- **Caching**: Redis + Flask-Caching
+- **Message Queue**: RabbitMQ
+- **Frontend**: Vue.js 3 + PrimeVue
+- **LLM Integration**: Alibaba Cloud, Volcano Engine, Siliconflow, Zhipu AI
+
+## Requirements
 
 - Python 3.8+
-- Redis (用于缓存)
+- MySQL 8.0+
+- Redis 7.0+
 
-### 安装依赖
+## Installation
 
 ```bash
+# Clone the repository
+git clone https://gitee.com/yc-chan/finfilo.git
+cd finfilo
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+# or
+venv\Scripts\activate  # Windows
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 配置环境
+## Configuration
 
-复制 `.env.example` 为 `.env` 并配置相关 API Key：
+Copy the example environment file and configure your settings:
 
 ```bash
 cp .env.example .env
 ```
 
-### 启动服务
+Edit `.env` with your API keys and database credentials:
+
+```
+# Database
+DATABASE_URL=mysql+pymysql://user:password@localhost:3306/finfilo
+
+# Redis
+REDIS_URL=redis://localhost:6379/0
+
+# LLM API Keys (at least one required)
+QWEEN_API_KEY=your_qwen_key
+DOUBAO_API_KEY=your_doubao_key
+DEEPSEEK_API_KEY=your_deepseek_key
+ZHIPU_API_KEY=your_zhipu_key
+```
+
+## Running the Application
+
+### Development Mode
 
 ```bash
-# 开发环境
-python run.py
+python run_app.py
+```
 
-# 或使用 Docker
+The API will be available at `http://localhost:5000`
+
+### Docker Deployment
+
+```bash
 docker-compose up -d
 ```
 
-![SNI (5).png](public/readme/SNI%20%285%29.png)
+## API Endpoints
 
-![SNI (4).png](public/readme/SNI%20%284%29.png)
+### Stock APIs
 
-![SNI (3).png](public/readme/SNI%20%283%29.png)
-
-![SNI (1).png](public/readme/SNI%20%281%29.png)
-
-![SNI (6).png](public/readme/SNI%20%286%29.png)
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/v1/st

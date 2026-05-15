@@ -10,6 +10,7 @@ from app import api_prefix, cache
 from service import MarketNewsService
 from service.etf_service import EtfInfoService, EtfComponentService
 from utils.common import logger
+from job.job_news_feed_analysis import search_digest_keyword
 
 market_bp = Blueprint('market', __name__)
 
@@ -27,7 +28,7 @@ def get_news():
 def search_news():
     try:
         # 获取查询参数
-        keyword = request.args.get('keyword', type=str)
+        keyword = request.args.get('keyword', type=str, default='')
         stock_code = request.args.get('stock_code', type=str)
         start_time_str = request.args.get('start_time', type=str)
         end_time_str = request.args.get('end_time', type=str)
@@ -43,24 +44,30 @@ def search_news():
             end_time = datetime.fromisoformat(end_time_str.replace('Z', '+00:00'))
 
         # 调用服务层搜索
-        result = MarketNewsService.search(
-            keyword=keyword,
-            stock_code=stock_code,
-            start_time=start_time,
-            end_time=end_time,
-            page=page,
-            page_size=page_size
-        )
+        es_res = search_digest_keyword(keyword, top_k=page_size, sort_field="news_time.keyword", sort_order="desc")
+
+        result = {
+            "items": es_res['hits'],
+            "total": es_res['total'],
+            "page": page,
+            "page_size": page_size,
+            "has_more": False
+        }
+        # result = MarketNewsService.search(
+        #     keyword=keyword,
+        #     stock_code=stock_code,
+        #     start_time=start_time,
+        #     end_time=end_time,
+        #     page=page,
+        #     page_size=page_size
+        # )
 
         return jsonify(result), 200
 
-    except ValueError as ve:
-        # 时间格式错误
-        logger.error(f"Invalid datetime format in search_news: {ve}")
-        return jsonify({"error": "Invalid datetime format. Use ISO 8601, e.g., '2025-01-01T00:00:00'"}), 400
     except Exception as e:
         logger.error(f"Unexpected error in search_news endpoint: {e}")
         return jsonify({"error": "Internal server error"}), 500
+
 
 def make_response_json(data=None, msg="success", code=200):
     """
@@ -108,6 +115,7 @@ def get_etf_info(etf_code):
     except Exception as e:
         logger.error(f"Error fetching ETF info for {etf_code}: {e}")
         return make_response_json(msg=str(e), code=500)
+
 
 @market_bp.route(f'{api_prefix}/etf/<string:etf_code>/components', methods=['GET'])
 @cache.cached(timeout=300, query_string=True)

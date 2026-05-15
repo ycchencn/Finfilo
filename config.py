@@ -107,6 +107,7 @@ strategy_setting = {
 
 # elasticsearch
 elasticsearch_setting = {
+    'enable': True,
     'host': os.getenv( 'ES_HOST'),
     'username': os.getenv( 'ES_USER'),
     'password': os.getenv( 'ES_PASSWORD'),

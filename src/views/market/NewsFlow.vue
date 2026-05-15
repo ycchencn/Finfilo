@@ -71,7 +71,7 @@ const loadNewsData = async () => {
     try {
         const keyword = activeTopic.value === '全部新闻' ? '' : activeTopic.value;
         const res = await axios.get('/api/v1/market/search_news', {
-            params: {page: 1, page_size: 500, keyword}
+            params: {page: 1, page_size: 200, keyword}
         });
         news.value = res.data?.items || [];
     } catch (e) {
@@ -233,16 +233,16 @@ onMounted(async () => {
                             <div v-if="data.relations_stocks?.length" class="mt-2 text-sm">
                                 <strong class="text-gray-600">关联股票：</strong>
                                 <span class="ml-1 inline-flex flex-wrap gap-x-2">
-                  <a
-                      v-for="(stock, i) in data.relations_stocks"
-                      :key="stock.code"
-                      class="text-blue-600 hover:underline cursor-pointer"
-                      :href="'https://gushitong.baidu.com/stock/ab-' + stock.code"
-                      target="_blank"
-                  >
-                    {{ stock.code }}({{ stock.name }})
-                  </a>
-                </span>
+                                  <a
+                                      v-for="(stock, i) in data.relations_stocks"
+                                      :key="stock.code"
+                                      class="text-blue-600 hover:underline cursor-pointer"
+                                      :href="'https://gushitong.baidu.com/stock/ab-' + stock.code"
+                                      target="_blank"
+                                  >
+                                    {{ stock.code }}({{ stock.name }})
+                                  </a>
+                                </span>
                             </div>
 
                             <div v-if="data.tags?.length" class="mt-1.5 text-sm">
@@ -250,7 +250,7 @@ onMounted(async () => {
                                 <span v-for="tag in data.tags" :key="tag" class="tag-badge ml-1">{{ tag }}</span>
                             </div>
 
-                            <div v-if="data.bullish_level != 0" class="mt-2">
+                            <div v-if="data.bullish_level !== 0" class="mt-2">
                                 <BullishBearishIndicator :value="data.bullish_level" :max-segments="10"/>
                             </div>
                         </div>

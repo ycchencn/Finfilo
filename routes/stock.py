@@ -125,29 +125,6 @@ def get_stocks_monitored():
     return jsonify(stocks)
 
 
-@stock_bp.route(f'{api_prefix}/etfs', methods=['GET'])
-@cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
-def get_etfs():
-    """
-    获取ETF监控列表
-    """
-    etfs = datagigi.get_etf_list(market='cn')[:8]
-    for etf in etfs:
-        etf['52week_low'] = FactorValueService.get_latest_factor_value(
-            ticker=etf['symbol'],
-            factor_name='52week_low'
-        )
-        etf['52week_high'] = FactorValueService.get_latest_factor_value(
-            ticker=etf['symbol'],
-            factor_name='52week_high'
-        )
-        etf['composition'] = datagigi.get_etf_composition(symbol=etf['symbol'])
-        etf['composition'] = etf['composition']['data']
-        etf['ohlc_last'] = datagigi.get_last_tick(symbol=etf['symbol'])
-        etf['ohlc_last']['chg_pct'] = (etf['ohlc_last']['lastPrice'] - etf['ohlc_last']['lastClose']) / etf['ohlc_last']['lastClose'] * 100
-    return jsonify(etfs)
-
-
 @stock_bp.route(f'{api_prefix}/stock/greed_data/<string:stock_code>', methods=['GET'])
 def get_stocks_greed_data(stock_code):
     """

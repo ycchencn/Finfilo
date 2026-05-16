@@ -14,6 +14,7 @@ from routes.stock import stock_bp
 from routes.market import market_bp
 from routes.portfolio import portfolio_bp
 from routes.watchlist import watchlist_bp
+from routes.etf import etf_bp
 from service.log_service import LogService
 
 # 指定时区为北京时间
@@ -24,6 +25,7 @@ app.register_blueprint(stock_bp)
 app.register_blueprint(market_bp)
 app.register_blueprint(portfolio_bp)
 app.register_blueprint(watchlist_bp)
+app.register_blueprint(etf_bp)
 
 @app.route('/api/v1/auth/login', methods=['POST'])
 def auth_login_action():

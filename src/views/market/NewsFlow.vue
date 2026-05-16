@@ -31,6 +31,7 @@ const MOCK_TOPICS = [
     {id: 7, name: '货币政策'},
     {id: 8, name: '业绩披露'},
     {id: 9, name: '商业航天'},
+    {id: 15, name: '半导体'},
     {id: 10, name: '机器人'},
     {id: 11, name: 'CPO'},
     {id: 12, name: 'PCB'},
@@ -71,7 +72,7 @@ const loadNewsData = async () => {
     try {
         const keyword = activeTopic.value === '全部新闻' ? '' : activeTopic.value;
         const res = await axios.get('/api/v1/market/search_news', {
-            params: {page: 1, page_size: 500, keyword}
+            params: {page: 1, page_size: 200, keyword}
         });
         news.value = res.data?.items || [];
     } catch (e) {
@@ -228,21 +229,21 @@ onMounted(async () => {
                                 {{ formatDaysAgo(data.news_time) }}
                                 <a v-if="data.url" :href="data.url" target="_blank" class="text-blue-500 hover:underline ml-2">原文</a>
                             </div>
-                            <p class="news-digest font-semibold text-sm leading-relaxed">{{ data.digest }}</p>
+                            <p class="news-digest leading-relaxed">{{ data.digest }}</p>
 
                             <div v-if="data.relations_stocks?.length" class="mt-2 text-sm">
                                 <strong class="text-gray-600">关联股票：</strong>
                                 <span class="ml-1 inline-flex flex-wrap gap-x-2">
-                  <a
-                      v-for="(stock, i) in data.relations_stocks"
-                      :key="stock.code"
-                      class="text-blue-600 hover:underline cursor-pointer"
-                      :href="'https://gushitong.baidu.com/stock/ab-' + stock.code"
-                      target="_blank"
-                  >
-                    {{ stock.code }}({{ stock.name }})
-                  </a>
-                </span>
+                                  <a
+                                      v-for="(stock, i) in data.relations_stocks"
+                                      :key="stock.code"
+                                      class="text-blue-600 hover:underline cursor-pointer"
+                                      :href="'https://gushitong.baidu.com/stock/ab-' + stock.code"
+                                      target="_blank"
+                                  >
+                                    {{ stock.code }}({{ stock.name }})
+                                  </a>
+                                </span>
                             </div>
 
                             <div v-if="data.tags?.length" class="mt-1.5 text-sm">
@@ -250,7 +251,7 @@ onMounted(async () => {
                                 <span v-for="tag in data.tags" :key="tag" class="tag-badge ml-1">{{ tag }}</span>
                             </div>
 
-                            <div v-if="data.bullish_level != 0" class="mt-2">
+                            <div v-if="data.bullish_level !== 0" class="mt-2">
                                 <BullishBearishIndicator :value="data.bullish_level" :max-segments="10"/>
                             </div>
                         </div>

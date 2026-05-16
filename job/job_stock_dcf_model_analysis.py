@@ -54,6 +54,12 @@ def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
     # 3 获取关联新闻供LLM分析
     relative_news = MarketNewsService.search(stock_code=_stock_code, page_size=30)
 
+    # 获取财务报告数据
+    report_balance = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Balance')
+    report_income = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Income')
+    report_cashflow = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='CashFlow')
+    report_capital = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Capital')
+
     # 4 大模型汇总输出分析报告
     template = Template(prompt_template)
 
@@ -64,6 +70,10 @@ def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
         today=trade_date,
         market_data=market_data.to_csv(),
         relative_news=relative_news,
+        report_balance=report_balance,
+        report_income=report_income,
+        report_capital=report_capital,
+        report_cashflow=report_cashflow
     )
 
     logger.info(f"传入大模型进行DCF分析：{stock_name}【{_stock_code}】，大模型版本：{staff.model}")
@@ -140,7 +150,9 @@ def dcf_report_extra(_stock_code, report_content):
 
 
 if __name__ == '__main__':
-    # stock_code = '688362'
-    # job_stock_dcf_model_analysis(stock_code)
 
-    job_stock_dcf_model_analysis_daily(override=True)
+    stock_code = '600460'
+
+    job_stock_dcf_model_analysis(stock_code)
+
+    # job_stock_dcf_model_analysis_daily(override=True)

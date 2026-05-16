@@ -4,7 +4,7 @@ pandas~=3.0.2
 sqlalchemy~=2.0.49
 pymysql~=1.1.1
 redis
-akshare~=1.18.26
+akshare
 openai
 pytest~=9.0.2
 flask~=3.1.3

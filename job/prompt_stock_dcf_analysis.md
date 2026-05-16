@@ -20,6 +20,13 @@
 
 **个股基础信息**：$stock_detail  
 
+**个股财务数据**：
+
+$report_balance
+$report_income
+$report_capital
+$report_cashflow
+
 ## 输出要求
 1.  **格式**：使用 Markdown 格式，层级分明，重点数据加粗。
 2.  **语气**：专业、客观、理性，避免情绪化表达，但在结论部分要观点鲜明。

@@ -9,6 +9,7 @@ from app import api_prefix, cache
 from utils.data_loader import datagigi
 from service import FactorValueService
 from config import cache_setting
+from service.user_watchlist_service import UserWatchlistService
 
 etf_bp = Blueprint('etf', __name__)
 
@@ -19,6 +20,9 @@ def get_etfs():
     """
     获取ETF监控列表
     """
+    items = UserWatchlistService.get_all(securities_type='etf')
+    # 将对象转换为字典列表
+    watchlist = [item.to_dict() for item in items] if items else []
     etfs = [
         {"name": "中证100ETF易方达", "symbol": "159901"},
         {"name": "沪深300ETF", "symbol": "159919"},
@@ -43,4 +47,5 @@ def get_etfs():
         etf['composition'] = etf['composition']['data']
         etf['ohlc_last'] = datagigi.get_last_tick(symbol=etf['symbol'])
         etf['ohlc_last']['chg_pct'] = (etf['ohlc_last']['lastPrice'] - etf['ohlc_last']['lastClose']) / etf['ohlc_last']['lastClose'] * 100
+
     return jsonify(etfs)

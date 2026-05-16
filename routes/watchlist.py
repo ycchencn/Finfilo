@@ -46,8 +46,7 @@ def get_watchlist():
         page_size (int): 每页数量 (可选)
     """
     try:
-        # 这里简单演示获取全部，如果需要分页可以在 Service 层扩展
-        items = UserWatchlistService.get_all()
+        items = UserWatchlistService.get_all(securities_type='stock')
         # 将对象转换为字典列表
         watchlist = [item.to_dict() for item in items] if items else []
         stock_list = []

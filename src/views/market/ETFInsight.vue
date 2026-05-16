@@ -290,11 +290,6 @@ function initFilters1() {
                     {{ data['composition'].length }}
                 </template>
             </Column>
-            <Column field="amount" filterField="amount" header="成分股 PE-TTM">
-                <template #body="{ data }">
-                    {{ 0 }}
-                </template>
-            </Column>
             <Column header="52周价格范围">
                 <template #body="{ data }">
                     <PriceRange52Week

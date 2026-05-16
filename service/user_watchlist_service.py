@@ -106,7 +106,7 @@ class UserWatchlistService:
             return False
 
     @staticmethod
-    def get_all(user_id=None):
+    def get_all(user_id=None, securities_type='stock'):
         """
         获取所有自选股列表
         注：当前模型未包含 user_id 字段，若需支持多用户，请在模型中添加该字段并在查询时过滤
@@ -114,6 +114,7 @@ class UserWatchlistService:
         """
         try:
             query = db_session.query(UserWatchlist)
+            query = query.filter(UserWatchlist.securities_type==securities_type)
             # 如果未来添加了 user_id 支持，可以在这里加上 .filter(UserWatchlist.user_id == user_id)
             return query.order_by(UserWatchlist.created_at.desc()).all()
         except Exception as e:

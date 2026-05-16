@@ -235,7 +235,7 @@ class FactorValueService:
             return None
 
     @staticmethod
-    def get_latest_factor_value(ticker, factor_name: str) -> Optional[date]:
+    def get_latest_factor_value(ticker, factor_name: str) -> Any:
         """
         获取某因子最新计算日期（用于增量更新判断）。
         """
@@ -246,10 +246,10 @@ class FactorValueService:
                 .order_by(FactorValue.trade_date.desc())
                 .first()
             )
-            return latest[0] if latest else None
+            return latest[0] if latest else ''
         except Exception as e:
             logger.error(f"Error getting latest date for factor {factor_name}: {e}")
-            return None
+            return ''
 
     @staticmethod
     def get_latest_trading_date(factor_name='cn_trading_date') -> Optional[date]:

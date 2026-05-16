@@ -19,6 +19,11 @@ Base = declarative_base()
 db = SQLAlchemy()
 
 
+class TriggerType(str, Enum):
+    CRON = "cron"
+    DATE = "date"  # 一次性任务
+
+
 class Stock(Base):
     __tablename__ = 'stocks'
 
@@ -135,6 +140,7 @@ class UserWatchlist(db.Model):
     price = Column(Float(precision=2), default=0)
     diff = Column(Float(precision=2), default=0)
     created_at = Column(DateTime, default=datetime.now)
+    securities_type = Column(String(50))
 
     def to_dict(self):
         """
@@ -150,6 +156,7 @@ class UserWatchlist(db.Model):
             'diff': self.diff,
             'from_ai': self.from_ai,
             'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S') if self.created_at else None,
+            'securities_type': self.securities_type
         }
 
 
@@ -863,93 +870,6 @@ class ResearchReport(Base):
     @property
     def is_market_report(self) -> bool:
         return self.report_type in [2, 3]
-
-
-class EtfInfo(Base):
-    __tablename__ = 'etf_info'
-
-    etf_code = Column(String(20), primary_key=True)
-    etf_exch_id = Column(String(2), nullable=False)
-    name = Column(String(100))
-    cash_balance = Column(Numeric(precision=18, scale=4))
-    max_cash_ratio = Column(Numeric(precision=5, scale=4))
-    report_unit = Column(BigInteger)
-    nav_per_cu = Column(Numeric(precision=20, scale=4))
-    nav = Column(Numeric(precision=10, scale=4))
-    ecc = Column(Numeric(precision=18, scale=4))
-    need_publish = Column(Boolean, default=True)
-    enable_creation = Column(Boolean, default=True)
-    enable_redemption = Column(Boolean, default=True)
-    creation_limit = Column(BigInteger)
-    redemption_limit = Column(BigInteger)
-    type = Column(Integer)
-    trading_day = Column(Date)
-    pre_trading_day = Column(Date)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<EtfInfo(etf_code={self.etf_code}, name={self.name})>"
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "etf_code": self.etf_code,
-            "etf_exch_id": self.etf_exch_id,
-            "name": self.name,
-            "cash_balance": float(self.cash_balance) if self.cash_balance is not None else None,
-            "max_cash_ratio": float(self.max_cash_ratio) if self.max_cash_ratio is not None else None,
-            "report_unit": self.report_unit,
-            "nav_per_cu": float(self.nav_per_cu) if self.nav_per_cu is not None else None,
-            "nav": float(self.nav) if self.nav is not None else None,
-            "ecc": float(self.ecc) if self.ecc is not None else None,
-            "need_publish": bool(self.need_publish),
-            "enable_creation": bool(self.enable_creation),
-            "enable_redemption": bool(self.enable_redemption),
-            "creation_limit": self.creation_limit,
-            "redemption_limit": self.redemption_limit,
-            "type": self.type,
-            "trading_day": self.trading_day.isoformat() if self.trading_day else None,
-            "pre_trading_day": self.pre_trading_day.isoformat() if self.pre_trading_day else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-        }
-
-
-class EtfComponent(Base):
-    __tablename__ = 'etf_component'
-
-    etf_code = Column(String(20), ForeignKey('etf_info.etf_code', ondelete='CASCADE'), primary_key=True)
-    component_code = Column(String(20), primary_key=True)
-    component_exch_id = Column(String(2))
-    component_volume = Column(Integer)
-    replace_flag = Column(Integer)
-    replace_ratio = Column(Numeric(precision=10, scale=6))
-    replace_balance = Column(Numeric(precision=18, scale=4))
-    component_name = Column(String(100))
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    def __repr__(self):
-        return f"<EtfComponent(etf_code={self.etf_code}, component_code={self.component_code})>"
-
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "etf_code": self.etf_code,
-            "component_code": self.component_code,
-            "component_exch_id": self.component_exch_id,
-            "component_volume": self.component_volume,
-            "replace_flag": self.replace_flag,
-            "replace_ratio": float(self.replace_ratio) if self.replace_ratio is not None else None,
-            "replace_balance": float(self.replace_balance) if self.replace_balance is not None else None,
-            "component_name": self.component_name,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-        }
-
-
-class TriggerType(str, Enum):
-    CRON = "cron"
-    DATE = "date"  # 一次性任务
 
 
 class ScheduledTask(Base):

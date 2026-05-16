@@ -31,6 +31,7 @@ const MOCK_TOPICS = [
     {id: 7, name: '货币政策'},
     {id: 8, name: '业绩披露'},
     {id: 9, name: '商业航天'},
+    {id: 15, name: '半导体'},
     {id: 10, name: '机器人'},
     {id: 11, name: 'CPO'},
     {id: 12, name: 'PCB'},
@@ -228,7 +229,7 @@ onMounted(async () => {
                                 {{ formatDaysAgo(data.news_time) }}
                                 <a v-if="data.url" :href="data.url" target="_blank" class="text-blue-500 hover:underline ml-2">原文</a>
                             </div>
-                            <p class="news-digest font-semibold text-sm leading-relaxed">{{ data.digest }}</p>
+                            <p class="news-digest leading-relaxed">{{ data.digest }}</p>
 
                             <div v-if="data.relations_stocks?.length" class="mt-2 text-sm">
                                 <strong class="text-gray-600">关联股票：</strong>

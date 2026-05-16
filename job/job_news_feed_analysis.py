@@ -349,7 +349,6 @@ def search_digest_keyword(keywords: str, top_k: int = 20, sort_field: str = "_id
     query_body = {
         "size": top_k,
         "sort": [{sort_field: {"order": sort_order}}],
-        "_source": ["digest", "news_time", "relations_stocks", "tags", "sources", "url"],
         "query": query_part
     }
 

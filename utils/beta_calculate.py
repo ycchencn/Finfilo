@@ -7,7 +7,7 @@
 import numpy as np
 import pandas as pd
 from service import IndexDailyDataService, StockService
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 from utils.common import logger
 
 # Beta 计算函数
@@ -29,7 +29,7 @@ def calculate_beta(stock_code, index_code='000001', start_date="20200101", end_d
         index_close = index_df['close']
 
         # 获取ETF价格
-        stock_df = datajiji.get_history(stock_code, start_date, end_date, stock.get('market'))
+        stock_df = datagigi.get_history(stock_code, start_date, end_date, stock.get('market'))
         stock_close = stock_df.loc[start_date:end_date]["close"]
 
         if stock_close is None or stock_close.empty:

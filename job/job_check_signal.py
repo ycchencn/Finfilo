@@ -13,7 +13,7 @@ from utils.common import logger, get_today
 from utils.common import get_date_by_n
 from pathlib import Path
 from string import Template
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 
 # 获取当前 Python 文件所在目录
 CURRENT_DIR = Path(__file__).parent
@@ -55,12 +55,12 @@ def job_check_signal(_stock_code):
     end_date = FactorValueService.get_latest_trading_date().strftime('%Y%m%d')
 
     # 公司基本信息
-    stock = datajiji.get_stock_info(_stock_code, stock_info.get('market'))
+    stock = datagigi.get_stock_info(_stock_code, stock_info.get('market'))
     profile = stock.get('profile', {})
 
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
     try:
-        market_data = datajiji.get_history(
+        market_data = datagigi.get_history(
             symbol=_stock_code,
             start_date=start_date,
             end_date=end_date,

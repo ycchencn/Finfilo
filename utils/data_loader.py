@@ -4,6 +4,6 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from service.datajiji_api import DataJiji
+from service.datajiji_api import DataGigi
 
-datajiji = DataJiji(api_key='')
+datagigi = DataGigi(api_key='')

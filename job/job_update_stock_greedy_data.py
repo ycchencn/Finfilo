@@ -8,9 +8,9 @@ import pandas as pd
 from service import StockService
 from service.stock_fear_greed_service import StockFearGreedService
 from job.market_fear_greed import build_fear_greed_index
-from utils.common import get_today, logger
+from utils.common import get_today, logger, is_etf
 from datetime import datetime
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 
 def job_update_stock_greedy_data_daily(override_all=False):
     stocks = StockService.get_monitoring_stock_pool(per_page=500)
@@ -20,7 +20,10 @@ def job_update_stock_greedy_data_daily(override_all=False):
 def job_update_stock_greedy_data(index_code, override_all=False):
 
     try:
-        market_data = datajiji.get_history(symbol=index_code, start_date="20250101", end_date=get_today())
+        if is_etf(index_code):
+            market_data = datagigi.get_etf_history(symbol=index_code, start_date="20250101", end_date=get_today())
+        else:
+            market_data = datagigi.get_history(symbol=index_code, start_date="20250101", end_date=get_today())
         # 构建指数
         result = build_fear_greed_index(market_data)
     except Exception as e:

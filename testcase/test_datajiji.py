@@ -6,12 +6,12 @@
 
 import requests
 import unittest
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 
 class TestDatajiji(unittest.TestCase):
 
     def test_get_stocks(self):
-        res = datajiji.get_stock_list()
+        res = datagigi.get_stock_list()
         self.assertIsNotNone(res)
 
     def test_get_history(self):

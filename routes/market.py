@@ -10,7 +10,8 @@ from app import api_prefix, cache
 from service import MarketNewsService
 from service.etf_service import EtfInfoService, EtfComponentService
 from utils.common import logger
-from job.job_news_feed_analysis import search_digest_keyword
+
+# from job.job_news_feed_analysis import search_digest_keyword
 
 market_bp = Blueprint('market', __name__)
 
@@ -44,27 +45,28 @@ def search_news():
             end_time = datetime.fromisoformat(end_time_str.replace('Z', '+00:00'))
 
         # 调用服务层搜索
-        es_res = search_digest_keyword(keyword, top_k=page_size, sort_field="news_time.keyword", sort_order="desc")
+        # es_res = search_digest_keyword(keyword, top_k=page_size, sort_field="news_time.keyword", sort_order="desc")
+        # result = {
+        #     "items": es_res['hits'],
+        #     "total": es_res['total'],
+        #     "page": page,
+        #     "page_size": page_size,
+        #     "has_more": False
+        # }
 
-        result = {
-            "items": es_res['hits'],
-            "total": es_res['total'],
-            "page": page,
-            "page_size": page_size,
-            "has_more": False
-        }
-        # result = MarketNewsService.search(
-        #     keyword=keyword,
-        #     stock_code=stock_code,
-        #     start_time=start_time,
-        #     end_time=end_time,
-        #     page=page,
-        #     page_size=page_size
-        # )
+        result = MarketNewsService.search(
+            keyword=keyword,
+            stock_code=stock_code,
+            start_time=start_time,
+            end_time=end_time,
+            page=page,
+            page_size=page_size
+        )
 
         return jsonify(result), 200
 
     except Exception as e:
+
         logger.error(f"Unexpected error in search_news endpoint: {e}")
         return jsonify({"error": "Internal server error"}), 500
 

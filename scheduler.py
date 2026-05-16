@@ -12,7 +12,7 @@ from job import job_update_stock_factor_daily
 from backtest.strategy.ai_position_plan_daily import job_position_plan_daily_all
 from job.job_data_fix import job_update_stock_beta_all
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data_daily
-from job.job_sync_stock_data import job_sync_stock_data
+from job.job_sync_stock_data import job_sync_data
 
 if __name__ == '__main__':
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     scheduler.add_job(job_position_plan_daily_all, 'cron', day_of_week='sun', hour=20, minute=30, timezone=beijing_tz, kwargs={'trade_day_override': True})
 
     # 每周日 20:30 刷新个股信息
-    scheduler.add_job(job_sync_stock_data, 'cron', day_of_week='sun', hour=20, minute=30, timezone=beijing_tz)
+    scheduler.add_job(job_sync_data, 'cron', day_of_week='sun', hour=20, minute=30, timezone=beijing_tz)
 
     # 个股因子计算任务
     scheduler.add_job(job_update_stock_factor_daily, 'cron', hour=20, minute=10, timezone=beijing_tz)

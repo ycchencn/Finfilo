@@ -10,7 +10,7 @@ from app import api_prefix, cache
 from service import StockService, FactorValueService
 from service import JobService, ResearchReportService
 from service.stock_fear_greed_service import StockFearGreedService
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 from utils.common import get_today, get_date_by_years, validate_stock_code
 
 stock_bp = Blueprint('stock', __name__)
@@ -72,7 +72,7 @@ def update_stock(symbol):
 
     if not StockService.exists(symbol):
         # 个股不在数据库，查询api获取
-        stock_api = datajiji.get_stock_info(symbol, market=data.get('market', 'cn'))
+        stock_api = datagigi.get_stock_info(symbol, market=data.get('market', 'cn'))
         # 自动添加
         StockService.upsert_stock({
             'symbol': symbol,
@@ -130,11 +130,17 @@ def get_etfs():
     """
     获取ETF监控列表
     """
-    page = request.args.get('page', default=1, type=int)
-    market = request.args.get('market', default='cn', type=str)
-    page_size = request.args.get('page_size', default=300, type=int)
-    stocks = StockService.get_etfs(per_page=page_size, market=market)
-    return jsonify(stocks)
+    etfs = datagigi.get_etf_list(market='cn')[:8]
+    for etf in etfs:
+        etf['52week_low'] = FactorValueService.get_latest_factor_value(
+            ticker=etf['symbol'],
+            factor_name='52week_low'
+        )
+        etf['52week_high'] = FactorValueService.get_latest_factor_value(
+            ticker=etf['symbol'],
+            factor_name='52week_high'
+        )
+    return jsonify(etfs)
 
 
 @stock_bp.route(f'{api_prefix}/stock/greed_data/<string:stock_code>', methods=['GET'])
@@ -148,6 +154,11 @@ def get_stocks_greed_data(stock_code):
 
 @stock_bp.route(f'{api_prefix}/stocks/<string:stock_code>', methods=['GET'])
 def get_stock(stock_code):
+    """
+    获取个股信息
+    :param stock_code:
+    :return:
+    """
     if not validate_stock_code(stock_code):
         return jsonify({'code': -1, 'message': 'invalid stock code!'}), 500
 
@@ -160,16 +171,21 @@ def get_stock(stock_code):
     return jsonify(stock)
 
 
-@stock_bp.route('/api/v1/stock_history_db/<string:stock_code>', methods=['GET'])
+@stock_bp.route('/api/v1/stock_history/<string:stock_code>', methods=['GET'])
 @cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
-def get_stock_history_db(stock_code):
+def get_stock_history(stock_code):
+    """
+    获取个股历史行情
+    :param symbol:
+    :return:
+    """
     if not validate_stock_code(stock_code):
         return jsonify({'code': -1, 'message': 'invalid stock code!'}), 500
 
     # 获取查询参数
     start_date = request.args.get('start_date', default=get_date_by_years(years=-3))
     end_date = request.args.get('end_date', default=get_today())
-    securities_data = datajiji.get_history(stock_code, start_date, end_date)
+    securities_data = datagigi.get_history(stock_code, start_date, end_date)
 
     # 将DataFrame转换为字典列表
     securities_data_dict = securities_data.to_dict(orient='records')
@@ -185,6 +201,11 @@ def stock_re_analysis(symbol):
 
 @stock_bp.route(f'{api_prefix}/stock/re_analysis_dcf/<string:symbol>', methods=['PUT'])
 def stock_re_analysis_dcf(symbol):
+    """
+    重新分析个股DCF
+    :param symbol:
+    :return:
+    """
     if not validate_stock_code(symbol):
         return jsonify({'code': -1, 'message': 'invalid stock code!'}), 500
 
@@ -206,10 +227,15 @@ def stock_re_analysis_dcf(symbol):
 @stock_bp.route(f'{api_prefix}/stocks/profile/<string:symbol>', methods=['GET'])
 @cache.cached(timeout=cache_setting.get('stock_list'), query_string=True)
 def get_stock_profile(symbol):
+    """
+    获取公司信息
+    :param symbol:
+    :return:
+    """
     if not validate_stock_code(symbol):
         return jsonify({}), 500
     stock_info = StockService.get_stock_by_symbol(symbol)
-    stock_info_api = datajiji.get_stock_info(symbol, market=stock_info.get('market'))
+    stock_info_api = datagigi.get_stock_info(symbol, market=stock_info.get('market'))
     profile = stock_info_api.get('profile', {})
     beta = FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='beta')
     profile['beta'] = beta

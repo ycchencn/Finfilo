@@ -205,11 +205,7 @@ export const fetchStockMarketData = async (stockCode, startDate, endDate) => {
         // 2. 构建带查询参数的 URL
         const params = new URLSearchParams({ start_date, end_date, version });
 
-        if (isCrypto(stockCode)) {
-            response = await fetch(`/api/v1/crypto_history/${stockCode}?${params}`);
-        } else {
-            response = await fetch(`/api/v1/stock_history_db/${stockCode}?${params}`);
-        }
+        response = await fetch(`/api/v1/stock_history/${stockCode}?${params}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

@@ -64,6 +64,12 @@ const router = createRouter({
                     meta: { title: '个股监控详情', requiresAuth: true }
                 },
                 {
+                    path: '/quant/etf_detail/:symbol',
+                    name: 'etf-detail',
+                    component: () => import('@/views/market/ETFDetail.vue'),
+                    meta: { title: '个股监控详情', requiresAuth: true }
+                },
+                {
                     path: '/quant/trade_signal',
                     name: 'trade_signal',
                     component: () => import('@/views/quant/QuantSignals.vue'),

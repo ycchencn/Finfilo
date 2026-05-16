@@ -7,7 +7,7 @@
 import pandas as pd
 import numpy as np
 from service import FactorValueService, IndexConstituentsService, StockService
-from utils.common import logger
+from utils.common import logger, is_etf
 
 class FactorCalService:
 
@@ -16,12 +16,15 @@ class FactorCalService:
 
         """统一获取并标准化行情数据"""
 
-        from utils.data_loader import datajiji
+        from utils.data_loader import datagigi
 
-        stock = StockService.get_stock_by_symbol(stock_code)
-        assert stock is not None
+        if is_etf(stock_code):
+            df = datagigi.get_etf_history(stock_code, start_date, end_date)
+        else:
+            stock = StockService.get_stock_by_symbol(stock_code)
+            assert stock is not None
+            df = datagigi.get_history(stock_code, start_date, end_date, stock.get('market'))
 
-        df = datajiji.get_history(stock_code, start_date, end_date, stock.get('market'))
         df = df.reset_index()
 
         if df.empty:

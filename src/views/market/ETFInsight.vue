@@ -258,13 +258,13 @@ function initFilters1() {
                 <template #body="{ data }">
                     <router-link class="text-blue-500"
                                  target="_blank"
-                                 :to="{ name: 'stock-monitor-detail', params: { symbol: data.symbol } }">{{ data.symbol }}
+                                 :to="{ name: 'etf-detail', params: { symbol: data.symbol } }">{{ data.symbol }}
                     </router-link><br/>{{ data.name }}
                 </template>
             </Column>
             <Column field="name" filterField="name" header="最新净值">
                 <template #body="{ data }">
-                    {{ data.ohlc_last.lastPrice.toFixed(3) }}
+                    {{ 0 }}
                 </template>
             </Column>
             <Column field="chg_pct" filterField="chg_pct" header="涨跌幅">
@@ -274,12 +274,27 @@ function initFilters1() {
             </Column>
             <Column field="amount" filterField="amount" header="成交">
                 <template #body="{ data }">
-                    {{ formatMoney(data.ohlc_last.amount) }}
+                    {{ 0 }}
+                </template>
+            </Column>
+            <Column field="amount" filterField="amount" header="成分股 PE-TTM">
+                <template #body="{ data }">
+                    {{ 0 }}
+                </template>
+            </Column>
+            <Column header="52周价格范围">
+                <template #body="{ data }">
+                    <PriceRange52Week
+                      :low52w="data['52week_low']"
+                      :high52w="data['52week_high']"
+                      :currentPrice="data.close"
+                      style="width: 100px;"
+                    />
                 </template>
             </Column>
             <Column field="name" filterField="name" header="更新时间">
                 <template #body="{ data }">
-                    {{ data.last_update }}
+                    {{ 0 }}
                 </template>
             </Column>
         </DataTable>

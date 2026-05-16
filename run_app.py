@@ -12,7 +12,6 @@ from app import app, get_real_ip
 from routes.main import main_bp
 from routes.stock import stock_bp
 from routes.market import market_bp
-from routes.backtest import backtest_bp
 from routes.portfolio import portfolio_bp
 from routes.watchlist import watchlist_bp
 from service.log_service import LogService
@@ -23,7 +22,6 @@ beijing_tz = pytz.timezone('Asia/Shanghai')
 app.register_blueprint(main_bp)
 app.register_blueprint(stock_bp)
 app.register_blueprint(market_bp)
-app.register_blueprint(backtest_bp)
 app.register_blueprint(portfolio_bp)
 app.register_blueprint(watchlist_bp)
 

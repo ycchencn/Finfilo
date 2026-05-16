@@ -16,7 +16,7 @@ from service import (
     PortfolioTransactionService
 )
 from utils.common import logger, get_today, is_etf
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 
 class StrategyRunner:
 
@@ -162,9 +162,9 @@ class StrategyRunner:
 
                 # 从数据库获取行情数据
                 if is_etf(code):
-                    df = datajiji.get_etf_history(code, trading_date, trading_date)
+                    df = datagigi.get_etf_history(code, trading_date, trading_date)
                 else:
-                    df = datajiji.get_history(code, trading_date, trading_date)
+                    df = datagigi.get_history(code, trading_date, trading_date)
 
                 if df is None or df.empty:
                     logger.warning(f"⚠️ 行情缺失: {code} 在 {trading_date} 无数据")

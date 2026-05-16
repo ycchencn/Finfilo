@@ -157,7 +157,7 @@ def job_update_stock_factor(stock_code, trade_date=None, save_last=False, time_p
     if trade_date is None:
         trade_date = get_today(_format='%Y%m%d')
 
-    logger.info(f"计算个股因子数据：{stock_code}")
+    logger.info(f"计算因子数据：{stock_code}")
 
     # 2、计算所有因子
     factors = FactorCalService.calculate_all_factors(stock_code, get_date_by_n(time_period, _format='%Y%m%d'), trade_date)

@@ -10,7 +10,7 @@ from utils.common import logger
 from utils.common import get_today, get_date_by_n
 from service import StockService, FactorValueService, MarketNewsService
 from service import ResearchReportService, JobService
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 from pathlib import Path
 from string import Template
 
@@ -21,7 +21,7 @@ prompt_template = Path(CURRENT_DIR / './prompt_stock_dcf_analysis.md').read_text
 
 
 def get_stock_detail(_stock_code, market):
-    stock = datajiji.get_stock_info(_stock_code, market)
+    stock = datagigi.get_stock_info(_stock_code, market)
     profile = stock.get('profile', {})
     return profile
 
@@ -39,7 +39,7 @@ def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
 
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
     try:
-        market_data = datajiji.get_history(
+        market_data = datagigi.get_history(
             symbol=_stock_code,
             start_date=start_date,
             end_date=end_date)

@@ -29,7 +29,6 @@ VECTOR_FIELD = 'vector'
 DEFAULT_VECTOR_DIMS = 1024  # ⚠️ 请根据实际使用的Embedding模型调整该值
 EMBEDDING_TEXT_SEP = " | "
 
-# ================= 基础设施初始化 =================
 if elasticsearch_setting['enable']:
     es_client = Elasticsearch(
         elasticsearch_setting['host'],

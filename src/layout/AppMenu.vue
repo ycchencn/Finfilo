@@ -11,7 +11,12 @@ const model = ref([
                 label: '事件驱动',
                 icon: 'pi pi-fw pi-wave-pulse',
                 to: '/market/news_flow'
-            }
+            },
+            {
+                label: 'ETF洞察',
+                icon: 'pi pi-fw pi-cloud-download',
+                to: '/market/etf_insight'
+            },
         ]
     },
     {

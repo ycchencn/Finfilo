@@ -5,15 +5,15 @@
 """
 
 from service.stock import StockService
-from utils.data_loader import datajiji
+from utils.data_loader import datagigi
 from utils.common import logger
 
-def job_sync_stock_data():
+def job_sync_data():
 
-    stock_list = datajiji.get_stock_list()
+    stock_list = datagigi.get_stock_list()
 
     for stock in stock_list['data']:
-        logger.info(f"更新个股信息, {stock['symbol']}")
+        logger.info(f"更新个股信息, {stock['symbol']}, {stock['name']}")
         StockService.upsert_stock({
             'symbol': stock['symbol'],
             'name': stock['name'],
@@ -21,4 +21,4 @@ def job_sync_stock_data():
 
 if __name__ == '__main__':
 
-    job_sync_stock_data()
+    job_sync_data()

@@ -126,7 +126,7 @@ def get_stocks_monitored():
 
 
 @stock_bp.route(f'{api_prefix}/etfs', methods=['GET'])
-# @cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
+@cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
 def get_etfs():
     """
     获取ETF监控列表
@@ -141,6 +141,8 @@ def get_etfs():
             ticker=etf['symbol'],
             factor_name='52week_high'
         )
+        etf['composition'] = datagigi.get_etf_composition(symbol=etf['symbol'])
+        etf['composition'] = etf['composition']['data']
         etf['ohlc_last'] = datagigi.get_last_tick(symbol=etf['symbol'])
         etf['ohlc_last']['chg_pct'] = (etf['ohlc_last']['lastPrice'] - etf['ohlc_last']['lastClose']) / etf['ohlc_last']['lastClose'] * 100
     return jsonify(etfs)

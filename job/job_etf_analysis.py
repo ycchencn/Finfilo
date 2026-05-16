@@ -16,7 +16,7 @@ if __name__ == '__main__':
     etfs = etfs[:8]
     for etf in etfs:
 
-        # job_update_stock_greedy_data(index_code=etf['symbol'], override_all=True)
+        job_update_stock_greedy_data(index_code=etf['symbol'], override_all=True)
 
         # 计算因子
         job_update_stock_factor(stock_code=etf['symbol'], save_last=False, time_period=-1200)

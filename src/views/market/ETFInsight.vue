@@ -19,18 +19,17 @@ const modal_stock_code = ref(null);
 const {showSuccess, showError} = useNotification();
 const dt1 = ref(null);
 const modal_analysis_interval = ref(1)
-const filter_market = ref('cn')
 
-function loadStockList() {
-    // 获取个股数据
-    axios.get(`/api/v1/etfs?page_size=300&page=1&v=1.0`).then(response => {
+function loadETFList() {
+    // 获取数据
+    axios.get(`/api/v1/etfs?page_size=300&page=1&v=1.3`).then(response => {
         stock_list.value = response.data;
     });
 }
 
 onBeforeMount(() => {
-    // 获取个股数据
-    loadStockList()
+    // 获取数据
+    loadETFList();
     initFilters1();
 });
 
@@ -267,19 +266,28 @@ function initFilters1() {
                     <br/>{{ data.name }}
                 </template>
             </Column>
-            <Column field="name" filterField="name" header="最新净值">
+            <Column field="close" filterField="close" header="最新净值" sortable>
                 <template #body="{ data }">
-                    {{ data.ohlc_last.lastPrice }}
+                    <b :style="{ color: data.ohlc_last.chg_pct > 0 ? 'red' : 'green' }">
+                        {{ data.ohlc_last.lastPrice != null ? data.ohlc_last.lastPrice.toFixed(3) : '--' }}
+                    </b>
                 </template>
             </Column>
-            <Column field="chg_pct" filterField="chg_pct" header="涨跌幅">
+            <Column field="chg_pct" filterField="chg_pct" header="涨跌幅" sortable>
                 <template #body="{ data }">
-                    {{ formatPercentage(data.ohlc_last.chg_pct.toFixed(2), true) }}%
+                    <b :style="{ color: data.ohlc_last.chg_pct > 0 ? 'red' : 'green' }">
+                        {{ data.ohlc_last.chg_pct != null ? data.ohlc_last.chg_pct.toFixed(2) + '%' : '--' }}
+                    </b>
                 </template>
             </Column>
             <Column field="amount" filterField="amount" header="成交">
                 <template #body="{ data }">
                     {{ formatStockTradeAmount(data.ohlc_last.amount) }}
+                </template>
+            </Column>
+            <Column field="amount" filterField="amount" header="成分股数量">
+                <template #body="{ data }">
+                    {{ data['composition'].length }}
                 </template>
             </Column>
             <Column field="amount" filterField="amount" header="成分股 PE-TTM">

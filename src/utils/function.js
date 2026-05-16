@@ -270,6 +270,29 @@ const FEAR_GREED_LEVELS = {
 };
 
 /**
+ * 格式化个股成交金额（对齐券商APP通用显示标准）
+ * @param {Number} value - 原始成交金额（单位：元）
+ * @returns {String} 格式化后的字符串，如"123.45万"、"2.34亿"
+ */
+export function formatStockTradeAmount(value) {
+  // 非法值兼容
+  if (typeof value !== 'number' || isNaN(value) || value < 0) {
+    return '--'
+  }
+  // 分档处理
+  if (value < 10000) {
+    // 小于1万：显示元，保留2位小数
+    return value.toFixed(2) + ' 元'
+  } else if (value < 100000000) {
+    // 1万到1亿：显示万
+    return (value / 10000).toFixed(2) + ' 万'
+  } else {
+    // 大于等于1亿：显示亿
+    return (value / 100000000).toFixed(2) + ' 亿'
+  }
+}
+
+/**
  * 格式化股票流通市值为亿单位
  * @param {Number} value - 原始市值（单位：元）
  * @returns {String} 格式化后的字符串，如"15.00亿"

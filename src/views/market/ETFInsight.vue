@@ -1,23 +1,27 @@
 <script setup>
 
-import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
-import { useNotification } from '@/composables/useNotification';
-import { onBeforeMount, reactive, ref } from 'vue';
+import {FilterMatchMode, FilterOperator} from '@primevue/core/api';
+import {useNotification} from '@/composables/useNotification';
+import {onBeforeMount, reactive, ref} from 'vue';
 import Dialog from 'primevue/dialog';
 import axios from 'axios';
 import PriceRange52Week from '@/components/PriceRange52Week.vue';
+import {
+    formatPercentage,
+    formatStockTradeAmount,
+} from '@/utils/function.js';
 
 const stock_list = ref([]);
 const filters1 = ref(null);
 const loading1 = ref(null);
 const modal_visible = ref(false);
 const modal_stock_code = ref(null);
-const { showSuccess, showError } = useNotification();
+const {showSuccess, showError} = useNotification();
 const dt1 = ref(null);
 const modal_analysis_interval = ref(1)
 const filter_market = ref('cn')
 
-function loadStockList(){
+function loadStockList() {
     // 获取个股数据
     axios.get(`/api/v1/etfs?page_size=300&page=1&v=1.0`).then(response => {
         stock_list.value = response.data;
@@ -37,35 +41,35 @@ onBeforeMount(() => {
  * @returns {String} - 格式化后的字符串
  */
 function formatMoney(val, decimals = 2) {
-  if (val === '' || val === null || val === undefined) return '--';
+    if (val === '' || val === null || val === undefined) return '--';
 
-  // 转为数字
-  const num = Number(val);
-  if (isNaN(num)) return '0.00';
+    // 转为数字
+    const num = Number(val);
+    if (isNaN(num)) return '0.00';
 
-  // 如果数值小于 1万，直接格式化加千分位
-  if (num < 10000) {
-    return num.toLocaleString('zh-CN', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-  }
-
-  // 定义单位和除数
-  const units = [
-    { value: 100000000, label: '亿' },
-    { value: 10000, label: '万' }
-  ];
-
-  for (let unit of units) {
-    if (num >= unit.value) {
-      const result = num / unit.value;
-      // 这里的 toLocaleString 会自动处理千分位（如果需要）和保留小数
-      return result.toLocaleString('zh-CN', {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-      }) + unit.label;
+    // 如果数值小于 1万，直接格式化加千分位
+    if (num < 10000) {
+        return num.toLocaleString('zh-CN', {minimumFractionDigits: decimals, maximumFractionDigits: decimals});
     }
-  }
 
-  return num.toString();
+    // 定义单位和除数
+    const units = [
+        {value: 100000000, label: '亿'},
+        {value: 10000, label: '万'}
+    ];
+
+    for (let unit of units) {
+        if (num >= unit.value) {
+            const result = num / unit.value;
+            // 这里的 toLocaleString 会自动处理千分位（如果需要）和保留小数
+            return result.toLocaleString('zh-CN', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            }) + unit.label;
+        }
+    }
+
+    return num.toString();
 }
 
 /**
@@ -112,7 +116,7 @@ async function addStockMonitor(stockCode) {
         let message = '操作失败，请重试';
         if (axios.isAxiosError(error)) {
             if (error.response) {
-                const { status, data } = error.response;
+                const {status, data} = error.response;
                 message = data.message;
                 // 可继续扩展其他业务状态码
             } else if (error.request) {
@@ -131,78 +135,78 @@ async function addStockMonitor(stockCode) {
 
 // 1. 阶段映射配置 (保持不变)
 const PHASE_CONFIG = {
-    0: { label: '未知阶段', type: 'unknown', severity: 'secondary' },
-    1: { label: '吸筹阶段', type: 'accumulate', severity: 'info' },
-    2: { label: '洗盘阶段', type: 'wash', severity: 'help' },
-    3: { label: '拉升阶段', type: 'rise', severity: 'success' },
-    5: { label: '出货阶段', type: 'distribute', severity: 'warn' },
-    6: { label: '出货阶段', type: 'distribute', severity: 'danger' }
+    0: {label: '未知阶段', type: 'unknown', severity: 'secondary'},
+    1: {label: '吸筹阶段', type: 'accumulate', severity: 'info'},
+    2: {label: '洗盘阶段', type: 'wash', severity: 'help'},
+    3: {label: '拉升阶段', type: 'rise', severity: 'success'},
+    5: {label: '出货阶段', type: 'distribute', severity: 'warn'},
+    6: {label: '出货阶段', type: 'distribute', severity: 'danger'}
 };
 
 const stockIntervalOptions = [
-    { label: '每天', value: 1 },
-    { label: '每3天', value: 3 },
+    {label: '每天', value: 1},
+    {label: '每3天', value: 3},
 ];
 
 // 2. 修改 initFilters1 函数，添加 main_force_behavior_phase 的配置
 function initFilters1() {
     filters1.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        global: {value: null, matchMode: FilterMatchMode.CONTAINS},
     };
 }
 
 </script>
 
 <template>
-    <Toast />
+    <Toast/>
     <Dialog v-model:visible="modal_visible" modal header="添加个股监控" :style="{ width: '25rem' }">
-      <div class="flex flex-col gap-4">
-        <!-- 股票代码 -->
-        <div>
-          <label for="stock_code" class="font-semibold block mb-1">股票代码</label>
-          <InputText
-            id="stock_code"
-            v-model="modal_stock_code"
-            autocomplete="off"
-            placeholder="填写股票代码"
-            @keyup.enter="modal_visible=false; addStockMonitor(modal_stock_code);"
-            class="w-full mt-3"
-          />
+        <div class="flex flex-col gap-4">
+            <!-- 股票代码 -->
+            <div>
+                <label for="stock_code" class="font-semibold block mb-1">股票代码</label>
+                <InputText
+                    id="stock_code"
+                    v-model="modal_stock_code"
+                    autocomplete="off"
+                    placeholder="填写股票代码"
+                    @keyup.enter="modal_visible=false; addStockMonitor(modal_stock_code);"
+                    class="w-full mt-3"
+                />
+            </div>
+
+            <!-- 分析周期 -->
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label for="analysis_interval" class="font-semibold">分析周期（天）</label>
+                </div>
+                <Dropdown
+                    v-model="modal_analysis_interval"
+                    :options="stockIntervalOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="选择分析周期"
+                    class="w-full mt-3"
+                    @change="() => {}"
+                />
+            </div>
         </div>
 
-        <!-- 分析周期 -->
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <label for="analysis_interval" class="font-semibold">分析周期（天）</label>
-          </div>
-            <Dropdown
-              v-model="modal_analysis_interval"
-              :options="stockIntervalOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="选择分析周期"
-              class="w-full mt-3"
-              @change="() => {}"
-            />
-        </div>
-      </div>
-
-      <!-- 操作按钮 -->
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <Button
-            type="button"
-            label="取消"
-            severity="secondary"
-            @click="modal_visible = false"
-          />
-          <Button
-            type="button"
-            label="确认"
-            @click="modal_visible=false; addStockMonitor(modal_stock_code);"
-          />
-        </div>
-      </template>
+        <!-- 操作按钮 -->
+        <template #footer>
+            <div class="flex justify-end gap-2">
+                <Button
+                    type="button"
+                    label="取消"
+                    severity="secondary"
+                    @click="modal_visible = false"
+                />
+                <Button
+                    type="button"
+                    label="确认"
+                    @click="modal_visible=false; addStockMonitor(modal_stock_code);"
+                />
+            </div>
+        </template>
     </Dialog>
     <div class="card">
         <DataTable
@@ -224,10 +228,10 @@ function initFilters1() {
         >
             <template #header>
                 <div class="flex flex-col md:flex-row items-center justify-between gap-3 w-full">
-                  <!-- 左侧：下拉框 -->
-                  <div class="w-full md:w-auto">
+                    <!-- 左侧：下拉框 -->
+                    <div class="w-full md:w-auto">
 
-                  </div>
+                    </div>
                     <!-- 右侧：按钮 + 搜索框 -->
                     <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end md:justify-start">
                         <Button
@@ -240,7 +244,7 @@ function initFilters1() {
                         />
                         <IconField>
                             <InputIcon>
-                                <i class="pi pi-search" />
+                                <i class="pi pi-search"/>
                             </InputIcon>
                             <InputText
                                 size="small"
@@ -259,22 +263,23 @@ function initFilters1() {
                     <router-link class="text-blue-500"
                                  target="_blank"
                                  :to="{ name: 'etf-detail', params: { symbol: data.symbol } }">{{ data.symbol }}
-                    </router-link><br/>{{ data.name }}
+                    </router-link>
+                    <br/>{{ data.name }}
                 </template>
             </Column>
             <Column field="name" filterField="name" header="最新净值">
                 <template #body="{ data }">
-                    {{ 0 }}
+                    {{ data.ohlc_last.lastPrice }}
                 </template>
             </Column>
             <Column field="chg_pct" filterField="chg_pct" header="涨跌幅">
                 <template #body="{ data }">
-                    {{ 0 }}
+                    {{ formatPercentage(data.ohlc_last.chg_pct.toFixed(2), true) }}%
                 </template>
             </Column>
             <Column field="amount" filterField="amount" header="成交">
                 <template #body="{ data }">
-                    {{ 0 }}
+                    {{ formatStockTradeAmount(data.ohlc_last.amount) }}
                 </template>
             </Column>
             <Column field="amount" filterField="amount" header="成分股 PE-TTM">
@@ -285,16 +290,11 @@ function initFilters1() {
             <Column header="52周价格范围">
                 <template #body="{ data }">
                     <PriceRange52Week
-                      :low52w="data['52week_low']"
-                      :high52w="data['52week_high']"
-                      :currentPrice="data.close"
-                      style="width: 100px;"
+                        :low52w="data['52week_low']"
+                        :high52w="data['52week_high']"
+                        :currentPrice="data.ohlc_last.lastPrice"
+                        style="width: 100px;"
                     />
-                </template>
-            </Column>
-            <Column field="name" filterField="name" header="更新时间">
-                <template #body="{ data }">
-                    {{ 0 }}
                 </template>
             </Column>
         </DataTable>
@@ -342,19 +342,39 @@ function initFilters1() {
 }
 
 .phase-tag {
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
-  color: white;
-  text-align: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
 }
 
 /* 不同阶段的颜色定义 */
-.phase-tag--accumulate { background-color: #1890ff; } /* 蓝色 - 吸筹 */
-.phase-tag--wash { background-color: #531dab; }       /* 靛紫色 - 洗盘 */
-.phase-tag--rise { background-color: #389e0d; }       /* 绿色 - 拉升 */
-.phase-tag--distribute { background-color: #d46b08; } /* 橙色 - 出货 */
-.phase-tag--unknown { background-color: #bfbfbf; }    /* 浅灰 - 未知 */
+.phase-tag--accumulate {
+    background-color: #1890ff;
+}
+
+/* 蓝色 - 吸筹 */
+.phase-tag--wash {
+    background-color: #531dab;
+}
+
+/* 靛紫色 - 洗盘 */
+.phase-tag--rise {
+    background-color: #389e0d;
+}
+
+/* 绿色 - 拉升 */
+.phase-tag--distribute {
+    background-color: #d46b08;
+}
+
+/* 橙色 - 出货 */
+.phase-tag--unknown {
+    background-color: #bfbfbf;
+}
+
+/* 浅灰 - 未知 */
 
 </style>

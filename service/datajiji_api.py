@@ -98,6 +98,34 @@ class DataGigi:
             print(f"请求失败: {e}")
             return None
 
+    def get_last_tick(
+            self,
+            symbol: str,
+            market: str = "cn"
+    ) -> pandas.DataFrame:
+        """
+        实时行情Tick
+
+        :param symbol: 股票代码，如 "000001"
+        :param market: 市场代码，默认 "cn"（中国）
+        :return: API 返回的原始文本（JSON 字符串），失败时返回 None
+        """
+        url = f"{self.BASE_URL}/{market}/stock/tick"
+        params = {
+            "symbol": symbol
+        }
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",  # 如果你的 API 需要 token 鉴权
+            # 或者用其他方式，如 "X-API-Key": self.api_key
+        }
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            response.raise_for_status()  # 抛出 HTTP 错误
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"请求失败: {e}")
+            return None
+
     def get_history(
             self,
             symbol: str,

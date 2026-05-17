@@ -150,12 +150,12 @@ const props = defineProps({
     /** 价格区间最小值，用于坐标映射 */
     minPrice: {
         type: Number,
-        default: 20
+        default: 0
     },
     /** 价格区间最大值，用于坐标映射 */
     maxPrice: {
         type: Number,
-        default: 90
+        default: 0
     },
     /** 图表高度 */
     chartHeight: {
@@ -220,22 +220,62 @@ const neutralValue = computed(() => Number(props.data.每股内在价值?.中性
 const optimisticValue = computed(() => Number(props.data.每股内在价值?.乐观情景 || 0))
 const adviceText = computed(() => props.data.估值判断 || '暂无估值建议')
 
+// ★ 新增：自动计算动态价格上下限，自动覆盖历史+当前+DCF估值全区间
+const dynamicMinPrice = computed(() => {
+    // 优先用用户传入的固定minPrice
+    if (props.minPrice > 0) return props.minPrice
+    // 收集所有有效价格（过滤空值/停牌0值）
+    const allValidPrices = [
+        ...props.historyData.filter(p => p && p > 0),
+        currentPrice.value,
+        conservativeValue.value,
+        neutralValue.value,
+        optimisticValue.value
+    ]
+    const minVal = Math.min(...allValidPrices)
+    // 下浮10%做padding，避免价格贴到画布底部，最低不小于0
+    return Math.max(0, minVal * 0.9)
+})
+const dynamicMaxPrice = computed(() => {
+    // 优先用用户传入的固定maxPrice
+    if (props.maxPrice > 0) return props.maxPrice
+    const allValidPrices = [
+        ...props.historyData.filter(p => p && p > 0),
+        currentPrice.value,
+        conservativeValue.value,
+        neutralValue.value,
+        optimisticValue.value
+    ]
+    const maxVal = Math.max(...allValidPrices)
+    // 上浮10%做padding，避免价格贴到画布顶部
+    return maxVal * 1.1
+})
 /**
- * 价格转SVG Y坐标
+ * ★ 优化价格转坐标逻辑，处理边界异常
  * @param {number} price 股票价格
  * @returns {number} Y坐标值
  */
 const priceToY = (price) => {
     const validHeight = props.chartHeight - 80
-    return (props.chartHeight - 40) - ((price - props.minPrice) * validHeight / (props.maxPrice - props.minPrice))
+    const minP = dynamicMinPrice.value
+    const maxP = dynamicMaxPrice.value
+    // 边界处理：所有价格相等时，返回垂直居中坐标，避免除以0报错
+    if (maxP === minP) {
+        return (props.chartHeight - 40) / 2
+    }
+    // 限制价格在区间内，防止异常价格溢出画布
+    const safePrice = Math.max(minP, Math.min(price, maxP))
+    return (props.chartHeight - 40) - ((safePrice - minP) * validHeight / (maxP - minP))
 }
-
 /**
- * 生成历史走势路径
+ * ★ 优化历史路径生成，处理数据不足的边界情况
  */
 const historyPath = computed(() => {
-    // 如果用户传入了真实历史数据，优先使用
     if (props.historyData.length) {
+        // 边界处理：只有1条历史数据时直接画水平线
+        if (props.historyData.length === 1) {
+            return `M 0 ${priceToY(props.historyData[0])} L 400 ${priceToY(currentPrice.value)}`
+        }
         let path = `M 0 ${priceToY(props.historyData[0])}`
         const step = 400 / (props.historyData.length - 1)
         props.historyData.forEach((price, index) => {

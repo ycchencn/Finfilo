@@ -58,6 +58,16 @@ const dcf_research_report = ref({
 const tech_report = ref(null)
 const dcf_research_report_drawer = ref(false)
 
+// 你的接口返回数据
+const stockData = ref({
+  "估值判断": "当前股价处于明显偏低水平，具备充分安全边际。建议逢低布局，第一目标位看至50元，中长期目标看至61元。",
+  "当前股价": 0,
+  "每股内在价值": {"中性情景": "61.02", "乐观情景": "158.33", "保守情景": "20.00"}
+})
+
+// 可选：真实历史价格数据
+const realHistoryData = ref([])
+
 const items = [
     {
         label: '重新分析',
@@ -145,9 +155,12 @@ onMounted(async () => {
     ohlc_last.value = stock_info.value.ohlc_last;
     stock_profile.value = await fetchStockProfile(stock_code)
     ohlc_data.value = await fetchStockMarketData(stock_code);
-    if (!ohlc_last.value.length) {
-        ohlc_last.value = ohlc_data.value[ohlc_data.value.length - 1];
-    }
+    // 1. 提取close数组，自动过滤空值/0值（停牌无收盘价的场景）
+    realHistoryData.value = ohlc_data.value
+      .map(ohlcItem => ohlcItem.close) // 提取每个K线的close字段
+      .filter(close => close != null && close > 0); // 过滤空值、停牌0值，避免后续计算报错
+    realHistoryData.value = realHistoryData.value.slice(-150)
+    stockData.value['当前股价'] = ohlc_last.value['close']
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
     chart.setStyles({
@@ -175,6 +188,13 @@ onMounted(async () => {
     // 获取技术分析报告
     axios.get(`/api/v1/stock/tech_analysis_report/${stock_code}`).then(response => {
         tech_report.value = response.data
+    });
+
+    // 获取DCF分析报告
+    axios.get(`/api/v1/stock/dcf_research_report/${stock_code}`).then(response => {
+        loading.value = false;
+        dcf_research_report.value = response.data
+        stockData.value = dcf_research_report.value['content_json'];
     });
 
     // 获取自选股数据
@@ -315,14 +335,6 @@ const reanalysisDcf = function () {
     }
 }
 
-// 你的接口返回数据
-const stockData = {
-  "估值判断": "当前股价处于明显偏低水平，具备充分安全边际。建议逢低布局，第一目标位看至50元，中长期目标看至61元。",
-  "当前股价": "36.00",
-  "每股内在价值": {"中性情景": "61.02", "乐观情景": "85.00", "保守情景": "20.00"}
-}
-// 可选：真实历史价格数据
-const realHistoryData = [15,33,31,34,60,55,32,30,34,36]
 
 onUnmounted(() => {
     dispose('chart');
@@ -493,14 +505,14 @@ onUnmounted(() => {
             <div class="font-semibold text-lg">
                 <i class="pi pi-chart-line text-green-500"></i> 技术面分析
             </div>
-            <!-- 自定义配置用法 -->
-<!--            <StockValuationChart-->
-<!--              :data="stockData"-->
-<!--              title=""-->
-<!--              ratingText=""-->
-<!--              ratingColor="#f97316"-->
-<!--              :historyData="realHistoryData"-->
-<!--            />-->
+            <StockValuationChart
+              v-if="stock_info['tech_indicator'] && ohlc_data.length > 0"
+              :data="stockData"
+              title=""
+              ratingText=""
+              ratingColor="#f97316"
+              :historyData="realHistoryData"
+            />
             <Divider/>
             <div class="mb-4 markdown-content" v-if="tech_report">
                 <MarkdownRenderer

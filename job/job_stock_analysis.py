@@ -52,5 +52,5 @@ def manual_analysis():
 
 if __name__ == '__main__':
 
-    stock_code = '300620'
+    stock_code = '688820'
     job_stock_analysis(stock_code)

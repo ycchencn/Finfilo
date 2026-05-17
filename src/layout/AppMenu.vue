@@ -26,6 +26,11 @@ const model = ref([
                 label: '关注清单',
                 icon: 'pi pi-fw pi-palette',
                 to: '/user/watch_list'
+            },
+            {
+                label: '股票池',
+                icon: 'pi pi-fw pi-clone',
+                to: '/quant/stock_monitor'
             }
         ]
     },
@@ -39,11 +44,6 @@ const model = ref([
             },
             {
                 label: '量化回测',
-                icon: 'pi pi-fw pi-clone',
-                to: '/quant/stock_monitor'
-            },
-            {
-                label: '股票池',
                 icon: 'pi pi-fw pi-clone',
                 to: '/quant/stock_monitor'
             }

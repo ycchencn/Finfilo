@@ -32,7 +32,7 @@ is_debug = os.getenv('DEBUG', False)
 # 数据库配置
 database_conn_str = os.getenv('DATABASE_CONN_STR')
 
-# 阿里云百炼API
+# Deepseek API
 deepseek_apikey = os.getenv('DEEPSEEK_APIKEY')
 
 # 阿里云百炼API

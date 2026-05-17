@@ -26,7 +26,95 @@ def get_stock_detail(_stock_code, market):
     return profile
 
 
+def check_analysis_interval(stock_code, interval=3):
+    """
+    @brief 检查指定个股的分析间隔是否满足要求
+
+    @param stock_code: 个股代码，如"600519.SH"
+    @type stock_code: str
+    @param interval: 最小分析间隔天数，默认3天
+    @type interval: int
+
+    @return: 如果可以进行分析返回True，否则返回False
+    @rtype: bool
+
+    @throws: ValueError: 当stock_code为空或interval<=0时抛出
+
+    @example:
+        # 检查贵州茅台是否可以进行新一轮分析（间隔至少3天）
+        if check_analysis_interval("600519.SH", interval=3):
+            logger.info("可以进行DCF分析")
+        else:
+            logger.info("上次分析时间未满3天，暂缓分析")
+    """
+    # 参数校验
+    if not stock_code or not isinstance(stock_code, str):
+        raise ValueError("个股代码不能为空，且必须为字符串类型")
+    if interval <= 0:
+        raise ValueError(f"分析间隔必须大于0，当前值: {interval}")
+
+    try:
+        # 查询该个股最近一次的分析报告
+        report = ResearchReportService.get_by_code(stock_code=stock_code, report_type=1)
+
+        # 如果没有历史报告，说明从未分析过，可以进行分析
+        if report is None or report.get('content_json') is None:
+            logger.info(f"[{stock_code}] 无历史分析记录，允许进行分析")
+            return True
+
+        # 处理时间字段为空的情况
+        if not report.get('created_at'):
+            logger.info(f"[{stock_code}] 历史分析记录缺少创建时间，视为无有效记录，允许进行分析")
+            return True
+
+        # 解析时间字符串
+        created_at_str = report['created_at']  # 格式: '2026-05-17T12:27:21'
+        try:
+            from datetime import datetime
+
+            # 处理多种日期格式
+            if 'T' in created_at_str:
+                # ISO 8601格式: 2026-05-17T12:27:21
+                last_analysis_time = datetime.fromisoformat(created_at_str)
+            elif ' ' in created_at_str:
+                # 常见格式: 2026-05-17 12:27:21
+                last_analysis_time = datetime.strptime(created_at_str, '%Y-%m-%d %H:%M:%S')
+            else:
+                # 纯日期格式: 2026-05-17
+                last_analysis_time = datetime.strptime(created_at_str, '%Y-%m-%d')
+        except (ValueError, TypeError) as e:
+            logger.info(f"[{stock_code}] 时间格式解析失败: {created_at_str}, 错误: {e}")
+            # 如果解析失败，为了安全起见，允许进行分析
+            return True
+
+        # 计算时间差
+        now = datetime.now()
+        time_diff = now - last_analysis_time
+
+        # 检查是否超过指定间隔天数
+        if time_diff.days >= interval:
+            logger.info(f"[{stock_code}] 距上次分析已过去{time_diff.days}天(≥{interval}天)，允许进行分析")
+            return True
+        else:
+            # 计算还需等待的天数
+            remaining_days = interval - time_diff.days
+            remaining_hours = int((interval - time_diff.days) * 24 - time_diff.seconds / 3600)
+            logger.info(
+                f"[{stock_code}] 距上次分析仅{time_diff.days}天(<{interval}天)，还需等待{remaining_days}天{remaining_hours}小时")
+            return False
+
+    except Exception as e:
+        # 捕获其他未预期的异常，记录日志并返回True（允许分析，避免阻塞流程）
+        logger.info(f"[{stock_code}] 检查分析间隔时出现异常: {e}")
+        # 可在此处添加日志记录到文件
+        return True
+
 def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
+
+    if not check_analysis_interval(_stock_code, interval=1):
+        logger.info(f"下一次分析间隔未到，跳过分析，{_stock_code}")
+        return False
+
     staff = get_analysis_model_by_setting(_setting_name='stock_dcf_analysis')
     staff.role_base = '你需要根据客户提供的资料对股票进行DCF估值分析，请使用Markdown输出'
     staff.set_response_text()
@@ -99,7 +187,7 @@ def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
 
     result = ResearchReportService.add(data)
 
-    # print(content)
+    # logger.info(content)
 
     return True
 

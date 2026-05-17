@@ -6,15 +6,14 @@
 
 import os
 from openai import OpenAI
-from config import aliyun_bailian_apikey
 
 client = OpenAI(
     api_key=os.environ.get('DEEPSEEK_APIKEY'),
     base_url="https://api.deepseek.com")
 
-class LLMBaseDeepSeek:
 
-    role_base= (
+class LLMBaseDeepSeek:
+    role_base = (
         '你是一个量化交易金融机构的专家'
         '请以JSON格式输出'
     )
@@ -27,8 +26,8 @@ class LLMBaseDeepSeek:
 
     response_format = 'json_object'
 
-    def __init__(self, client=client_aliyun):
-        self.client = client
+    def __init__(self):
+        self.client = OpenAI(api_key=os.environ.get('DEEPSEEK_APIKEY'), base_url="https://api.deepseek.com")
 
     def set_response_json(self):
         self.response_format = 'json_object'

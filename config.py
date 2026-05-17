@@ -80,8 +80,8 @@ cache_setting = {
 # 大模型配置
 llm_model_setting = {
     'stock_dcf_analysis': {
-        'platform': 'siliconflow',
-        'model': 'deepseek-ai/DeepSeek-V4-Flash'
+        'platform': 'deepseek',
+        'model': 'deepseek-v4-pro'
     },
     'stock_dcf_analysis_extra': {
         'platform': 'aliyun',

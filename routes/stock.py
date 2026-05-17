@@ -126,6 +126,7 @@ def get_stocks_monitored():
 
 
 @stock_bp.route(f'{api_prefix}/stock/greed_data/<string:stock_code>', methods=['GET'])
+@cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
 def get_stocks_greed_data(stock_code):
     """
     获取个股恐惧贪婪数据

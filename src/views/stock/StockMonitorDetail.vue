@@ -159,7 +159,7 @@ onMounted(async () => {
     realHistoryData.value = ohlc_data.value
       .map(ohlcItem => ohlcItem.close) // 提取每个K线的close字段
       .filter(close => close != null && close > 0); // 过滤空值、停牌0值，避免后续计算报错
-    realHistoryData.value = realHistoryData.value.slice(-150)
+    realHistoryData.value = realHistoryData.value.slice(-365)
     stockData.value['当前股价'] = ohlc_last.value['close']
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
@@ -503,8 +503,9 @@ onUnmounted(() => {
         <!-- 左侧 -->
         <div class="w-full md:w-1/2 flex flex-col min-h-0">
             <div class="font-semibold text-lg">
-                <i class="pi pi-chart-line text-green-500"></i> 技术面分析
+                <i class="pi pi-chart-line text-green-500"></i> DCF估值评级
             </div>
+            <Divider/>
             <StockValuationChart
               v-if="stock_info['tech_indicator'] && ohlc_data.length > 0"
               :data="stockData"
@@ -513,12 +514,6 @@ onUnmounted(() => {
               ratingColor="#f97316"
               :historyData="realHistoryData"
             />
-            <Divider/>
-            <div class="mb-4 markdown-content" v-if="tech_report">
-                <MarkdownRenderer
-                    :markdown="dictToMarkdownRecursive(tech_report.content_json['技术面深度诊断'])">
-                </MarkdownRenderer>
-            </div>
         </div>
 
         <!-- 右侧 -->
@@ -533,6 +528,29 @@ onUnmounted(() => {
             <div class="overflow-y-auto flex-1" v-if="greed_data">
                 <Chart type="line" :data="lineData" :options="lineOptions" style="height: 250px"></Chart>
             </div>
+        </div>
+
+    </div>
+
+
+    <div class="pd-2-0 mt-5 flex flex-col md:flex-row gap-6">
+
+        <!-- 左侧 -->
+        <div class="w-full md:w-1/2 flex flex-col min-h-0">
+            <div class="font-semibold text-lg">
+                <i class="pi pi-chart-line text-green-500"></i> 技术面分析
+            </div>
+            <Divider/>
+            <div class="mb-4 markdown-content" v-if="tech_report">
+                <MarkdownRenderer
+                    :markdown="dictToMarkdownRecursive(tech_report.content_json['技术面深度诊断'])">
+                </MarkdownRenderer>
+            </div>
+        </div>
+
+        <!-- 右侧 -->
+        <div class="w-full md:w-1/2 flex flex-col min-h-0">
+
         </div>
 
     </div>

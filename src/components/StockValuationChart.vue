@@ -16,7 +16,7 @@
         <svg
             width="100%"
             :height="chartHeight"
-            :viewBox="`0 0 800 ${chartHeight - 40}`"
+            :viewBox="`0 0 920 ${chartHeight - 40}`"
             style="display: block;"
         >
             <!-- 背景网格线 -->
@@ -82,17 +82,17 @@
             >
                 现价 {{ currentPrice }}
             </text>
-            <!-- 右侧标签 -->
-            <rect x="700" y="20" width="100" height="32" rx="4" :fill="optimisticLineColor"/>
-            <text x="750" y="42" text-anchor="middle" fill="#fff" font-size="14">
+            <!-- 右侧外置标签，自动和对应估值线水平对齐 -->
+            <rect x="810" :y="priceToY(optimisticValue) - 13" width="100" height="24" rx="3" :fill="optimisticLineColor"/>
+            <text x="860" :y="priceToY(optimisticValue)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14">
                 乐观 {{ optimisticValue }}
             </text>
-            <rect x="700" y="64" width="100" height="32" rx="4" :fill="neutralLineColor"/>
-            <text x="750" y="86" text-anchor="middle" fill="#fff" font-size="14">
+            <rect x="810" :y="priceToY(neutralValue) - 14" width="100" height="24" rx="3" :fill="neutralLineColor"/>
+            <text x="860" :y="priceToY(neutralValue)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14">
                 中性 {{ neutralValue }}
             </text>
-            <rect x="700" y="108" width="100" height="32" rx="4" :fill="conservativeLineColor"/>
-            <text x="750" y="130" text-anchor="middle" fill="#fff" font-size="14">
+            <rect x="810" :y="priceToY(conservativeValue) - 14" width="100" height="24" rx="3" :fill="conservativeLineColor"/>
+            <text x="860" :y="priceToY(conservativeValue)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14">
                 保守 {{ conservativeValue }}
             </text>
         </svg>
@@ -160,7 +160,7 @@ const props = defineProps({
     /** 图表高度 */
     chartHeight: {
         type: Number,
-        default: 200
+        default: 240
     },
     /** 历史走势数据，数组格式，不传则自动生成模拟数据 */
     historyData: {
@@ -197,9 +197,10 @@ const props = defineProps({
         type: Object,
         default: () => ({
             maxWidth: '900px',
-            margin: '20px auto',
-            padding: '20px',
+            margin: '0px auto',
+            padding: '0px 10px',
             background: '#fff',
+            border: '1px solid #eee',
             borderRadius: '0px',
             boxShadow: ''
         })

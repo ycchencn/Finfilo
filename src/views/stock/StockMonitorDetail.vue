@@ -186,7 +186,6 @@ onMounted(async () => {
     axios.get(`/api/v1/stock/dcf_research_report/${stock_code}`).then(response => {
         loading.value = false;
         dcf_research_report.value = response.data
-        stockData.value = dcf_research_report.value['content_json'];
     });
 
     // 获取自选股数据

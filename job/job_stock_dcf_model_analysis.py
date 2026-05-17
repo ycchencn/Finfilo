@@ -151,7 +151,7 @@ def dcf_report_extra(_stock_code, report_content):
 
 if __name__ == '__main__':
 
-    stock_code = '002015'
+    stock_code = '603186'
     job_stock_dcf_model_analysis(stock_code)
 
     # job_stock_dcf_model_analysis_daily(override=True)

@@ -85,15 +85,15 @@
             <!-- 右侧外置标签，自动和对应估值线水平对齐 -->
             <rect x="810" :y="priceToY(optimisticValue) - 13" width="100" height="24" rx="3" :fill="optimisticLineColor"/>
             <text x="860" :y="priceToY(optimisticValue)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14">
-                乐观 {{ optimisticValue }}
+                乐观 {{ optimisticValue.toFixed(2) }}
             </text>
             <rect x="810" :y="priceToY(neutralValue) - 14" width="100" height="24" rx="3" :fill="neutralLineColor"/>
             <text x="860" :y="priceToY(neutralValue)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14">
-                中性 {{ neutralValue }}
+                中性 {{ neutralValue.toFixed(2) }}
             </text>
             <rect x="810" :y="priceToY(conservativeValue) - 14" width="100" height="24" rx="3" :fill="conservativeLineColor"/>
             <text x="860" :y="priceToY(conservativeValue)" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-size="14">
-                保守 {{ conservativeValue }}
+                保守 {{ conservativeValue.toFixed(2) }}
             </text>
         </svg>
 

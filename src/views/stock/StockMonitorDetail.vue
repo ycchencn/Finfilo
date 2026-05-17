@@ -58,13 +58,6 @@ const dcf_research_report = ref({
 const tech_report = ref(null)
 const dcf_research_report_drawer = ref(false)
 
-// 你的接口返回数据
-const stockData = ref({
-  "估值判断": "当前股价处于明显偏低水平，具备充分安全边际。建议逢低布局，第一目标位看至50元，中长期目标看至61元。",
-  "当前股价": 0,
-  "每股内在价值": {"中性情景": "61.02", "乐观情景": "158.33", "保守情景": "20.00"}
-})
-
 // 可选：真实历史价格数据
 const realHistoryData = ref([])
 
@@ -159,8 +152,7 @@ onMounted(async () => {
     realHistoryData.value = ohlc_data.value
       .map(ohlcItem => ohlcItem.close) // 提取每个K线的close字段
       .filter(close => close != null && close > 0); // 过滤空值、停牌0值，避免后续计算报错
-    realHistoryData.value = realHistoryData.value.slice(-365)
-    stockData.value['当前股价'] = ohlc_last.value['close']
+    realHistoryData.value = realHistoryData.value.slice(-365/2)
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
     chart.setStyles({
@@ -507,8 +499,8 @@ onUnmounted(() => {
             </div>
             <Divider/>
             <StockValuationChart
-              v-if="stock_info['tech_indicator'] && ohlc_data.length > 0"
-              :data="stockData"
+               v-if="dcf_research_report?.content_json"
+              :data="dcf_research_report?.content_json"
               title=""
               ratingText=""
               ratingColor="#f97316"

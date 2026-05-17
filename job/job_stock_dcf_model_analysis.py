@@ -109,9 +109,9 @@ def check_analysis_interval(stock_code, interval=3):
         # 可在此处添加日志记录到文件
         return True
 
-def job_stock_dcf_model_analysis(_stock_code, send_notification=False):
+def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notification=False):
 
-    if not check_analysis_interval(_stock_code, interval=1):
+    if not skip_interval and not check_analysis_interval(_stock_code, interval=1):
         logger.info(f"下一次分析间隔未到，跳过分析，{_stock_code}")
         return False
 
@@ -203,6 +203,7 @@ def job_stock_dcf_model_analysis_daily(override=False):
             'job_func': 'job_stock_dcf_model_analysis',
             'job_args': {
                 '_stock_code': stock['symbol'],
+                'skip_interval': False,
                 'send_notification': False
             }
         })
@@ -239,7 +240,7 @@ def dcf_report_extra(_stock_code, report_content):
 
 if __name__ == '__main__':
 
-    stock_code = '603186'
-    job_stock_dcf_model_analysis(stock_code)
+    stock_code = '688726'
+    job_stock_dcf_model_analysis(stock_code, skip_interval=True)
 
     # job_stock_dcf_model_analysis_daily(override=True)

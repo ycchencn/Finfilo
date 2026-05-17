@@ -33,6 +33,9 @@ is_debug = os.getenv('DEBUG', False)
 database_conn_str = os.getenv('DATABASE_CONN_STR')
 
 # 阿里云百炼API
+deepseek_apikey = os.getenv('DEEPSEEK_APIKEY')
+
+# 阿里云百炼API
 aliyun_bailian_apikey = os.getenv('ALIYUN_BAILIAN_APIKEY')
 
 # 豆包API
@@ -77,8 +80,8 @@ cache_setting = {
 # 大模型配置
 llm_model_setting = {
     'stock_dcf_analysis': {
-        'platform': 'aliyun',
-        'model': 'deepseek-v4-pro'
+        'platform': 'siliconflow',
+        'model': 'deepseek-ai/DeepSeek-V4-Flash'
     },
     'stock_dcf_analysis_extra': {
         'platform': 'aliyun',

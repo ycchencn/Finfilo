@@ -11,12 +11,16 @@ from staffs.llm_base_volcengine import LLMBaseVolcEngine
 from staffs.llm_base_zhipu import LLMBaseZhipu
 from staffs.llm_base_siliconflow import LLMBaseSiliconflow
 from staffs.llm_base_aliyun import LLMBaseAliyun
+from staffs.llm_base_deepseek import LLMBaseDeepSeek
 from config import llm_model_setting
 
 
 def get_analysis_model_by_setting(_setting_name='stock_dcf_analysis'):
     _staff = None
     _setting = llm_model_setting.get(_setting_name)
+
+    if _setting.get('platform') == 'deepseek':
+        _staff = LLMBaseDeepSeek()
 
     if _setting.get('platform') == 'volcengine':
         _staff = LLMBaseVolcEngine()

@@ -140,6 +140,7 @@ def job_check_signal_daily(override=False):
                 '_stock_code': stock['symbol'],
             }
         })
+        logger.info(f"send signal analysis of {stock['symbol']}")
 
 if __name__ == '__main__':
 

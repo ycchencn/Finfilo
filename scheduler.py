@@ -43,6 +43,9 @@ if __name__ == '__main__':
     # 更新个股恐贪数据
     scheduler.add_job(job_update_stock_greedy_data_daily, 'cron', hour=20, minute=55, timezone=beijing_tz)
 
+    # 每周五晚上更新DCF数据
+    scheduler.add_job(job_sync_data, 'cron', day_of_week='fir', hour=20, minute=30, timezone=beijing_tz)
+
     try:
         # 开始执行计划任务
         logger.info(f"running scheduler service")

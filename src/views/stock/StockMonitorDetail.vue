@@ -145,6 +145,9 @@ onMounted(async () => {
     ohlc_last.value = stock_info.value.ohlc_last;
     stock_profile.value = await fetchStockProfile(stock_code)
     ohlc_data.value = await fetchStockMarketData(stock_code);
+    if (!ohlc_last.value.length) {
+        ohlc_last.value = ohlc_data.value[ohlc_data.value.length - 1];
+    }
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
     chart.setStyles({

@@ -12,6 +12,7 @@ from config import database_conn_str, redis_host, redis_port
 from typing import Optional
 from flask_caching import Cache
 from redis import ConnectionPool
+from flask import json, Response
 
 # 初始化Flask应用和数据库连接
 app = Flask(__name__, static_folder="../dist", static_url_path='')
@@ -25,7 +26,6 @@ redis_pool = ConnectionPool(host=redis_host, port=redis_port, db=0)
 app.config['CACHE_TYPE'] = 'RedisCache'
 app.config['CACHE_REDIS_CONNECTION_POOL'] = redis_pool
 app.config['CACHE_REDIS_URL'] = f'redis://{redis_host}:{redis_port}/0'
-
 
 # 配置信任的代理 IP 段（内网/可信代理）
 TRUSTED_PROXIES = [
@@ -107,6 +107,14 @@ def get_client_info() -> dict:
         'forwarded_for': request.headers.get('X-Forwarded-For'),
         'is_trusted': is_trusted_proxy(request.remote_addr),
     }
+
+
+def json_resp(ctx):
+    return Response(
+        json.dumps(ctx, ensure_ascii=False),
+        mimetype='application/json'
+    )
+
 
 cache = Cache(app)
 

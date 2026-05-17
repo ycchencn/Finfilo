@@ -34,6 +34,12 @@ const router = createRouter({
                     meta: { title: 'ETF洞察', requiresAuth: true }
                 },
                 {
+                    path: '/quant/dcf_insight',
+                    name: 'quant-etf-insight',
+                    component: () => import('@/views/quant/DCFInsight.vue'),
+                    meta: { title: 'DCF估值', requiresAuth: true }
+                },
+                {
                     path: '/user/watch_list',
                     name: 'user-watch-list',
                     component: () => import('@/views/user/WatchList.vue'),

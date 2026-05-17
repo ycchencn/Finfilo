@@ -43,9 +43,9 @@ const model = ref([
                 to: '/quant/portfolio_list'
             },
             {
-                label: '量化回测',
+                label: 'DCF估值',
                 icon: 'pi pi-fw pi-clone',
-                to: '/quant/stock_monitor'
+                to: '/quant/dcf_insight'
             }
         ]
     },

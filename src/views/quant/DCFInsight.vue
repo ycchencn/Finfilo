@@ -1,0 +1,250 @@
+<script setup>
+
+import { FilterMatchMode, FilterOperator } from '@primevue/core/api';
+import { onBeforeMount, reactive, ref } from 'vue';
+import { getMarketByCode, fearGreedToText } from '@/utils/function';
+import axios from 'axios';
+import PriceRange52Week from '@/components/PriceRange52Week.vue';
+
+const stock_list = ref([]);
+const filters1 = ref(null);
+const loading1 = ref(null);
+const dt1 = ref(null);
+const filter_market = ref('cn')
+
+function loadStockList(){
+    // 获取个股数据
+    axios.get(`/api/v1/quant/stock/get_dcf_report_snap?v=1.2`).then(response => {
+        stock_list.value = response.data.map(item => {
+            const ohlc = item.ohlc_last; // 可能为 null 或 undefined
+            return {
+                ...item,
+                fear_greed: item.greed_data?.fear_greed ?? null,
+                fear_greed_text: fearGreedToText(item.greed_data?.fear_greed ?? null),
+                chg_pct: ohlc?.chg_pct ?? null,
+                close: ohlc?.close ?? null,
+                open: ohlc?.open ?? null,
+                high: ohlc?.high ?? null,
+                low: ohlc?.low ?? null,
+                market: getMarketByCode(item.symbol) ?? null
+            };
+        });
+        loading1.value = false;
+    }).catch(error => {
+        console.error('加载股票列表失败:', error);
+        loading1.value = false;
+        // 可选：显示错误提示
+    });
+}
+
+onBeforeMount(() => {
+    // 获取个股数据
+    loadStockList()
+    initFilters1();
+});
+
+// 在 <script setup> 内部添加：
+function getFearGreedClass(greedValue) {
+    if (greedValue >= 60) return 'fg-extreme-greed';
+    if (greedValue >= 55) return 'fg-greed';
+    if (greedValue >= 35) return 'fg-neutral';
+    if (greedValue >= 20) return 'fg-fear';
+    return 'fg-extreme-fear';
+}
+
+// 1. 阶段映射配置 (保持不变)
+const PHASE_CONFIG = {
+    0: { label: '未知阶段', type: 'unknown', severity: 'secondary' },
+    1: { label: '吸筹阶段', type: 'accumulate', severity: 'info' },
+    2: { label: '洗盘阶段', type: 'wash', severity: 'help' },
+    3: { label: '拉升阶段', type: 'rise', severity: 'success' },
+    5: { label: '出货阶段', type: 'distribute', severity: 'warn' },
+    6: { label: '出货阶段', type: 'distribute', severity: 'danger' }
+};
+
+// 将对象转换为 [{ label: '吸筹阶段', value: '1' }, ...] 格式
+const phaseFilterOptions = Object.entries(PHASE_CONFIG)
+    .filter(([key, config]) => key !== '0') // 过滤掉 key 为 '0' 的项
+    .map(([key, config]) => ({
+    label: config.label,
+    value: key // 使用字符串作为 value，兼容性更好
+}));
+
+const stockIntervalOptions = [
+    { label: '每天', value: 1 },
+    { label: '每3天', value: 3 },
+];
+
+const marketFilterOptions = [
+    { label: 'A股', value: 'cn' },
+    { label: '美股', value: 'us' },
+    { label: '港股', value: 'hk' },
+];
+
+// 2. 修改 initFilters1 函数，添加 main_force_behavior_phase 的配置
+function initFilters1() {
+    filters1.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        // 添加这一行配置
+        main_force_behavior_phase: {
+            value: null,
+            matchMode: FilterMatchMode.CONTAINS
+        },
+        // 新增：市场筛选配置
+        market: {
+            value: null,
+            matchMode: FilterMatchMode.EQUALS
+        }
+    };
+}
+
+</script>
+
+<template>
+    <Toast />
+    <div class="card">
+        <DataTable
+            ref="dt1"
+            tableStyle="font-size:12px"
+            :value="stock_list"
+            :paginator="true"
+            :rows="50"
+            dataKey="symbol"
+            :rowHover="true"
+            :size="'large'"
+            filterDisplay="menu"
+            :loading="loading1"
+            :filters="filters1"
+            :globalFilterFields="['symbol', 'name', 'concepts']"
+            :showGridlines="false"
+            sortField="opt_space"
+            sortOrder="-1"
+        >
+            <template #header>
+                <div class="flex flex-col md:flex-row items-center justify-between gap-3 w-full">
+                    <!-- 左侧：下拉框 -->
+                    <div class="w-full md:w-auto">
+                        <span class="font-semibold">DCF估值信息汇总 - 每周更新</span>
+                    </div>
+                    <!-- 右侧：按钮 + 搜索框 -->
+                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end md:justify-start">
+                        <IconField>
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText
+                                size="small"
+                                v-model="filters1.global.value"
+                                placeholder="Keyword Search"
+                                class="w-full md:w-64"
+                            />
+                        </IconField>
+                    </div>
+                </div>
+            </template>
+            <template #empty> No data found.</template>
+            <template #loading> Loading customers data. Please wait.</template>
+            <Column field="name" filterField="name" header="名称">
+                <template #body="{ data }">
+                    <router-link class="text-blue-500"
+                                 target="_blank"
+                                 :to="{ name: 'stock-monitor-detail', params: { symbol: data.symbol } }">{{ data.symbol }}
+                    </router-link><br/>{{ data.name }}
+                </template>
+            </Column>
+            <Column field="current_price" filterField="current_price" header="最新" sortable>
+                <template #body="{ data }">
+                        {{ data.current_price != null ? data.current_price.toFixed(2) : '--' }}
+                </template>
+            </Column>
+            <Column field="opt_valuation" filterField="opt_valuation" header="乐观估值" sortable>
+                <template #body="{ data }">
+                        {{ data.opt_valuation != null ? data.opt_valuation.toFixed(2) : '--' }}
+                </template>
+            </Column>
+            <Column field="opt_space" filterField="opt_space" header="乐观空间" sortable>
+                <template #body="{ data }">
+                        {{ data.opt_space != null ? (data.opt_space * 100).toFixed(2) : '--' }}%
+                </template>
+            </Column>
+            <Column field="mid_valuation" filterField="mid_valuation" header="中性估值" sortable>
+                <template #body="{ data }">
+                        {{ data.mid_valuation != null ? data.mid_valuation.toFixed(2) : '--' }}
+                </template>
+            </Column>
+            <Column field="mid_space" filterField="mid_space" header="中性空间" sortable>
+                <template #body="{ data }">
+                        {{ data.mid_space != null ? (data.mid_space * 100).toFixed(2) : '--' }}%
+                </template>
+            </Column>
+            <Column field="cons_valuation" filterField="cons_valuation" header="保守估值" sortable>
+                <template #body="{ data }">
+                        {{ data.cons_valuation != null ? data.cons_valuation.toFixed(2) : '--' }}%
+                </template>
+            </Column>
+            <Column field="cons_space" filterField="cons_space" header="保守空间" sortable>
+                <template #body="{ data }">
+                        {{ data.cons_space != null ? (data.cons_space * 100).toFixed(2) : '--' }}%
+                </template>
+            </Column>
+        </DataTable>
+    </div>
+
+</template>
+
+<style scoped lang="scss">
+
+:deep(.p-datatable-frozen-tbody) {
+    font-weight: bold;
+}
+
+:deep(.p-datatable-scrollable .p-frozen-column) {
+    font-weight: bold;
+}
+
+:deep(.fg-extreme-fear .p-progressbar-value) {
+    background: #bebebe !important; /* 极度恐惧 - 柔和红 */
+}
+
+:deep(.fg-fear .p-progressbar-value) {
+    background: #bebebe !important; /* 恐惧 - 深橙 */
+}
+
+:deep(.fg-neutral .p-progressbar-value) {
+    background: #9ccc65 !important; /* 中性 - 金黄 */
+}
+
+:deep(.fg-greed .p-progressbar-value) {
+    background: #ef5350 !important; /* 贪婪 - 浅绿 */
+}
+
+:deep(.fg-extreme-greed .p-progressbar-value) {
+    background: #ef5350 !important; /* 极度贪婪 - 绿 */
+}
+
+:deep(.p-progressbar) {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+:deep(.p-progressbar-value) {
+    border-radius: 8px;
+}
+
+.phase-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+}
+
+/* 不同阶段的颜色定义 */
+.phase-tag--accumulate { background-color: #1890ff; } /* 蓝色 - 吸筹 */
+.phase-tag--wash { background-color: #531dab; }       /* 靛紫色 - 洗盘 */
+.phase-tag--rise { background-color: #389e0d; }       /* 绿色 - 拉升 */
+.phase-tag--distribute { background-color: #d46b08; } /* 橙色 - 出货 */
+.phase-tag--unknown { background-color: #bfbfbf; }    /* 浅灰 - 未知 */
+
+</style>

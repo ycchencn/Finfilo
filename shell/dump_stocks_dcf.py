@@ -4,12 +4,15 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
+import json
 import pandas as pd
 import time
 from openpyxl.styles import Alignment
 from utils.data_loader import datagigi
+from utils.redis_obj import redis_obj
 from service import ResearchReportService
 from service.stock import StockService
+from utils.common import get_now
 
 
 def export_dcf_to_excel(
@@ -19,6 +22,24 @@ def export_dcf_to_excel(
 ):
     """从监控股票池获取DCF估值信息，输出为Excel文件（纯数值，百分比列设置Excel格式，首行筛选，左对齐垂直居中）"""
     stocks = StockService.get_monitoring_stock_pool(market='cn', per_page=300)
+
+    # 中英列名映射
+    column_mapping_cn_to_en = {
+        '名称': 'name',
+        '代码': 'symbol',
+        '现价': 'current_price',
+        '乐观估值': 'opt_valuation',
+        '乐观空间': 'opt_space',
+        '中性估值': 'mid_valuation',
+        '中性空间': 'mid_space',
+        '保守估值': 'cons_valuation',
+        '保守空间': 'cons_space'
+    }
+    # 反向映射（英文 -> 中文）
+    column_mapping_en_to_cn = {v: k for k, v in column_mapping_cn_to_en.items()}
+
+    # 排序参数转换
+    sort_by_en = column_mapping_cn_to_en.get(sort_by, 'mid_space')  # 默认按中性空间
 
     records = []
 
@@ -73,16 +94,18 @@ def export_dcf_to_excel(
             mid_space = (mid - current_price) / current_price
             cons_space = (cons - current_price) / current_price
 
+            # 使用英文键构建记录
             records.append({
-                '名称': name,
-                '代码': symbol,
-                '现价': current_price,
-                '乐观估值': opt,
-                '乐观空间': opt_space,
-                '中性估值': mid,
-                '中性空间': mid_space,
-                '保守估值': cons,
-                '保守空间': cons_space
+                'name': name,
+                'symbol': symbol,
+                'current_price': round(current_price, 2),
+                'opt_valuation': opt,
+                'opt_space': round(opt_space, 2),
+                'mid_valuation': mid,
+                'mid_space': round(mid_space, 2),
+                'cons_valuation': cons,
+                'cons_space': round(cons_space, 2),
+                'update_time': get_now()
             })
 
             print(f"处理数据，{symbol}, {name}")
@@ -95,18 +118,27 @@ def export_dcf_to_excel(
         print("没有有效的记录，无法生成Excel文件")
         return
 
+    # ---- 写入Redis（英文field） ----
+    redis_obj.set('dcf_valuation_report', json.dumps(records, ensure_ascii=False))
+
+    # ---- 生成DataFrame并重命名为中文列名 ----
     df = pd.DataFrame(records)
 
-    if sort_by in df.columns:
-        df = df.sort_values(by=sort_by, ascending=ascending)
+    # 排序（使用英文列名）
+    if sort_by_en in df.columns:
+        df = df.sort_values(by=sort_by_en, ascending=ascending)
     else:
-        print(f"[警告] 排序列 '{sort_by}' 不存在，将按原始顺序输出")
+        print(f"[警告] 排序列 '{sort_by_en}' 不存在，将按原始顺序输出")
 
+    # 将列名替换为中文
+    df = df.rename(columns=column_mapping_en_to_cn)
+
+    # ---- 导出Excel（中文表头） ----
     with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='DCF估值报告')
         worksheet = writer.sheets['DCF估值报告']
 
-        # 1. 设置百分比列的单元格格式
+        # 1. 设置百分比列的单元格格式（注意列名已变为中文）
         percent_columns = ['乐观空间', '中性空间', '保守空间']
         for idx, col_name in enumerate(df.columns, start=1):
             if col_name in percent_columns:
@@ -115,7 +147,7 @@ def export_dcf_to_excel(
                     cell.number_format = '0.00%'
 
         # 2. 设置所有单元格左对齐、垂直居中
-        for row in range(1, worksheet.max_row + 1):           # 包含表头
+        for row in range(1, worksheet.max_row + 1):
             for col in range(1, worksheet.max_column + 1):
                 cell = worksheet.cell(row=row, column=col)
                 cell.alignment = Alignment(horizontal='left', vertical='center')

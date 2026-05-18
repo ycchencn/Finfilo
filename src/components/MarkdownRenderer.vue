@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue';
-import { marked } from 'marked';
+import {ref, watch} from 'vue';
+import {marked} from 'marked';
 import markedKatex from 'marked-katex-extension';
 // 确保已在 main.js 或此处引入了 katex 的 CSS: import 'katex/dist/katex.min.css';
 
@@ -45,7 +45,7 @@ export default {
 
         watch(() => props.markdown, (newVal) => {
             renderMarkdown(newVal);
-        }, { immediate: true });
+        }, {immediate: true});
 
         return {
             compiledMarkdown
@@ -56,7 +56,6 @@ export default {
 
 <style module>
 .markdownContent {
-    //font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 12px; /* 主字体缩小 */
     line-height: 1.5;
     color: #333;
@@ -154,11 +153,6 @@ export default {
     list-style: circle;
 }
 
-.markdownContent li strong {
-    //display: block;
-    //padding-bottom: 5px;
-}
-
 /* 表格：紧凑型 */
 .markdownContent table {
     width: 100%;
@@ -183,7 +177,6 @@ export default {
     background-color: #fcfcfc;
 }
 
-/* === 关键：KaTeX 公式样式修正 === */
 /* 确保公式在行内垂直对齐 */
 .markdownContent .katex {
     font-size: 1.1em; /* 稍微放大公式以匹配正文 */

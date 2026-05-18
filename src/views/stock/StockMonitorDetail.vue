@@ -145,7 +145,6 @@ onMounted(async () => {
 
     lineOptions.value = getLineChartOptions();
     stock_info.value = await fetchStockInfo(stock_code);
-    ohlc_last.value = stock_info.value.ohlc_last;
     stock_profile.value = await fetchStockProfile(stock_code)
     ohlc_data.value = await fetchStockMarketData(stock_code);
     // 1. 提取close数组，自动过滤空值/0值（停牌无收盘价的场景）
@@ -153,11 +152,16 @@ onMounted(async () => {
       .map(ohlcItem => ohlcItem.close) // 提取每个K线的close字段
       .filter(close => close != null && close > 0); // 过滤空值、停牌0值，避免后续计算报错
     realHistoryData.value = realHistoryData.value.slice(-365/2)
+    // 最新的一个K线
+    ohlc_last.value = ohlc_data.value[ohlc_data.value.length - 1]
+
+    // 初始化图表
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
     chart.setStyles({
         ...chartConfigs, // 如果有其他全局配置，展开它
     });
+
     // 触发一次k线设置
     changeChartType()
     chart.setSymbol({ticker: stock_code});
@@ -499,11 +503,12 @@ onUnmounted(() => {
             <Divider/>
             <StockValuationChart
                v-if="dcf_research_report?.content_json"
-              :data="dcf_research_report?.content_json"
-              title=""
-              ratingText=""
-              ratingColor="#f97316"
-              :historyData="realHistoryData"
+               :data="dcf_research_report?.content_json"
+               :currentPrice="ohlc_last['close']"
+               title=""
+               ratingText=""
+               ratingColor="#f97316"
+               :historyData="realHistoryData"
             />
         </div>
 

@@ -82,7 +82,6 @@ const formatCurrency = (value) => {
 
 .range-fill {
     height: 100%;
-    //background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
     border-radius: 4px;
     position: relative;
     transition: width 0.5s ease-out; /* 添加动画效果 */

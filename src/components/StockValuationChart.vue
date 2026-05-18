@@ -129,7 +129,7 @@ const props = defineProps({
         type: Object,
         required: true,
         validator: (val) => {
-            return val?.当前股价 && val?.估值判断 && val?.每股内在价值
+            return val?.估值判断 && val?.每股内在价值
         }
     },
     /** 组件标题 */
@@ -146,6 +146,11 @@ const props = defineProps({
     ratingColor: {
         type: String,
         default: '#f43f5e'
+    },
+    /** 当前股价 */
+    currentPrice: {
+        type: Number,
+        default: 0
     },
     /** 价格区间最小值，用于坐标映射 */
     minPrice: {
@@ -214,8 +219,10 @@ const props = defineProps({
     optimisticAreaColor: {type: String, default: 'rgba(239, 68, 68, 0.15)'}
 })
 
+console.log(props.data.currentPrice)
+
 // 数据提取&容错
-const currentPrice = computed(() => Number(props.data.当前股价 || 0))
+const currentPrice = computed(() => Number(props.currentPrice || 0))
 const conservativeValue = computed(() => Number(props.data.每股内在价值?.保守情景 || 0))
 const neutralValue = computed(() => Number(props.data.每股内在价值?.中性情景 || 0))
 const optimisticValue = computed(() => Number(props.data.每股内在价值?.乐观情景 || 0))

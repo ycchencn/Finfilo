@@ -49,15 +49,6 @@ onBeforeMount(() => {
     initFilters1();
 });
 
-// 在 <script setup> 内部添加：
-function getFearGreedClass(greedValue) {
-    if (greedValue >= 60) return 'fg-extreme-greed';
-    if (greedValue >= 55) return 'fg-greed';
-    if (greedValue >= 35) return 'fg-neutral';
-    if (greedValue >= 20) return 'fg-fear';
-    return 'fg-extreme-fear';
-}
-
 /**
  * 添加股票到监控列表
  * @param {string} stockCode - 股票代码（如 '600519', 'AAPL', '00700.HK' 等）
@@ -129,23 +120,9 @@ const PHASE_CONFIG = {
     6: { label: '出货阶段', type: 'distribute', severity: 'danger' }
 };
 
-// 将对象转换为 [{ label: '吸筹阶段', value: '1' }, ...] 格式
-const phaseFilterOptions = Object.entries(PHASE_CONFIG)
-    .filter(([key, config]) => key !== '0') // 过滤掉 key 为 '0' 的项
-    .map(([key, config]) => ({
-    label: config.label,
-    value: key // 使用字符串作为 value，兼容性更好
-}));
-
 const stockIntervalOptions = [
     { label: '每天', value: 1 },
     { label: '每3天', value: 3 },
-];
-
-const marketFilterOptions = [
-    { label: 'A股', value: 'cn' },
-    { label: '美股', value: 'us' },
-    { label: '港股', value: 'hk' },
 ];
 
 // 2. 修改 initFilters1 函数，添加 main_force_behavior_phase 的配置

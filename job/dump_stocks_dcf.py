@@ -163,4 +163,5 @@ def export_dcf_to_excel(
 
 
 if __name__ == '__main__':
-    export_dcf_to_excel('dcf_valuation_report.xlsx', sort_by='中性空间', ascending=False)
+
+    export_dcf_to_excel('./dcf_valuation_report.xlsx', sort_by='中性空间', ascending=False)

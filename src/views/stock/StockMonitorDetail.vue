@@ -630,14 +630,6 @@ onUnmounted(() => {
     border-radius: 3px
 }
 
-:deep(.p-datatable-frozen-tbody) {
-    font-weight: bold;
-}
-
-:deep(.p-datatable-scrollable .p-frozen-column) {
-    font-weight: bold;
-}
-
 .news-item {
     font-size: 0.95rem;
     line-height: 1.5;
@@ -678,10 +670,6 @@ onUnmounted(() => {
 
 .info-icon {
     font-size: 12px;
-}
-
-.stock-price {
-    font-family: "Sans Serif Collection";
 }
 
 </style>

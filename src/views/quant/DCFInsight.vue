@@ -56,18 +56,17 @@ function initFilters1() {
     <div class="card">
         <DataTable
             ref="dt1"
-            tableStyle="font-size:12px"
             :value="stock_list"
             :paginator="true"
             :rows="50"
             dataKey="symbol"
             :rowHover="true"
-            :size="'large'"
             filterDisplay="menu"
             :loading="loading1"
             :filters="filters1"
             :globalFilterFields="['symbol', 'name', 'concepts']"
             :showGridlines="false"
+            size="medium"
             sortField="opt_space"
             sortOrder="-1"
         >
@@ -103,7 +102,11 @@ function initFilters1() {
                             data.symbol
                         }}
                     </router-link>
-                    <br/>{{ data.name }}
+                </template>
+            </Column>
+            <Column field="name" filterField="name" header="名称">
+                <template #body="{ data }">
+                    {{ data.name }}
                 </template>
             </Column>
             <Column field="current_price" filterField="current_price" header="最新" sortable>
@@ -118,9 +121,9 @@ function initFilters1() {
             </Column>
             <Column field="opt_space" filterField="opt_space" header="乐观空间" sortable>
                 <template #body="{ data }">
-                    <b :style="{ color: data.opt_space > 0 ? 'red' : 'green' }">
+                    <span :style="{ color: data.opt_space > 0 ? 'red' : 'green' }">
                         {{ data.opt_space != null ? (data.opt_space * 100).toFixed(2) : '--' }}%
-                    </b>
+                    </span>
                 </template>
             </Column>
             <Column field="mid_valuation" filterField="mid_valuation" header="中性估值" sortable>
@@ -130,9 +133,9 @@ function initFilters1() {
             </Column>
             <Column field="mid_space" filterField="mid_space" header="中性空间" sortable>
                 <template #body="{ data }">
-                    <b :style="{ color: data.mid_space > 0 ? 'red' : 'green' }">
+                    <span :style="{ color: data.mid_space > 0 ? 'red' : 'green' }">
                         {{ data.mid_space != null ? (data.mid_space * 100).toFixed(2) + '%' : '--' }}
-                    </b>
+                    </span>
                 </template>
             </Column>
             <Column field="cons_valuation" filterField="cons_valuation" header="保守估值" sortable>
@@ -142,9 +145,14 @@ function initFilters1() {
             </Column>
             <Column field="cons_space" filterField="cons_space" header="保守空间" sortable>
                 <template #body="{ data }">
-                    <b :style="{ color: data.cons_space > 0 ? 'red' : 'green' }">
+                    <span :style="{ color: data.cons_space > 0 ? 'red' : 'green' }">
                         {{ data.cons_space != null ? (data.cons_space * 100).toFixed(2) + '%' : '--' }}
-                    </b>
+                    </span>
+                </template>
+            </Column>
+            <Column field="update_time" filterField="update_time" header="更新时间">
+                <template #body="{ data }">
+                    {{ data.update_time }}
                 </template>
             </Column>
         </DataTable>

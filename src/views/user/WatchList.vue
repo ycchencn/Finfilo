@@ -224,12 +224,12 @@ const conceptsFilterOptions = [
             :rows="25"
             dataKey="symbol"
             :rowHover="true"
-            :size="'large'"
             filterDisplay="menu"
             :loading="loading1"
             :filters="filters1"
             :globalFilterFields="['symbol', 'name', 'concepts']"
             :showGridlines="false"
+            size="medium"
             sortField="chg_pct"
             sortOrder="-1"
         >

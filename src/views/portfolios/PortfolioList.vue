@@ -68,7 +68,6 @@ const formatType = (phaseInt) => {
     <ConfirmDialog></ConfirmDialog>
     <div class="card">
         <DataTable
-            tableStyle="font-size:12px"
             :value="portfolios"
             :rows="25"
             dataKey="id"
@@ -77,7 +76,7 @@ const formatType = (phaseInt) => {
             filterDisplay="menu"
             :loading="loading1"
             :globalFilterFields="['name']"
-            :size="'large'"
+            size="medium"
             showGridlines
         >
             <template #header>
@@ -121,7 +120,7 @@ const formatType = (phaseInt) => {
 
             <Column field="name" filterField="name" header="今日收益">
                 <template #body="{ data }">
-                    <span class="font-mono"
+                    <span
                       :class="{
                       'text-red-600': data.summary.daily_pnl_change > 0,
                       'text-green-600': data.summary.daily_pnl_change < 0,
@@ -136,7 +135,7 @@ const formatType = (phaseInt) => {
             <Column field="calculated_return_rate" header="累计收益">
                 <template #body="{ data }">
                     <!-- 直接使用预处理好的字段，简单且无运行时错误风险 -->
-                    <span class="font-mono" :class="{
+                    <span :class="{
                         'text-red-600': parseFloat(data.calculated_return_rate) > 0,
                         'text-green-600': parseFloat(data.calculated_return_rate) < 0,
                     }">
@@ -146,7 +145,7 @@ const formatType = (phaseInt) => {
                 </template>
             </Column>
 
-            <Column field="name" filterField="name" header="浮动盈亏" class="font-mono">
+            <Column field="name" filterField="name" header="浮动盈亏">
                 <template #body="{ data }">
                     <span
                       :class="{

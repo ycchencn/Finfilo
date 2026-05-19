@@ -1,41 +1,24 @@
 @use 'mixins' as *;
 
 .layout-topbar {
-    position: fixed;
+    //position: fixed;
     height: 4rem;
     z-index: 997;
-    left: 0;
-    top: 0;
-    width: 100%;
+    //left: 0;
+    //top: 0;
+    //width: 100%;
     padding: 0 2rem;
     background-color: var(--surface-card);
     transition: left var(--layout-section-transition-duration);
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    //box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    margin-left: var(--left-menu-grap);
 
     .layout-topbar-logo-container {
         width: 20rem;
         display: flex;
         align-items: center;
-    }
-
-    .layout-topbar-logo {
-        display: inline-flex;
-        align-items: center;
-        font-size: 1.5rem;
-        border-radius: var(--content-border-radius);
-        color: var(--text-color);
-        font-weight: 500;
-        gap: 0.5rem;
-
-        svg {
-            width: 3rem;
-        }
-
-        &:focus-visible {
-            @include focused();
-        }
     }
 
     .layout-topbar-action {
@@ -46,7 +29,6 @@
         border-radius: 50%;
         width: 2.5rem;
         height: 2.5rem;
-        color: var(--text-color);
         transition: background-color var(--element-transition-duration);
         cursor: pointer;
 

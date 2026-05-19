@@ -8,12 +8,9 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 <template>
     <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
-            <button class="layout-menu-button layout-topbar-action" @click="toggleMenu">
-                <i class="pi pi-bars"></i>
-            </button>
-            <router-link to="/market/news_flow" class="layout-topbar-logo">
-                <img src="/images/finfilo-logo.png" style="width: 120px;">
-            </router-link>
+<!--            <button class="layout-menu-button layout-topbar-action" @click="toggleMenu">-->
+<!--                <i class="pi pi-bars"></i>-->
+<!--            </button>-->
         </div>
 
         <div class="layout-topbar-actions">

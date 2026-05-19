@@ -353,8 +353,10 @@ onUnmounted(() => {
         <div class="flex flex-col h-full">
 
             <!-- 滚动区域 -->
-            <div class="flex-1 overflow-y-auto p-3">
+            <div class="flex-1 overflow-y-auto">
                 <!-- Markdown 内容 -->
+                <span class="text-sm">大模型：{{ dcf_research_report.broker_name }}</span>
+                <Divider />
                 <!-- 注意：如果内容很长，确保 MarkdownRenderer 内部没有设置固定高度 -->
                 <MarkdownRenderer :markdown="dcf_research_report?.content_text || '暂无报告内容'"/>
                 <!-- 底部占位符，防止内容被底部按钮栏遮挡 (如果按钮栏是 absolute/fixed) -->

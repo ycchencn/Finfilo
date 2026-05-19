@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import {ref} from 'vue';
 
 import AppMenuItem from './AppMenuItem.vue';
 
@@ -74,6 +74,12 @@ const model = ref([
 </script>
 
 <template>
+    <div class="text-center mt-2">
+        <router-link to="/market/news_flow" class="layout-topbar-logo">
+            <img src="/images/finfilo-logo.png" style="width: 120px;">
+        </router-link>
+    </div>
+    <Divider />
     <ul class="layout-menu">
         <template v-for="(item, i) in model" :key="item">
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>

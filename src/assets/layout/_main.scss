@@ -1,15 +1,19 @@
 .layout-main-container {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 93vh;
     justify-content: space-between;
     //padding: 6rem 2rem 0 2rem;
-    padding: 4rem 0 0 0;
+    //padding: 5px 0 0 0;
     transition: margin-left var(--layout-section-transition-duration);
+    //border-top: 1px solid #eee;
 }
 
 .layout-main {
     flex: 1 1 auto;
     //padding-bottom: 2rem;
     background: var(--surface-card);
+    .card{
+        padding-top: 0;
+    }
 }

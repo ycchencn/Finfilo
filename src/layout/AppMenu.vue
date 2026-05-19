@@ -76,7 +76,7 @@ const model = ref([
 <template>
     <div class="text-center mt-2">
         <router-link to="/market/news_flow" class="layout-topbar-logo">
-            <img src="/images/finfilo-logo.png" style="width: 120px;">
+            <img src="/images/finfilo-logo-220.png" style="width: 180px;">
         </router-link>
     </div>
     <Divider />

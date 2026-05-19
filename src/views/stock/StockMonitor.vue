@@ -241,7 +241,6 @@ const conceptsFilterOptions = [
     <div class="card">
         <DataTable
             ref="dt1"
-            tableStyle="font-size:12px"
             :value="stock_list"
             :paginator="true"
             :rows="25"
@@ -419,7 +418,6 @@ const conceptsFilterOptions = [
 .phase-tag {
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 12px;
   font-weight: bold;
   color: white;
   text-align: center;

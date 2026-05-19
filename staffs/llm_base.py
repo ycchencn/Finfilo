@@ -4,7 +4,6 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-import requests
 from openai import OpenAI
 from config import aliyun_bailian_apikey
 
@@ -14,7 +13,7 @@ client_aliyun = OpenAI(
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
 )
 
-class LLMBaseAliyun:
+class LLMBase:
 
     role_base= (
         '你是一个量化交易金融机构的专家'
@@ -50,13 +49,10 @@ class LLMBaseAliyun:
         :param messages:
         :return:
         """
-        # 1. 获取MCP工具元数据
-        tools = requests.get("http://localhost:8081/mcp/tools").json()['data']
         return self.client.chat.completions.create(
             model=self.model,
             messages=messages,
             response_format={"type": self.response_format},
-            tools=tools,
             extra_body={"enable_search": self.enable_search}
         )
 

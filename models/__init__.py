@@ -352,6 +352,7 @@ class InvestmentPortfolio(Base):
     total_position_pct = Column(DECIMAL(5, 2), nullable=False, comment='总仓位百分比')
     base_currency = Column(String(10), default='USD', comment='基准货币')
     position_plan = Column(JSON, nullable=True)
+    position_plan_reason = Column(Text, nullable=True)
     init_cash = Column(DECIMAL(5, 2), nullable=False)
     current_cash = Column(DECIMAL(5, 2), nullable=False)
     create_time = Column(DateTime, default=datetime.now, comment='创建时间')
@@ -372,6 +373,7 @@ class InvestmentPortfolio(Base):
             'total_position_pct': float(self.total_position_pct) if self.total_position_pct is not None else None,
             'base_currency': self.base_currency,
             'position_plan': self.position_plan,
+            'position_plan_reason': self.position_plan_reason,
             'create_time': self.create_time.strftime('%Y-%m-%d %H:%M:%S') if self.create_time else None,
             'update_time': self.create_time.isoformat() if self.update_time else None,
             'init_cash': self.init_cash,

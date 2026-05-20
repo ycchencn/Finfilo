@@ -233,14 +233,6 @@ function initFilters1() {
                     </div>
                     <!-- 右侧：按钮 + 搜索框 -->
                     <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end md:justify-start">
-                        <Button
-                            type="button"
-                            icon="pi pi-plus"
-                            size="small"
-                            label="添加个股"
-                            @click="modal_visible = true"
-                            class="whitespace-nowrap"
-                        />
                         <IconField>
                             <InputIcon>
                                 <i class="pi pi-search"/>

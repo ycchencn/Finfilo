@@ -9,16 +9,13 @@ import { useNotification } from '@/composables/useNotification';
 import {
     fetchPortfolioInfo,
     setColorOptions,
-    getMarketByCode,
     formatCurrency,
     formatHoldingDuration,
     formatDaysAgo,
     fetchPortfolioSummaryDaily,
     fetchPortfolioTransaction
 } from '@/utils/function.js';
-import ProfitLossCalendar from '@/components/ProfitLossCalendar.vue';
 import axios from 'axios';
-import router from '@/router';
 import Dialog from 'primevue/dialog';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
 const { showSuccess, showError } = useNotification();
@@ -37,7 +34,6 @@ const modal_visible = ref(false);
 const code = ref(``);
 // 盈亏日历数据
 const profitData = ref({});
-// let editorInstance = null;
 
 // 编辑器选项对象
 const editorOptions = {
@@ -373,7 +369,7 @@ async function updatePortfolioPrompt() {
             持仓风格：{{ profInfo?.desc || '加载中...' }}
         </div>
 
-        <div class="text-sm text-gray-500 mb-3">大模型版本：{{ profInfo?.llm_setting.model || '加载中...' }}</div>
+        <div class="text-sm text-gray-500 mb-3" v-if="profInfo?.llm_setting">大模型版本：{{ profInfo?.llm_setting.model || '加载中...' }}</div>
 
         <!-- 组合概览卡片 -->
         <div v-if="profInfo" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">

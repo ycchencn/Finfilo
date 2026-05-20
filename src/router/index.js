@@ -22,6 +22,12 @@ const router = createRouter({
                     meta: { title: '市场温度计', requiresAuth: true }
                 },
                 {
+                    path: '/market/cn_market_overview',
+                    name: 'cn-market-overview',
+                    component: () => import('@/views/market/MarketOverview.vue'),
+                    meta: { title: '沪深大盘', requiresAuth: true }
+                },
+                {
                     path: '/market/sector_sentiment',
                     name: 'market-sector-sentiment',
                     component: () => import('@/views/market/SectorSentiment.vue'),

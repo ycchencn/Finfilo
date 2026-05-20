@@ -8,7 +8,7 @@ import json
 from service import JobService
 from service import StockService, FactorValueService, FactorSelectorService, ResearchReportService
 from service.factor_desc import factor_descriptions
-from llms import get_analysis_model_by_setting
+from llms import get_model_by_setting
 from utils.common import logger, get_today
 from utils.common import get_date_by_n
 from pathlib import Path
@@ -45,7 +45,7 @@ def job_check_signal(_stock_code):
     # 获取分析报告
     dcf_report = ResearchReportService.get_by_code(stock_code=_stock_code, report_type=1)
 
-    staff = get_analysis_model_by_setting(_setting_name='stock_tech_analysis')
+    staff = get_model_by_setting(_setting_name='stock_tech_analysis')
     staff.set_response_json()
 
     trade_date = FactorValueService.get_latest_trading_date()

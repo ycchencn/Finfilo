@@ -359,7 +359,7 @@ class InvestmentPortfolio(Base):
     update_time = Column(DateTime, onupdate=datetime.now, comment='更新时间')
     llm_base = Column(String(50), default='doubao', comment='llm base')
     llm_prompt = Column(Text, default='')
-    llm_id = Column(String(50), default='doubao', comment='llm base')
+    llm_setting = Column(JSON, nullable=True)
     portfolio_assets = relationship("PortfolioAssets", back_populates="portfolio")
     risk_metrics = relationship("RiskMetrics", back_populates="portfolio")
     desc = Column(Text)
@@ -380,7 +380,7 @@ class InvestmentPortfolio(Base):
             'current_cash': self.current_cash,
             'llm_base': self.llm_base,
             'llm_prompt': self.llm_prompt,
-            'llm_id': self.llm_id,
+            'llm_setting': self.llm_setting,
             'desc': self.desc,
             'enable': self.enable,
             'strategy_type': int(self.strategy_type)

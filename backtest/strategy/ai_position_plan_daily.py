@@ -5,7 +5,7 @@
 """
 
 import json
-from llms import get_staff
+from llms import get_staff, get_model_by_setting
 from service import FactorValueService
 from service import InvestmentPortfolioService, PortfolioAssetsService, StockService, IndexDailyDataService, MarketNewsService
 from utils.common import get_today, logger, get_date_by_n
@@ -85,12 +85,11 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     # 调仓计划
     position_plan_old = investment_info.get('position_plan')
 
-    # 根据策略获取大模型对象
-    llm_base = investment_info.get('llm_base', 'doubao')
-    staff = get_staff(llm_base=llm_base)
-    if llm_base == 'doubao':
-        staff.set_model(model=doubao_model)
+    # 大模型设置
+    llm_setting = investment_info.get('llm_setting')
 
+    # 根据策略获取大模型对象
+    staff = get_model_by_setting(_setting=llm_setting)
     staff.role_base = prompt_quant_decision
     staff.set_response_json()
 
@@ -202,4 +201,4 @@ if __name__ == '__main__':
 
     # job_position_plan_daily_all(trade_day_override=True)
 
-    job_position_plan_daily(portfolio_id=1, send_feishu=False)
+    job_position_plan_daily(portfolio_id=13, send_feishu=False)

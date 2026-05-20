@@ -5,7 +5,7 @@
 """
 import json
 
-from llms import get_analysis_model_by_setting
+from llms import get_model_by_setting
 from utils.common import logger
 from utils.common import get_today, get_date_by_n
 from service import StockService, FactorValueService, MarketNewsService
@@ -115,7 +115,7 @@ def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notifica
         logger.info(f"下一次分析间隔未到，跳过分析，{_stock_code}")
         return False
 
-    staff = get_analysis_model_by_setting(_setting_name='stock_dcf_analysis')
+    staff = get_model_by_setting(_setting_name='stock_dcf_analysis')
     staff.role_base = '你需要根据客户提供的资料对股票进行DCF估值分析，请使用Markdown输出'
     staff.set_response_text()
 
@@ -217,7 +217,7 @@ def dcf_report_extra(_stock_code, report_content):
     :param report_content:
     :return:
     """
-    staff = get_analysis_model_by_setting(_setting_name='stock_dcf_analysis_extra')
+    staff = get_model_by_setting(_setting_name='stock_dcf_analysis_extra')
     staff.role_base = '你需要从dcf报告提取股价预期，使用JSON输出'
     question = f"""
     请严格输出具体的价格，不要给35-40这样子模棱两可的数据

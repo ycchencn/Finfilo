@@ -25,8 +25,10 @@ function loadStockList(){
             let chg_pct = 0;
             let close = 0;
             if (item.last_tick){
+                // 如果有最新报价就使用最新报价
+                // console.log(item.last_tick);
                 let ohlc = item.last_tick; // 可能为 null 或 undefined
-                chg_pct = (ohlc?.lastPrice - ohlc?.lastClose / ohlc?.lastClose) / 100
+                chg_pct = (item.last_tick.lastPrice - item.last_tick.lastClose) / item.last_tick.lastClose * 100
                 close = ohlc?.lastPrice
             } else {
                 close = item.ohlc_last?.close

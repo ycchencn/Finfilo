@@ -13,7 +13,7 @@ from typing import List, Dict, Any
 import finfilo
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
-from llms import get_analysis_model_by_setting
+from llms import get_model_by_setting
 from service import MarketNewsService
 from service.stock_star_news import StockStarNewsScraper
 from service.wallstreet_fetcher import WallStreetCNFetcher
@@ -37,7 +37,7 @@ if elasticsearch_setting['enable']:
 else:
     es_client = None
 
-analysis_model = get_analysis_model_by_setting('news_analysis')
+analysis_model = get_model_by_setting('news_analysis')
 analysis_model.set_response_json()
 prompt_template = load_prompt_template(template_path=Path(__file__).parent / "prompt_news_analysis.md")
 

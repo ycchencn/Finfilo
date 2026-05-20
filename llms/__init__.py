@@ -15,9 +15,11 @@ from llms.llm_base_deepseek import LLMBaseDeepSeek
 from config import llm_model_setting
 
 
-def get_analysis_model_by_setting(_setting_name='stock_dcf_analysis'):
+def get_model_by_setting(_setting_name='stock_dcf_analysis', _setting=None):
+
     _staff = None
-    _setting = llm_model_setting.get(_setting_name)
+    if _setting is None:
+        _setting = llm_model_setting.get(_setting_name)
 
     if _setting.get('platform') == 'deepseek':
         _staff = LLMBaseDeepSeek()
@@ -30,6 +32,9 @@ def get_analysis_model_by_setting(_setting_name='stock_dcf_analysis'):
 
     if _setting.get('platform') == 'aliyun':
         _staff = LLMBaseAliyun()
+
+    if _setting.get('platform') == 'zhipu':
+        _staff = LLMBaseZhipu()
 
     assert _staff is not None
 

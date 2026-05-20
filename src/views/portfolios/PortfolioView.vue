@@ -372,7 +372,8 @@ async function updatePortfolioPrompt() {
         <div class="text-sm text-gray-500 mb-3">
             持仓风格：{{ profInfo?.desc || '加载中...' }}
         </div>
-<!--        <div class="text-sm text-gray-500 mb-3">智能体：{{ profInfo?.llm_base || '加载中...' }}</div>-->
+
+        <div class="text-sm text-gray-500 mb-3">大模型版本：{{ profInfo?.llm_setting.model || '加载中...' }}</div>
 
         <!-- 组合概览卡片 -->
         <div v-if="profInfo" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -407,7 +408,7 @@ async function updatePortfolioPrompt() {
             <Card>
                 <template #title>浮动盈亏</template>
                 <template #content>
-                    <div class="font-mono"
+                    <div
                         :class="[
               'text-xl font-semibold',
               profInfo.summary?.total_unrealized_pnl < 0
@@ -573,12 +574,13 @@ async function updatePortfolioPrompt() {
             <h2 class="text-xl font-semibold mb-4">持仓明细</h2>
             <p class="mb-4 text-gray-500 text-sm">每个交易日盘后更新数据，最新数据日期：{{ formatDaysAgo(profInfo.assets[0]['last_update']) }}</p>
             <DataTable
-                tableStyle="font-size:12px"
                 :value="profInfo.assets"
                 :rows="20"
                 sortField="positionPct"
                 :rowHover="true"
                 :showGridlines="false"
+                size="medium"
+                style="font-size: 11px"
                 :sortOrder="-1"
             >
                 <Column field="stock_code" header="代码" style="width: 100px">
@@ -593,46 +595,46 @@ async function updatePortfolioPrompt() {
 
                 <Column field="name" header="名称" style="width: 140px">
                     <template #body="slotProps">
-                        <Tag>{{ getMarketByCode(slotProps.data.stock_code) }}</Tag> {{ slotProps.data.name }}
+                        {{ slotProps.data.name }}
                     </template>
                 </Column>
 
                 <Column field="position_size" header="持仓量" style="width: 100px" sortable>
                     <template #body="slotProps">
-                        <span class="font-mono">{{ slotProps.data.position_size?.toLocaleString() || '—' }}</span>
+                        <span>{{ slotProps.data.position_size?.toLocaleString() || '—' }}</span>
                     </template>
                 </Column>
 
                 <!-- ✅ 新增：仓位占比 -->
                 <Column field="positionPct" header="仓位占比" style="width: 100px" sortable>
                     <template #body="slotProps">
-                        <span class="font-mono">{{ slotProps.data.positionPct.toFixed(2) }}%</span>
+                        <span>{{ slotProps.data.positionPct.toFixed(2) }}%</span>
                     </template>
                 </Column>
 
                 <!-- ✅ 新增：持仓市值 -->
                 <Column header="持仓市值" style="width: 120px">
                     <template #body="slotProps">
-                        <span class="font-mono">{{ formatCurrency(getMarketValue(slotProps.data)) }}</span>
+                        <span>{{ formatCurrency(getMarketValue(slotProps.data)) }}</span>
                     </template>
                 </Column>
 
                 <Column field="cost_price" header="成本价" style="width: 100px">
                     <template #body="slotProps">
-                        <span class="font-mono">{{ slotProps.data.cost_price?.toFixed(2) || '—' }}</span>
+                        <span>{{ slotProps.data.cost_price?.toFixed(2) || '—' }}</span>
                     </template>
                 </Column>
 
                 <Column field="position_price" header="收盘价" style="width: 100px">
                     <template #body="slotProps">
-                        <span class="font-mono">{{ slotProps.data.position_price?.toFixed(2) || '—' }}</span>
+                        <span>{{ slotProps.data.position_price?.toFixed(2) || '—' }}</span>
                     </template>
                 </Column>
 
                 <Column field="pnl" header="浮动盈亏" style="width: 120px" sortable>
                     <template #body="slotProps">
                   <span
-                      class="font-mono"
+                     
                       :class="{
                       'text-red-500': getUnrealizedPnL(slotProps.data) > 0,
                       'text-green-600': getUnrealizedPnL(slotProps.data) < 0,
@@ -646,7 +648,7 @@ async function updatePortfolioPrompt() {
                 <Column header="盈亏%" style="width: 100px">
                     <template #body="slotProps">
                   <span
-                      class="font-mono"
+                     
                       :class="{
                       'text-red-500': getPnLPct(slotProps.data) > 0,
                       'text-green-600': getPnLPct(slotProps.data) < 0,
@@ -660,7 +662,7 @@ async function updatePortfolioPrompt() {
                 <Column header="最新盈亏" style="width: 100px">
                     <template #body="slotProps">
                       <span
-                          class="font-mono"
+                         
                           :class="{
                           'text-red-500': slotProps.data.dailyChange > 0,
                           'text-green-600': slotProps.data.dailyChange < 0,
@@ -686,11 +688,12 @@ async function updatePortfolioPrompt() {
             <h2 class="text-xl font-semibold mb-4">交易记录</h2>
             <p class="mb-4 text-gray-500 text-sm">每个交易日盘后更新数据，最新数据日期：{{ formatDaysAgo(profInfo.assets[0]['last_update']) }}</p>
             <DataTable
-                tableStyle="font-size:12px"
                 :value="profTransaction"
                 :paginator="true"
                 :rows="15"
                 sortField="positionPct"
+                size="medium"
+                style="font-size: 11px"
                 :rowHover="true"
                 :showGridlines="false"
                 :sortOrder="-1"
@@ -707,7 +710,7 @@ async function updatePortfolioPrompt() {
 
                 <Column field="name" header="名称" style="width: 140px">
                     <template #body="slotProps">
-                        <Tag>{{ getMarketByCode(slotProps.data.code) }}</Tag> {{ slotProps.data.name }}
+                        {{ slotProps.data.name }}
                     </template>
                 </Column>
 
@@ -719,26 +722,26 @@ async function updatePortfolioPrompt() {
 
                 <Column field="name" header="成交价">
                     <template #body="slotProps">
-                        <span class="font-mono">{{ formatCurrency(slotProps.data.price) }}</span>
+                        <span>{{ formatCurrency(slotProps.data.price) }}</span>
                     </template>
                 </Column>
 
                 <Column field="name" header="数量">
                     <template #body="slotProps">
-                        <span class="font-mono">{{ slotProps.data.qty }}</span>
+                        <span>{{ slotProps.data.qty }}</span>
                     </template>
                 </Column>
 
                 <Column field="name" header="金额">
                     <template #body="slotProps">
-                        <span class="font-mono">{{ formatCurrency(slotProps.data.amount) }}</span>
+                        <span>{{ formatCurrency(slotProps.data.amount) }}</span>
                     </template>
                 </Column>
 
                 <Column field="name" header="实现盈亏">
                     <template #body="slotProps">
                         <span
-                            class="font-mono"
+                           
                             :class="{
                               'text-red-500': slotProps.data.realized_pnl > 0,
                               'text-green-600': slotProps.data.realized_pnl < 0,
@@ -771,6 +774,11 @@ async function updatePortfolioPrompt() {
 </template>
 
 <style scoped>
+.p-card{
+    border-radius: 6px;
+    border: 1px solid #eee;
+    box-shadow: none;
+}
 .p-card .p-card-title {
     font-weight: 600;
     color: #1f2937;

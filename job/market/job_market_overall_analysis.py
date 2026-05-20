@@ -4,7 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from llms import get_staff
+from llms import get_model_by_setting
 from pathlib import Path
 from string import Template
 from service import FactorValueService, MarketNewsService, IndexDailyDataService
@@ -19,7 +19,7 @@ prompt_template = Path(CURRENT_DIR / './prompt_market_overall_analysis.md').read
 
 def job_market_overall_analysis(send_feishu=False):
 
-    staff = get_staff(llm_base='qwen')
+    staff = get_model_by_setting(_setting_name='stock_tech_analysis')
     staff.set_response_text()
 
     trade_date = FactorValueService.get_latest_trading_date()

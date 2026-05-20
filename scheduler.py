@@ -14,6 +14,7 @@ from job.job_data_fix import job_update_stock_beta_all
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data_daily
 from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
 from job.job_sync_stock_data import job_sync_data
+from job.job_check_signal import job_check_signal_daily
 
 if __name__ == '__main__':
 
@@ -37,6 +38,9 @@ if __name__ == '__main__':
 
     # 个股因子计算任务
     scheduler.add_job(job_update_stock_factor_daily, 'cron', hour=20, minute=10, timezone=beijing_tz)
+
+    # 个股走势技术分析
+    scheduler.add_job(job_check_signal_daily, 'cron', hour=20, minute=10, timezone=beijing_tz)
 
     # 量化回测任务执行，运算个股beta数据
     scheduler.add_job(job_update_stock_beta_all, 'cron', hour=20, minute=15, timezone=beijing_tz)

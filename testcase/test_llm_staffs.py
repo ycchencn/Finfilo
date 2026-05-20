@@ -5,9 +5,9 @@
 """
 
 import unittest, requests, json
-from staffs.llm_base_doubao import LLMBaseDoubao
-from staffs.llm_base_siliconflow import LLMBaseSiliconflow
-from staffs.llm_base_aliyun import LLMBaseAliyun
+from llms.llm_base_doubao import LLMBaseDoubao
+from llms.llm_base_siliconflow import LLMBaseSiliconflow
+from llms.llm_base_aliyun import LLMBaseAliyun
 from pathlib import Path
 
 # 获取当前 Python 文件所在目录
@@ -23,49 +23,13 @@ class TestLLMStaffs(unittest.TestCase):
 
     def test_qwen_mcp_call(self):
         llm = LLMBaseAliyun()
-        llm.set_response_text()
-        response = llm.create_completion(messages=[
-            {"role": "user", "content": '获取股票A股的股票列表'}
-        ])
-        print(response)
-        # 4. 调用MCP接口
-        try:
-            # 1. 用点属性访问tool_calls，而非字典下标
-            assistant_message = response.choices[0].message
-            if assistant_message.tool_calls:
-                # 2. 遍历所有工具调用（Qwen可能返回多个）
-                for tool_call in assistant_message.tool_calls:
-                    # 3. 用点属性访问function的name和arguments
-                    function_name = tool_call.function.name
-                    # 4. 用json.loads解析arguments字符串（替代不安全的eval）
-                    function_args = json.loads(tool_call.function.arguments)
-                    # 调用MCP接口
-                    mcp_response = requests.post(
-                        "http://localhost:8081/mcp/call",
-                        json={
-                            "function_name": function_name,
-                            "parameters": function_args
-                        },
-                        timeout=10  # 添加超时，避免阻塞
-                    ).json()
-                    # print("MCP返回结果：", mcp_response)
-                    # 5. 将MCP结果返回给大模型生成最终回答
-                    final_response = llm.create_completion(messages=[
-                        {"role": "user", "content": '获取股票A股的股票列表'},
-                        response.choices[0].message,
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "content": str(mcp_response['data'])
-                        }
-                    ])
-                    print(final_response.choices[0].message.content)
+        # 直接调用ask方法，自动完成工具调用+最终回答生成
+        final_answer = llm.ask('获取股票A股的股票列表，返回前50支的代码和名称')
+        print("最终回答：\n", final_answer)
 
-            else:
-                print("模型未触发工具调用，直接回答：", assistant_message.content)
-        except Exception as e:
-            print(f"处理工具调用失败：{str(e)}")
-            raise  # 抛出异常，让测试用例失败以便排查
+        # 验证回答是否包含有效数据（可根据实际业务调整断言）
+        self.assertIn("代码", final_answer)
+        self.assertIn("名称", final_answer)
 
 
     def test_silicon(self):

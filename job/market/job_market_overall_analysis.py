@@ -4,7 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from staffs import get_staff
+from llms import get_staff
 from pathlib import Path
 from string import Template
 from service import FactorValueService, MarketNewsService, IndexDailyDataService

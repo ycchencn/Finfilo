@@ -5,13 +5,13 @@
 """
 
 import random
-from staffs.qianwen_trader import QianWenTrader
-from staffs.llm_base_doubao import LLMBaseDoubao
-from staffs.llm_base_volcengine import LLMBaseVolcEngine
-from staffs.llm_base_zhipu import LLMBaseZhipu
-from staffs.llm_base_siliconflow import LLMBaseSiliconflow
-from staffs.llm_base_aliyun import LLMBaseAliyun
-from staffs.llm_base_deepseek import LLMBaseDeepSeek
+from llms.qianwen_trader import QianWenTrader
+from llms.llm_base_doubao import LLMBaseDoubao
+from llms.llm_base_volcengine import LLMBaseVolcEngine
+from llms.llm_base_zhipu import LLMBaseZhipu
+from llms.llm_base_siliconflow import LLMBaseSiliconflow
+from llms.llm_base_aliyun import LLMBaseAliyun
+from llms.llm_base_deepseek import LLMBaseDeepSeek
 from config import llm_model_setting
 
 

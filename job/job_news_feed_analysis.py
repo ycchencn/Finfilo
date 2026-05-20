@@ -13,12 +13,12 @@ from typing import List, Dict, Any
 import finfilo
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
-from staffs import get_analysis_model_by_setting
+from llms import get_analysis_model_by_setting
 from service import MarketNewsService
 from service.stock_star_news import StockStarNewsScraper
 from service.wallstreet_fetcher import WallStreetCNFetcher
 from utils.common import string_to_md5, logger, timestamp_to_date
-from staffs.prompts import prompt_155th
+from llms.prompts import prompt_155th
 from prompts.prompt_generator import load_prompt_template
 from backtest.text_embedding import get_embedding
 from config import elasticsearch_setting

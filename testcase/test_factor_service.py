@@ -6,7 +6,7 @@
 
 import unittest
 from service import MarketDataService, FactorSelectorService, factor_descriptions, financial_factor_descriptions
-from staffs.quant_agent_coder import QuantAgentCoder
+from llms.quant_agent_coder import QuantAgentCoder
 from datetime import date, datetime
 from job.job_update_factors import update_financial_factor
 from utils.beta_calculate import calculate_beta

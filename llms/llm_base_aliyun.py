@@ -4,11 +4,8 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-import requests
-import json
 from openai import OpenAI
 from config import aliyun_bailian_apikey
-from config import datajiji_host
 from llms.llm_base import LLMBase
 
 client_aliyun = OpenAI(
@@ -26,8 +23,6 @@ class LLMBaseAliyun(LLMBase):
         '请根据工具返回的结果，用自然语言整理成清晰易懂的回答。'
     )
 
-    client = None
-
     model = 'qwen3.6-plus'
 
     enable_search = True
@@ -36,4 +31,4 @@ class LLMBaseAliyun(LLMBase):
 
     def __init__(self, client=client_aliyun):
         self.client = client
-        super().__init__()
+        super().__init__(client)

@@ -8,6 +8,7 @@ import unittest, requests, json
 from llms.llm_base_doubao import LLMBaseDoubao
 from llms.llm_base_siliconflow import LLMBaseSiliconflow
 from llms.llm_base_aliyun import LLMBaseAliyun
+from llms.llm_base_deepseek import LLMBaseDeepSeek
 from pathlib import Path
 
 # 获取当前 Python 文件所在目录
@@ -40,6 +41,19 @@ class TestLLMStaffs(unittest.TestCase):
     def test_doubao(self):
         staff_doubao = LLMBaseDoubao()
         print(staff_doubao.ask(question='今天星期几, 返回JSON'))
+
+    def test_deepseek_mcp(self):
+        llm = LLMBaseDeepSeek()
+        # 直接调用ask方法，自动完成工具调用+最终回答生成
+        final_answer = llm.ask('获取股票A股的股票列表，返回前50支的代码和名称')
+        print("最终回答：\n", final_answer)
+        # 验证回答是否包含有效数据（可根据实际业务调整断言）
+        # self.assertIn("代码", final_answer)
+        # self.assertIn("名称", final_answer)
+
+    def test_deepseek_ask(self):
+        llm = LLMBaseDeepSeek()
+        print(llm.ask(question='今天星期几, 返回JSON'))
 
 if __name__ == '__main__':
     unittest.main()

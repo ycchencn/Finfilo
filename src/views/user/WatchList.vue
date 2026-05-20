@@ -22,16 +22,22 @@ function loadStockList(){
     // 获取个股数据
     axios.get(`/api/v1/watchlist?page_size=50&page=1&market=${filter_market.value}&v=1.1`).then(response => {
         stock_list.value = response.data.map(item => {
-            const ohlc = item.ohlc_last; // 可能为 null 或 undefined
+            let chg_pct = 0;
+            let close = 0;
+            if (item.last_tick){
+                let ohlc = item.last_tick; // 可能为 null 或 undefined
+                chg_pct = (ohlc?.lastPrice - ohlc?.lastClose / ohlc?.lastClose) / 100
+                close = ohlc?.lastPrice
+            } else {
+                close = item.ohlc_last?.close
+                chg_pct = item.ohlc_last?.chg_pct
+            }
             return {
                 ...item,
                 fear_greed: item.greed_data?.fear_greed ?? null,
                 fear_greed_text: fearGreedToText(item.greed_data?.fear_greed ?? null),
-                chg_pct: ohlc?.chg_pct ?? null,
-                close: ohlc?.close ?? null,
-                open: ohlc?.open ?? null,
-                high: ohlc?.high ?? null,
-                low: ohlc?.low ?? null,
+                chg_pct: chg_pct,
+                close: close,
                 market: getMarketByCode(item.symbol) ?? null
             };
         });

@@ -9,6 +9,7 @@ from app import api_prefix, cache
 from service.user_watchlist_service import UserWatchlistService
 from service import StockService, FactorValueService
 from service.stock_fear_greed_service import StockFearGreedService
+from utils.data_loader import datagigi
 from utils.common import logger
 
 # 创建蓝图
@@ -39,6 +40,7 @@ def get_main_force_behavior_phase(code):
 
 
 @watchlist_bp.route(f'{api_prefix}/watchlist', methods=['GET'])
+@cache.cached(timeout=60*15, query_string=True)
 def get_watchlist():
     """
     获取自选股列表
@@ -64,6 +66,7 @@ def get_watchlist():
             _stock['greed_data'], _stock['main_force_behavior_phase'] = get_main_force_behavior_phase(_stock['symbol'])
             _stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_low')
             _stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_high')
+            _stock['last_tick'] = datagigi.get_last_tick(symbol=_stock['symbol'])
             stock_list.append(_stock)
 
         return jsonify(stock_list)

@@ -210,7 +210,6 @@ function initFilters1() {
     <div class="card">
         <DataTable
             ref="dt1"
-            tableStyle="font-size:12px"
             :value="stock_list"
             :paginator="true"
             :rows="25"
@@ -221,6 +220,7 @@ function initFilters1() {
             :filters="filters1"
             :globalFilterFields="['symbol', 'name', 'concepts']"
             :showGridlines="false"
+            style="font-size: 11px"
             size="medium"
             sortField="fear_greed"
             sortOrder="-1"

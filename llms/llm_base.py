@@ -46,21 +46,28 @@ class LLMBase:
     def set_model(self, model):
         self.model = model
 
-    def ask(self, question: str) -> str:
+    def ask(self, question):
         """
-        对外暴露的问答接口：自动处理工具调用并返回最终回答
-        :param question: 用户问题
-        :return: 自然语言回答
+        ask ai
+        :param question:
+        :return:
         """
+
         if not self.client:
             raise ValueError("LLM客户端未初始化，请传入有效的OpenAI实例")
 
-        messages = [
-            {'role': 'system', 'content': self.role_base},
-            {'role': 'user', 'content': question}
-        ]
-        result = self.create_completion_with_tools(messages)
-        return result['final_answer']
+        # 模型列表：https://help.aliyun.com/zh/model-studio/getting-started/models
+        completion = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {'role': 'system', 'content': self.role_base},
+                {'role': 'user', 'content': question}
+            ],
+            response_format={"type": self.response_format},
+            extra_body={"enable_search": self.enable_search}
+        )
+        self._print_token_usage(completion.usage)
+        return completion.choices[0].message.content
 
     def create_completion(self, messages: list) -> object:
         """
@@ -71,15 +78,15 @@ class LLMBase:
         if not self.client:
             raise ValueError("LLM客户端未初始化，请传入有效的OpenAI实例")
 
-        tools = self._get_mcp_tools()
         completion = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
             response_format={"type": self.response_format},
-            tools=tools,
             extra_body={"enable_search": self.enable_search}
         )
+
         self._print_token_usage(completion.usage)
+
         return completion
 
     def set_mcp_url(self, url):

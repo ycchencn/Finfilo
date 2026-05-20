@@ -44,12 +44,11 @@ class TestLLMStaffs(unittest.TestCase):
 
     def test_deepseek_mcp(self):
         llm = LLMBaseDeepSeek()
+        llm.set_response_text()
+        llm.set_model('deepseek-v4-flash')
         # 直接调用ask方法，自动完成工具调用+最终回答生成
-        final_answer = llm.ask('获取股票A股的股票列表，返回前50支的代码和名称')
+        final_answer = llm.ask('获取股票A股的股票列表，返回前10支符合国家155规划的代码和名称')
         print("最终回答：\n", final_answer)
-        # 验证回答是否包含有效数据（可根据实际业务调整断言）
-        # self.assertIn("代码", final_answer)
-        # self.assertIn("名称", final_answer)
 
     def test_deepseek_ask(self):
         llm = LLMBaseDeepSeek()

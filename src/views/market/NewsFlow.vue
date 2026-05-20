@@ -162,11 +162,10 @@ onMounted(async () => {
 <template>
     <div class="flex bg-gray-50 overflow-hidden">
         <!-- 左侧：话题导航面板 -->
-        <div class="w-64 min-w-[16rem] border-r border-gray-200 bg-white flex flex-col shadow-sm z-10">
+        <div class="min-w-56 border-r border-gray-200 bg-white flex flex-col shadow-sm z-10">
             <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
                 <h3 class="font-semibold text-base text-gray-700">话题列表</h3>
-                <Button icon="pi pi-plus" @click="openAddDialog" rounded text severity="primary"
-                        aria-label="Add Topic"/>
+                <Button icon="pi pi-plus" @click="openAddDialog" rounded text severity="primary" aria-label="Add Topic"/>
             </div>
 
             <div class="flex-1 overflow-y-auto p-2 space-y-1">
@@ -210,7 +209,7 @@ onMounted(async () => {
         <div class="flex-1 p-4 overflow-y-auto flex flex-col bg-white">
 
             <DataTable
-                tableStyle="width: 100%; border-collapse: separate; border-spacing: 0;"
+                tableStyle="width: 100%; border-collapse: separate; border-spacing: 0;font-size:11px"
                 :value="news"
                 :paginator="true"
                 :rows="50"

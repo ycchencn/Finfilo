@@ -76,6 +76,7 @@ const formatType = (phaseInt) => {
             filterDisplay="menu"
             :loading="loading1"
             :globalFilterFields="['name']"
+            style="font-size: 11px"
             size="medium"
             showGridlines
         >

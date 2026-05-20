@@ -218,7 +218,6 @@ const conceptsFilterOptions = [
     <div class="card">
         <DataTable
             ref="dt1"
-            tableStyle="font-size:12px"
             :value="stock_list"
             :paginator="false"
             :rows="25"
@@ -230,6 +229,7 @@ const conceptsFilterOptions = [
             :globalFilterFields="['symbol', 'name', 'concepts']"
             :showGridlines="false"
             size="medium"
+            style="font-size: 11px"
             sortField="chg_pct"
             sortOrder="-1"
         >
@@ -257,16 +257,16 @@ const conceptsFilterOptions = [
             </Column>
             <Column field="close" filterField="close" header="最新" sortable>
                 <template #body="{ data }">
-                    <b :style="{ color: data.chg_pct > 0 ? 'red' : 'green' }">
+                    <span :style="{ color: data.chg_pct > 0 ? 'red' : 'green' }">
                         {{ data.close != null ? data.close.toFixed(2) : '--' }}
-                    </b>
+                    </span>
                 </template>
             </Column>
             <Column field="chg_pct" filterField="chg_pct" header="涨跌幅" sortable>
                 <template #body="{ data }">
-                    <b :style="{ color: data.chg_pct > 0 ? 'red' : 'green' }">
+                    <span :style="{ color: data.chg_pct > 0 ? 'red' : 'green' }">
                         {{ data.chg_pct != null ? data.chg_pct.toFixed(2) + '%' : '--' }}
-                    </b>
+                    </span>
                 </template>
             </Column>
             <Column field="main_force_behavior_phase" filterField="main_force_behavior_phase" header="主力行为">

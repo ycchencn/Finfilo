@@ -67,6 +67,7 @@ function initFilters1() {
             :globalFilterFields="['symbol', 'name', 'concepts']"
             :showGridlines="false"
             size="medium"
+            style="font-size: 11px"
             sortField="opt_space"
             sortOrder="-1"
         >

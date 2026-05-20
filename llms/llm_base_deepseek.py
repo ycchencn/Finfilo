@@ -19,7 +19,7 @@ class LLMBaseDeepSeek(LLMBase):
         '请以JSON格式输出'
     )
 
-    model = 'deepseek-v4-pro'
+    model = 'deepseek-v4-flash'
 
     enable_search = True
 

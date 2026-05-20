@@ -51,14 +51,6 @@ const sectors = ref<SectorItem[]>([
     {name: '房地产', changePercent: -2.33, leadingStock: '万科A'}
 ])
 
-const topStocks = ref<StockItem[]>([
-    {name: '中芯国际', code: '688981', price: 58.32, changePercent: 5.68},
-    {name: '宁德时代', code: '300750', price: 213.45, changePercent: 4.21},
-    {name: '贵州茅台', code: '600519', price: 1680.0, changePercent: -2.11},
-    {name: '药明康德', code: '603259', price: 47.56, changePercent: 7.32},
-    {name: '隆基绿能', code: '601012', price: 21.3, changePercent: 3.45}
-])
-
 // ========================
 // 分时图（上证指数）数据
 // ========================
@@ -89,27 +81,6 @@ const minuteChartOptions = ref({
         y: {grid: {color: '#e5e7eb'}}
     }
 })
-
-// ========================
-// 涨跌停家数柱状图数据
-// ========================
-const limitUpDownData = ref({
-    labels: ['12/02', '12/02', '12/02', '12/02', '12/02', '12/02', '12/02', '12/03', '12/04', '12/05', '12/06', '12/09', '12/10'],
-    datasets: [
-        {
-            label: '涨停家数',
-            data: [68, 72, 68, 72, 68, 72, 68, 72, 81, 56, 94, 102, 88],
-            backgroundColor: '#ef4444',
-        },
-        {
-            label: '跌停家数',
-            data: [12, 8, 12, 8, 12, 8, 12, 8, 90, 9, 6, 10, 11],
-            backgroundColor: '#10b981',
-            borderRadius: 4
-        }
-    ]
-})
-
 const limitUpDownOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -389,19 +360,31 @@ const formatSign = (val: number) => val > 0 ? `+${val.toFixed(2)}` : val.toFixed
 .grid-row {
     display: flex;
     gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    align-items: stretch; /* 确保左右卡片等高 */
+    align-items: stretch; /* 保持主轴拉伸 */
 
-    .chart-card {
+    // 统一接管所有图表卡片的尺寸流
+    .chart-card,
+    .distribution-card,
+    .stocks-card,
+    .sector-card-custom {
         flex: 1;
-    }
+        height: 100%; // 关键：允许父级 align-items: stretch 锁定实际高度
 
-    .stocks-card {
-        flex: 1;
-    }
+        // 覆盖 PrimeVue Card 默认盒模型，让内容区参与垂直分配
+        .p-card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; // 防止内容溢出导致卡片撑破
+        }
 
-    .distribution-card {
-        flex: 1;
+        // 图表包装器：占满剩余空间，并提供保底高度防止加载期抖动
+        .chart-wrapper {
+            flex: 1;
+            min-height: 195px;
+            height: 100%;
+            position: relative;
+        }
     }
 }
 

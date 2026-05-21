@@ -71,11 +71,11 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
         return False
 
     # 获取大盘数据
-    market_data = IndexDailyDataService.get_history(
-        symbol="000001",
-        start_date=get_date_by_n(-1 * strategy_setting.get('max_market_limit', 120)),
-        end_date=get_today()
-    )
+    # market_data = IndexDailyDataService.get_history(
+    #     symbol="000001",
+    #     start_date=get_date_by_n(-1 * strategy_setting.get('max_market_limit', 120)),
+    #     end_date=get_today()
+    # )
 
     # 获取持仓信息
     investment_info = InvestmentPortfolioService.get_by_portfolio_id(portfolio_id)
@@ -105,9 +105,9 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     # 近期新闻
     recent_news = MarketNewsService.get_by_time_range(limit=strategy_setting.get('news_limit'))
 
-    market_csv = df_to_compact_csv(market_data, max_rows=strategy_setting.get('max_market_limit', 120))
+    # market_csv = df_to_compact_csv(market_data, max_rows=strategy_setting.get('max_market_limit', 120))
     template = Template(llm_prompt_str)
-    template_sys = load_prompt_template_by_name('prompt_strategy_template')
+    # template_sys = load_prompt_template_by_name('prompt_strategy_template')
     holdings_text = format_holdings_text(holding_assets)
     stock_pool_text = format_stock_pool_text(stock_pool)
 
@@ -126,7 +126,7 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     # 用户预设 prompt
     prompt = template.safe_substitute(
         current_date=get_today(),
-        market_data_csv=market_csv,
+        market_data_csv=None,
         holdings_text=holdings_text,
         stock_pool_text=stock_pool_text,
         available_money=available_money,
@@ -201,4 +201,4 @@ if __name__ == '__main__':
 
     # job_position_plan_daily_all(trade_day_override=True)
 
-    job_position_plan_daily(portfolio_id=13, send_feishu=False)
+    job_position_plan_daily(portfolio_id=6, send_feishu=False)

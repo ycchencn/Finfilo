@@ -146,6 +146,7 @@ onMounted(async () => {
     lineOptions.value = getLineChartOptions();
     stock_info.value = await fetchStockInfo(stock_code);
     stock_profile.value = await fetchStockProfile(stock_code)
+    // 获取日K
     ohlc_data.value = await fetchStockMarketData(stock_code);
     // 1. 提取close数组，自动过滤空值/0值（停牌无收盘价的场景）
     realHistoryData.value = ohlc_data.value

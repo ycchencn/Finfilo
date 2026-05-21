@@ -4,8 +4,8 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
+from datetime import datetime
 from flask import request, jsonify, Blueprint
-from config import cache_setting
 from app import api_prefix, cache
 from service import StockService, FactorValueService
 from service import JobService, ResearchReportService
@@ -15,6 +15,17 @@ from utils.common import get_today, get_date_by_years, validate_stock_code
 
 stock_bp = Blueprint('stock', __name__)
 
+def trading_cache_key(*args, **kwargs):
+    """
+    动态生成缓存键：盘前/交易中正常缓存，盘后(15:00~09:00)强制换Key回源
+    ⚠️ 注意：使用自定义 make_cache_key 后，decorator 中的 query_string=True 将失效
+    """
+    now = datetime.now()
+    # 盘后时段判定
+    is_after_hours = now.hour >= 15 or now.hour < 9
+    # 基于当前请求的完整路径+查询参数生成键（无需依赖内部参数）
+    base = request.full_path or request.path
+    return f"{base}_{'PH' if is_after_hours else 'TRD'}"
 
 def get_main_force_behavior_phase(code):
     greed_data = StockFearGreedService.get_latest_by_index(index_code=code)
@@ -100,7 +111,7 @@ def update_stock(symbol):
 
 
 @stock_bp.route(f'{api_prefix}/stocks_monitored', methods=['GET'])
-@cache.cached(timeout=cache_setting.get('stock_list'), query_string=True)
+@cache.cached(timeout=3600, query_string=True, make_cache_key=trading_cache_key)
 def get_stocks_monitored():
     """
     获取个股监控列表
@@ -126,7 +137,7 @@ def get_stocks_monitored():
 
 
 @stock_bp.route(f'{api_prefix}/stock/greed_data/<string:stock_code>', methods=['GET'])
-@cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
+@cache.cached(timeout=3600, query_string=True, make_cache_key=trading_cache_key)
 def get_stocks_greed_data(stock_code):
     """
     获取个股恐惧贪婪数据
@@ -155,7 +166,7 @@ def get_stock(stock_code):
 
 
 @stock_bp.route('/api/v1/stock_history/<string:stock_code>', methods=['GET'])
-@cache.cached(timeout=cache_setting.get('stock_history'), query_string=True)
+@cache.cached(timeout=3600, query_string=True, make_cache_key=trading_cache_key)
 def get_stock_history(stock_code):
     """
     获取个股历史行情
@@ -208,7 +219,7 @@ def stock_re_analysis_dcf(symbol):
 
 
 @stock_bp.route(f'{api_prefix}/stocks/profile/<string:symbol>', methods=['GET'])
-@cache.cached(timeout=cache_setting.get('stock_list'), query_string=True)
+@cache.cached(timeout=3600, query_string=True, make_cache_key=trading_cache_key)
 def get_stock_profile(symbol):
     """
     获取公司信息

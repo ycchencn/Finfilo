@@ -4,6 +4,15 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
  **/
 
+// 格式化为 %Y%m%d
+const formatDate = (date) => {
+    const year = date.getFullYear();
+    // getMonth() 返回 0-11，需要 +1，并补零
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}${month}${day}`;
+};
+
 export function getLineChartOptions() {
     return {
         responsive: true,
@@ -176,15 +185,6 @@ const getDefaultDateRange = () => {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setFullYear(endDate.getFullYear() - 3);
-
-    // 格式化为 %Y%m%d
-    const formatDate = (date) => {
-        const year = date.getFullYear();
-        // getMonth() 返回 0-11，需要 +1，并补零
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}${month}${day}`;
-    };
 
     return {
         start_date: formatDate(startDate),

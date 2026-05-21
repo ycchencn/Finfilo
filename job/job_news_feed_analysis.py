@@ -92,7 +92,6 @@ def safe_bulk_write(client, actions):
         if errors:
             print(json.dumps(errors[0], ensure_ascii=False, indent=2))
     """
-    ok, errs = [], []
     try:
         success_count, errors = bulk(client, actions, raise_on_error=False, request_timeout=30)
         return success_count, errors
@@ -526,10 +525,4 @@ def job_news_scrape_all() -> None:
 
 if __name__ == '__main__':
 
-    # res = vector_search_optimized(query_text='美国能源信息署', top_k=10)
-    res = search_digest_keyword("美股", top_k=10, sort_field="news_time.keyword", sort_order="desc")
-
-    print(res)
-
-    # 推荐在生产环境使用 schedule 或 Celery/APScheduler 接管
-    # job_news_feed_analysis_wallstreet()
+    pass

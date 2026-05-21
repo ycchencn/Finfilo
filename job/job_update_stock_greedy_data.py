@@ -88,6 +88,8 @@ if __name__ == '__main__':
 
     # job_update_stock_greedy_data_daily(override_all=True)
 
+    # 是否覆盖旧数据
+    override_all = False
     stocks = StockService.search_stocks(securities_type='stock', monitoring=1, per_page=10000)
 
     # 循环对个股进行每日挖掘

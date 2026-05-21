@@ -6,17 +6,30 @@
 
 from datetime import datetime
 from flask import jsonify, Blueprint, request
-from app import api_prefix, cache
+from app import api_prefix, cache, json_resp
 from service import MarketNewsService
 from utils.common import logger
+from utils.data_loader import datagigi
 
 # from job.job_news_feed_analysis import search_digest_keyword
 
 market_bp = Blueprint('market', __name__)
 
 
+@market_bp.route(f'{api_prefix}/market/sectors', methods=['GET'])
+@cache.cached(timeout=3600, query_string=True)
+def get_market_sectors():
+    """
+    获取沪深板块涨跌幅数据
+    :return:
+    """
+    sector_type = request.args.get('sector_type', default='sw1', type=str)
+    market_sector = datagigi.get_market_sector(sector_type=sector_type)
+    return json_resp(market_sector)
+
+
 @market_bp.route(f'{api_prefix}/market/news', methods=['GET'])
-@cache.cached(timeout=60 * 5, query_string=True)
+@cache.cached(timeout=3600, query_string=True)
 def get_news():
     page = request.args.get('page', default=1, type=int)
     page_size = request.args.get('page_size', default=20, type=int)

@@ -156,18 +156,21 @@ class DataGigi:
     def get_last_tick(
             self,
             symbol: str,
+            tick_type: str = 'stock',
             market: str = "cn"
     ) -> pandas.DataFrame:
         """
         实时行情Tick
 
         :param symbol: 股票代码，如 "000001"
+        :param tick_type: 数据类型
         :param market: 市场代码，默认 "cn"（中国）
         :return: API 返回的原始文本（JSON 字符串），失败时返回 None
         """
         url = f"{self.BASE_URL}/{market}/stock/tick"
         params = {
-            "symbol": symbol
+            "symbol": symbol,
+            "tick_type": tick_type
         }
         headers = {
             "Authorization": f"Bearer {self.api_key}",  # 如果你的 API 需要 token 鉴权
@@ -180,6 +183,44 @@ class DataGigi:
         except requests.exceptions.RequestException as e:
             print(f"请求失败: {e}")
             return None
+
+    def get_index_history(
+            self,
+            index_code: str,
+            start_date: str,
+            end_date: str,
+            market: str = "cn"
+    ) -> pandas.DataFrame:
+        """
+        获取指数历史数据
+
+        :param index_code: 股票代码，如 "000001"
+        :param start_date: 开始日期，格式 YYYYMMDD，如 "20260101"
+        :param end_date: 结束日期，格式 YYYYMMDD，如 "20260115"
+        :param market: 市场代码，默认 "cn"（中国）
+        :return: API 返回的原始文本（JSON 字符串），失败时返回 None
+        """
+        url = f"{self.BASE_URL}/{market}/index/history"
+        params = {
+            "start_date": start_date,
+            "end_date": end_date,
+            "index_code": index_code
+        }
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",  # 如果你的 API 需要 token 鉴权
+            # 或者用其他方式，如 "X-API-Key": self.api_key
+        }
+
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=10)
+            response.raise_for_status()  # 抛出 HTTP 错误
+            df = pd.DataFrame(response.json())
+            df['date'] = pd.to_datetime(df['date'])
+            df.set_index("date", inplace=True)
+            return df
+        except requests.exceptions.RequestException as e:
+            print(f"请求失败: {e}")
+            return pd.DataFrame()
 
     def get_history(
             self,

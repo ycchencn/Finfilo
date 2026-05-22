@@ -4,7 +4,7 @@ import {onMounted, onUnmounted, watch} from 'vue';
 import {init, dispose} from 'klinecharts';
 import {ref} from 'vue';
 import {useRoute} from 'vue-router';
-import {chartConfigs} from '@/utils/constants.js';
+import {styles} from '@/utils/constants.js';
 import StockValuationChart from '@/components/StockValuationChart.vue'
 import {
     fetchStockMarketData,
@@ -150,9 +150,9 @@ onMounted(async () => {
     ohlc_data.value = await fetchStockMarketData(stock_code);
     // 1. 提取close数组，自动过滤空值/0值（停牌无收盘价的场景）
     realHistoryData.value = ohlc_data.value
-      .map(ohlcItem => ohlcItem.close) // 提取每个K线的close字段
-      .filter(close => close != null && close > 0); // 过滤空值、停牌0值，避免后续计算报错
-    realHistoryData.value = realHistoryData.value.slice(-365/2)
+        .map(ohlcItem => ohlcItem.close) // 提取每个K线的close字段
+        .filter(close => close != null && close > 0); // 过滤空值、停牌0值，避免后续计算报错
+    realHistoryData.value = realHistoryData.value.slice(-365 / 2)
     // 最新的一个K线
     ohlc_last.value = ohlc_data.value[ohlc_data.value.length - 1]
 
@@ -160,7 +160,7 @@ onMounted(async () => {
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
     chart.setStyles({
-        ...chartConfigs, // 如果有其他全局配置，展开它
+        ...styles, // 如果有其他全局配置，展开它
     });
 
     // 触发一次k线设置
@@ -175,7 +175,8 @@ onMounted(async () => {
 
     // 设置技术指标
     chart.createIndicator(chart_indicator.value, true, {id: 'candle_pane_vol'});
-    chart.createIndicator('EMA', true, {id: 'candle_pane'});
+    // 将指标叠加到蜡烛图窗口
+    chart.createIndicator('MA', {pane: {id: 'candle_pane'}, isStack: true})
 
     // 加载新闻关联数据
     axios.get('/api/v1/market/search_news?c=1&stock_code=' + stock_code).then(response => {
@@ -237,7 +238,7 @@ onMounted(async () => {
 });
 
 const chartFilterOptions = [
-    {label: 'K线', value: 'candle_solid'},
+    {label: 'K线', value: 'candle_up_stroke'},
     {label: '美国线', value: 'ohlc'},
     {label: '面积图', value: 'area'},
 ];
@@ -250,7 +251,18 @@ const chartIndicatorOptions = [
     {label: 'BBI', value: 'BBI'},
     {label: 'BOLL', value: 'BOLL'},
     {label: 'KDJ', value: 'KDJ'},
+    {label: 'MTM', value: 'MTM'},
+    {label: 'DMI', value: 'DMI'},
 ];
+
+const changeChartIndicator = function () {
+    // 技术指标操作
+    chart.removeIndicator('candle_pane_vol')
+    chart.createIndicator(chart_indicator.value, true, {id: 'candle_pane_vol'});
+    // 关键：将当前选择的类型保存到本地存储
+    localStorage.setItem(CHART_INDICATOR_STORAGE_KEY, chart_indicator.value);
+}
+
 
 const changeChartType = function () {
     chart.setStyles({
@@ -260,7 +272,6 @@ const changeChartType = function () {
             type: chart_type.value
         }
     });
-
     // 关键：将当前选择的类型保存到本地存储
     localStorage.setItem(CHART_TYPE_STORAGE_KEY, chart_type.value);
 }
@@ -291,13 +302,6 @@ const toggleLike = function () {
             watched.value = true;
         });
     }
-}
-
-const changeChartIndicator = function () {
-    chart.removeIndicator('candle_pane_vol')
-    chart.createIndicator(chart_indicator.value, true, {id: 'candle_pane_vol'});
-    // 关键：将当前选择的类型保存到本地存储
-    localStorage.setItem(CHART_INDICATOR_STORAGE_KEY, chart_indicator.value);
 }
 
 const reanalysisDcf = function () {
@@ -357,7 +361,7 @@ onUnmounted(() => {
             <div class="flex-1 overflow-y-auto">
                 <!-- Markdown 内容 -->
                 <span class="text-sm">大模型：{{ dcf_research_report.broker_name }}</span>
-                <Divider />
+                <Divider/>
                 <!-- 注意：如果内容很长，确保 MarkdownRenderer 内部没有设置固定高度 -->
                 <MarkdownRenderer :markdown="dcf_research_report?.content_text || '暂无报告内容'"/>
                 <!-- 底部占位符，防止内容被底部按钮栏遮挡 (如果按钮栏是 absolute/fixed) -->
@@ -466,7 +470,9 @@ onUnmounted(() => {
             </div>
 
             <div class="text-sm text-gray-500 mb-2" v-if="stock_info?.market === 'cn'">
-                流通市值：{{ formatMarketCapToBillions(stock_info?.instrument_detail?.FloatVolume * ohlc_last['close']) }}
+                流通市值：{{
+                    formatMarketCapToBillions(stock_info?.instrument_detail?.FloatVolume * ohlc_last['close'])
+                }}
             </div>
 
             <div class="text-sm text-gray-500 mb-2">
@@ -505,13 +511,13 @@ onUnmounted(() => {
             </div>
             <Divider/>
             <StockValuationChart
-               v-if="dcf_research_report?.content_json"
-               :data="dcf_research_report?.content_json"
-               :currentPrice="ohlc_last['close']"
-               title=""
-               ratingText=""
-               ratingColor="#f97316"
-               :historyData="realHistoryData"
+                v-if="dcf_research_report?.content_json"
+                :data="dcf_research_report?.content_json"
+                :currentPrice="ohlc_last['close']"
+                title=""
+                ratingText=""
+                ratingColor="#f97316"
+                :historyData="realHistoryData"
             />
         </div>
 

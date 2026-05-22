@@ -2,12 +2,11 @@
  * @author Yc
  * Chaos isn't a pit. Chaos is a ladder. - Littlefinger
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
-**/
+ **/
 
 export const chartConfigs = {
-    // 网格线
     grid: {
-        show: false,
+        show: true,
         horizontal: {
             show: true,
             size: 1,
@@ -23,47 +22,67 @@ export const chartConfigs = {
             dashedValue: [2, 2]
         }
     },
-    // 蜡烛图
     candle: {
-        // 蜡烛图类型 'candle_solid'|'candle_stroke'|'candle_up_stroke'|'candle_down_stroke'|'ohlc'|'area'
-        type: 'candle_solid',
-        // 蜡烛柱
+        // 'candle_solid' | 'candle_stroke' | 'candle_up_stroke' | 'candle_down_stroke' | 'ohlc' | 'area'
+        type: 'candle_stroke',
         bar: {
-            upColor: '#F92855',  // 红色表示上涨
-            downColor: '#2DC08E', // 绿色表示下跌
-            noChangeColor: '#888888', // 无变化时的颜色
-            upBorderColor: '#F92855', // 红色边框表示上涨
-            downBorderColor: '#2DC08E', // 绿色边框表示下跌
-            noChangeBorderColor: '#888888', // 无变化时的边框颜色
-            upWickColor: '#F92855', // 红色蜡烛线表示上涨
-            downWickColor: '#2DC08E', // 绿色蜡烛线表示下跌
-            noChangeWickColor: '#888888' // 无变化时的蜡烛线颜色
+            // 'current_open' | 'previous_close'
+            compareRule: 'current_open',
+            upColor: '#2DC08E',
+            downColor: '#F92855',
+            noChangeColor: '#888888',
+            upBorderColor: '#2DC08E',
+            downBorderColor: '#F92855',
+            noChangeBorderColor: '#888888',
+            upWickColor: '#2DC08E',
+            downWickColor: '#F92855',
+            noChangeWickColor: '#888888'
+        },
+        area: {
+            lineSize: 2,
+            lineColor: '#1677FF',
+            smooth: false,
+            value: 'close',
+            backgroundColor: [{
+                offset: 0,
+                color: 'rgba(33, 150, 243, 0.01)'
+            }, {
+                offset: 1,
+                color: 'rgba(33, 150, 243, 0.2)'
+            }],
+            point: {
+                show: true,
+                color: 'rgba(33, 150, 243, 0.01)',
+                radius: 4,
+                rippleRadius: 8,
+                animation: true,
+                animationDuration: 1000
+            }
         },
         priceMark: {
             show: true,
-            // 最高价标记
             high: {
                 show: true,
-                color: '#222',
-                textOffset: 5,
+                color: '#D9D9D9',
+                textMargin: 5,
                 textSize: 10,
                 textFamily: 'Helvetica Neue',
                 textWeight: 'normal'
             },
-            // 最低价标记
             low: {
                 show: true,
-                color: '#222',
-                textOffset: 5,
+                color: '#D9D9D9',
+                textMargin: 5,
                 textSize: 10,
                 textFamily: 'Helvetica Neue',
-                textWeight: 'normal'
+                textWeight: 'normal',
             },
-            // 最新价标记
             last: {
                 show: true,
-                upColor: '#F92855',
-                downColor: '#2DC08E',
+                // 'current_open' | 'previous_close'
+                compareRule: 'current_open',
+                upColor: '#2DC08E',
+                downColor: '#F92855',
                 noChangeColor: '#888888',
                 line: {
                     show: true,
@@ -90,10 +109,30 @@ export const chartConfigs = {
                     family: 'Helvetica Neue',
                     weight: 'normal',
                     borderRadius: 2
-                }
+                },
+                // e.g.
+                // [{
+                //   show: true,
+                //   style: 'fill', // 'fill' | 'stroke' | 'stroke_fill'
+                //   position: 'above_price', // 'above_price' | 'below_price'
+                //   updateInterval: 0,
+                //   size: 12,
+                //   paddingLeft: 4,
+                //   paddingTop: 4,
+                //   paddingRight: 4,
+                //   paddingBottom: 4,
+                //   borderStyle: 'solid', // 'solid' | 'dashed'
+                //   borderSize: 0,
+                //   borderColor: 'transparent',
+                //   borderDashedValue: [2, 2],
+                //   color: '#FFFFFF',
+                //   family: 'Helvetica Neue',
+                //   weight: 'normal',
+                //   borderRadius: 2
+                // }]
+                extendTexts: []
             }
         },
-        // 提示
         tooltip: {
             offsetLeft: 4,
             offsetTop: 6,
@@ -103,21 +142,6 @@ export const chartConfigs = {
             showRule: 'always',
             // 'standard' | 'rect'
             showType: 'standard',
-            // 自定义显示，可以是回调方法也可以是数组，当是一个方法时，需要返回一个数组
-            // 数组的子项类型为 { title, value }
-            // title和value可以是字符串或者对象，对象类型为 { text, color }
-            // title 或者 title.text 可以是国际化的 key，
-            // value 或者 value.text 支持字符串模版
-            // 例如：想显示时间，开盘和收盘，配置[{ title: 'time', value: '{time}' }, { title: 'open', value: '{open}' }, { title: 'close', value: '{close}' }]
-            custom: [
-                { title: 'time', value: '{time}' },
-                { title: 'open', value: '{open}' },
-                { title: 'high', value: '{high}' },
-                { title: 'low', value: '{low}' },
-                { title: 'close', value: '{close}' },
-                { title: 'volume', value: '{volume}' }
-            ],
-            defaultValue: 'n/a',
             rect: {
                 // 'fixed' | 'pointer'
                 position: 'fixed',
@@ -134,24 +158,72 @@ export const chartConfigs = {
                 borderColor: '#f2f3f5',
                 color: '#FEFEFE'
             },
-            text: {
-                size: 12,
+            title: {
+                show: true,
+                size: 10,
                 family: 'Helvetica Neue',
                 weight: 'normal',
-                color: '#D9D9D9',
                 marginLeft: 8,
                 marginTop: 4,
                 marginRight: 8,
-                marginBottom: 4
+                marginBottom: 4,
+                template: '{ticker} · {period}'
             },
-            icons: []
+            legend: {
+                size: 10,
+                family: 'Helvetica Neue',
+                weight: 'normal',
+                color: '#76808F',
+                marginLeft: 8,
+                marginTop: 4,
+                marginRight: 8,
+                marginBottom: 4,
+                defaultValue: 'n/a',
+                // e.g.
+                // [{ title: 'time', value: '{time}' }, { title: 'close', value: '{close}' }]
+                // [{ title: { text: 'time', color: '#fff' }, value: { text: '{time}', color: '#fff' } }, { title: 'close', value: '{close}' }]
+                template: [
+                    {title: 'time', value: '{time}'},
+                    {title: 'open', value: '{open}'},
+                    {title: 'high', value: '{high}'},
+                    {title: 'low', value: '{low}'},
+                    {title: 'close', value: '{close}'},
+                    {title: 'volume', value: '{volume}'}
+                ]
+            },
+            // e.g.
+            // [{
+            //    id: 'icon_id',
+            //    position: 'left', // 'left' | 'middle' | 'right'
+            //    marginLeft: 8,
+            //    marginTop: 6,
+            //    marginRight: 0,
+            //    marginBottom: 0,
+            //    paddingLeft: 1,
+            //    paddingTop: 1,
+            //    paddingRight: 1,
+            //    paddingBottom: 1,
+            //    size: 12,
+            //    color: '#76808F',
+            //    activeColor: '#76808F',
+            //    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+            //    activeBackgroundColor: 'rgba(33, 150, 243, 0.4)',
+            //    type: 'path', // 'path', 'icon_font'
+            //    content: {
+            //      style: 'stroke', // 'stroke', 'fill'
+            //      path: 'M6.81029,6.02908L11.7878,1.02746C12.0193,0.79483,12.0193,0.445881,11.7878,0.213247C11.5563,-0.019386,11.209,-0.019386,10.9775,0.213247L6,5.21486L1.02251,0.174475C0.790997,-0.0581583,0.44373,-0.0581583,0.212219,0.174475C-0.0192925,0.407108,-0.0192925,0.756058,0.212219,0.988691L5.18971,6.02908L0.173633,11.0307C-0.0578778,11.2633,-0.0578778,11.6123,0.173633,11.8449C0.289389,11.9612,0.44373,12,0.598071,12C0.752411,12,0.906752,11.9612,1.02251,11.8449L6,6.8433L10.9775,11.8449C11.0932,11.9612,11.2476,12,11.4019,12C11.5563,12,11.7106,11.9612,11.8264,11.8449C12.0579,11.6123,12.0579,11.2633,11.8264,11.0307L6.81029,6.02908Z',
+            //      lineWidth: 1,
+            //    }
+            // }]
+            features: []
         }
     },
-    // 技术指标
     indicator: {
         ohlc: {
-            upColor: 'rgba(249, 40, 85, .7)',
-            downColor: 'rgba(45, 192, 142, .7)',
+            // 'current_open' | 'previous_close'
+            compareRule: 'current_open',
+            upColor: 'rgba(45, 192, 142, .7)',
+            downColor: 'rgba(249, 40, 85, .7)',
             noChangeColor: '#888888'
         },
         bars: [{
@@ -161,8 +233,8 @@ export const chartConfigs = {
             borderStyle: 'solid',
             borderSize: 1,
             borderDashedValue: [2, 2],
-            upColor: 'rgba(249, 40, 85, .7)',
-            downColor: 'rgba(45, 192, 142, .7)',
+            upColor: 'rgba(45, 192, 142, .7)',
+            downColor: 'rgba(249, 40, 85, .7)',
             noChangeColor: '#888888'
         }],
         lines: [
@@ -184,7 +256,7 @@ export const chartConfigs = {
                 smooth: false,
                 size: 1,
                 dashedValue: [2, 2],
-                color: '#2196F3'
+                color: '#1677FF'
             }, {
                 style: 'solid',
                 smooth: false,
@@ -210,7 +282,23 @@ export const chartConfigs = {
             downColor: 'rgba(249, 40, 85, .7)',
             noChangeColor: '#888888'
         }],
-        // 最新值标记
+        texts: [{
+            paddingLeft: 0,
+            paddingTop: 0,
+            paddingRight: 0,
+            paddingBottom: 0,
+            style: 'fill',
+            size: 10,
+            color: '#1677FF',
+            family: 'Helvetica Neue',
+            weight: 'normal',
+            borderStyle: 'solid',
+            borderDashedValue: [2, 2],
+            borderSize: 0,
+            borderColor: 'transparent',
+            borderRadius: 0,
+            backgroundColor: 'transparent'
+        }],
         lastValueMark: {
             show: false,
             text: {
@@ -218,7 +306,7 @@ export const chartConfigs = {
                 // 'fill' | 'stroke' | 'stroke_fill'
                 style: 'fill',
                 color: '#FFFFFF',
-                size: 12,
+                size: 10,
                 family: 'Helvetica Neue',
                 weight: 'normal',
                 // 'solid' | 'dashed'
@@ -232,43 +320,50 @@ export const chartConfigs = {
                 borderRadius: 2
             }
         },
-        // 提示
         tooltip: {
             offsetLeft: 4,
             offsetTop: 6,
             offsetRight: 4,
             offsetBottom: 6,
             // 'always' | 'follow_cross' | 'none'
-            showRule: 'none',
+            showRule: 'always',
             // 'standard' | 'rect'
             showType: 'standard',
-            showName: true,
-            showParams: true,
-            defaultValue: 'n/a',
-            text: {
-                size: 12,
+            title: {
+                show: true,
+                showName: true,
+                showParams: true,
+                size: 10,
                 family: 'Helvetica Neue',
                 weight: 'normal',
-                color: '#D9D9D9',
+                color: '#76808F',
+                marginLeft: 8,
+                marginTop: 4,
+                marginRight: 8,
+                marginBottom: 4
+            },
+            legend: {
+                size: 10,
+                family: 'Helvetica Neue',
+                weight: 'normal',
+                color: '#76808F',
+                marginLeft: 8,
                 marginTop: 4,
                 marginRight: 8,
                 marginBottom: 4,
-                marginLeft: 8
+                defaultValue: 'n/a'
             },
-            icons: []
+            features: []
         }
     },
-    // x轴
     xAxis: {
         show: true,
         size: 'auto',
-        // x轴线
         axisLine: {
             show: true,
             color: '#888888',
             size: 1
         },
-        // x轴分割文字
         tickText: {
             show: true,
             color: '#D9D9D9',
@@ -278,7 +373,6 @@ export const chartConfigs = {
             marginStart: 4,
             marginEnd: 4
         },
-        // x轴分割线
         tickLine: {
             show: true,
             size: 1,
@@ -286,17 +380,14 @@ export const chartConfigs = {
             color: '#888888'
         }
     },
-    // y轴
     yAxis: {
         show: true,
         size: 'auto',
-        // y轴线
         axisLine: {
             show: true,
             color: '#888888',
             size: 1
         },
-        // x轴分割文字
         tickText: {
             show: true,
             color: '#D9D9D9',
@@ -306,7 +397,6 @@ export const chartConfigs = {
             marginStart: 4,
             marginEnd: 4
         },
-        // x轴分割线
         tickLine: {
             show: true,
             size: 1,
@@ -314,22 +404,19 @@ export const chartConfigs = {
             color: '#888888'
         }
     },
-    // 图表之间的分割线
     separator: {
         size: 1,
         color: '#888888',
         fill: true,
         activeBackgroundColor: 'rgba(230, 230, 230, .15)'
     },
-    // 十字光标
     crosshair: {
         show: true,
-        // 十字光标水平线及文字
         horizontal: {
             show: true,
             line: {
                 show: true,
-                // 'solid'|'dashed'
+                // 'solid' | 'dashed'
                 style: 'dashed',
                 dashedValue: [4, 2],
                 size: 1,
@@ -340,7 +427,7 @@ export const chartConfigs = {
                 // 'fill' | 'stroke' | 'stroke_fill'
                 style: 'fill',
                 color: '#FFFFFF',
-                size: 12,
+                size: 10,
                 family: 'Helvetica Neue',
                 weight: 'normal',
                 // 'solid' | 'dashed'
@@ -354,9 +441,9 @@ export const chartConfigs = {
                 paddingTop: 4,
                 paddingBottom: 4,
                 backgroundColor: '#686D76'
-            }
+            },
+            features: []
         },
-        // 十字光标垂直线及文字
         vertical: {
             show: true,
             line: {
@@ -389,7 +476,6 @@ export const chartConfigs = {
             }
         }
     },
-    // 覆盖物
     overlay: {
         point: {
             color: '#1677FF',
@@ -423,8 +509,8 @@ export const chartConfigs = {
         polygon: {
             // 'fill' | 'stroke' | 'stroke_fill'
             style: 'fill',
-            color: 'transparent',
-            borderColor: 'transparent',
+            color: '#1677FF',
+            borderColor: '#1677FF',
             borderSize: 1,
             // 'solid' | 'dashed'
             borderStyle: 'solid',
@@ -450,10 +536,10 @@ export const chartConfigs = {
         text: {
             // 'fill' | 'stroke' | 'stroke_fill'
             style: 'fill',
-            color: '#222',
-            size: 0,
+            color: '#FFFFFF',
+            size: 10,
             family: 'Helvetica Neue',
-            weight: 'bold',
+            weight: 'normal',
             // 'solid' | 'dashed'
             borderStyle: 'solid',
             borderDashedValue: [2, 2],
@@ -464,26 +550,7 @@ export const chartConfigs = {
             paddingRight: 0,
             paddingTop: 0,
             paddingBottom: 0,
-            backgroundColor: 'transparent'
-        },
-        rectText: {
-            // 'fill' | 'stroke' | 'stroke_fill'
-            style: 'fill',
-            color: '#FFFFFF',
-            size: 12,
-            family: 'Helvetica Neue',
-            weight: 'normal',
-            // 'solid' | 'dashed'
-            borderStyle: 'solid',
-            borderDashedValue: [2, 2],
-            borderSize: 1,
-            borderRadius: 2,
-            borderColor: '#1677FF',
-            paddingLeft: 4,
-            paddingRight: 4,
-            paddingTop: 4,
-            paddingBottom: 4,
             backgroundColor: '#1677FF'
         }
     }
-};
+}

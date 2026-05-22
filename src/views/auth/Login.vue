@@ -45,7 +45,7 @@ function handleLogin() {
             store.state.token = response.data.token;
             localStorage.setItem('token', response.data.token);
             // 跳转页面
-            router.push({ path: '/market/news_flow' });
+            router.push({ path: '/market/cn_market_overview' });
         }
     }).catch(error => {
         // 可选：更详细的错误提示（如区分网络错误与认证失败）

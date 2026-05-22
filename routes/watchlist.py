@@ -61,6 +61,7 @@ def get_watchlist():
                 'concepts',
                 'ohlc_last'
             ])
+            _stock = datagigi.get_stock_info(symbol=item['stock_code'], market='cn')
             if _stock is None:
                 continue
             _stock['greed_data'], _stock['main_force_behavior_phase'] = get_main_force_behavior_phase(_stock['symbol'])
@@ -112,6 +113,7 @@ def add_stock():
         success = UserWatchlistService.add({
             "stock_code": json_data.get('stock_code'),
             "stock_name": "",
+            "securities_type": "stock",
             "topic": "",
             "desc": "",
             "price": 0,

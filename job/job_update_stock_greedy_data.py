@@ -95,4 +95,4 @@ if __name__ == '__main__':
     # 循环对个股进行每日挖掘
     for stock in stocks:
         stock_code = stock.get('symbol')
-        job_update_stock_greedy_data(index_code=stock_code, override_all=True)
+        job_update_stock_greedy_data(index_code=stock_code, override_all=False)

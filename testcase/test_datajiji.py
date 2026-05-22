@@ -22,6 +22,12 @@ class TestDatajiji(unittest.TestCase):
         # print(response.json())
         self.assertIsNotNone(response.json())
 
+    def test_get_index_history(self):
+        index_code = '000300'
+        res = datagigi.get_index_history(index_code, start_date='20210101', end_date='20210115')
+        # print(res)
+        self.assertIsNotNone(res)
+
 
 if __name__ == '__main__':
     unittest.main()

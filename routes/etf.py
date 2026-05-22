@@ -45,7 +45,7 @@ def get_etfs():
         )
         etf['composition'] = datagigi.get_etf_composition(symbol=etf['symbol'])
         etf['composition'] = etf['composition']['data']
-        etf['ohlc_last'] = datagigi.get_last_tick(symbol=etf['symbol'])
+        etf['ohlc_last'] = datagigi.get_last_tick(symbol=etf['symbol'], tick_type='etf')
         etf['ohlc_last']['chg_pct'] = (etf['ohlc_last']['lastPrice'] - etf['ohlc_last']['lastClose']) / etf['ohlc_last']['lastClose'] * 100
 
     return jsonify(etfs)

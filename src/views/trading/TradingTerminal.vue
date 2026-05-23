@@ -3,6 +3,7 @@ import {ref, onMounted, onUnmounted} from 'vue'
 import WatchlistPanel from '@/components/trading/WatchlistPanel.vue'
 import ChartArea from '@/components/trading/ChartArea.vue'
 import StatusBar from '@/components/trading/StatusBar.vue'
+import router from "@/router";
 
 const selectedSymbol = ref('603296')
 const currentSymbol = ref(selectedSymbol.value)
@@ -33,6 +34,10 @@ function handleKeyDown(e) {
     }
 }
 
+const toggleHome = () => {
+    router.push({path: '/market/cn_market_overview'});
+};
+
 onMounted(() => {
     window.addEventListener('keydown', handleKeyDown)
 })
@@ -58,10 +63,9 @@ onUnmounted(() => {
         </span>
             </div>
             <div class="flex items-center gap-2">
-                <Button size="small" variant="text" icon="pi pi-sync" @click="simulateDataRefresh"
-                        :loading="refreshing"/>
+                <Button size="small" variant="text" icon="pi pi-sync" @click="simulateDataRefresh" :loading="refreshing"/>
                 <Button size="small" variant="text" icon="pi pi-cog"/>
-                <Button size="small" variant="danger" label="一键平仓" class="!px-3 !py-1.5"/>
+                <Button size="small" variant="text" icon="pi pi-home" @click="toggleHome()"/>
             </div>
         </header>
         <!-- 主网格区域：h-full 占满剩余高度 -->

@@ -24,7 +24,6 @@ import {useToast} from 'primevue/usetoast';
 import {useNotification} from '@/composables/useNotification';
 import PriceRange52Week from '@/components/PriceRange52Week.vue';
 import router from '@/router'
-import Card from "primevue/card";
 
 let chart = ref(null)
 const toast = useToast();

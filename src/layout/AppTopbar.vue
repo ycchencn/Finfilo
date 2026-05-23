@@ -1,8 +1,14 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
 import AppConfigurator from './AppConfigurator.vue';
+import router from "@/router";
 
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
+
+const toggleTrading = () => {
+    router.push({path: '/quant/trading_terminal'});
+};
+
 </script>
 
 <template>
@@ -16,18 +22,11 @@ const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
         <div class="layout-topbar-actions">
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-calendar"></i>
-                        <span>Calendar</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-inbox"></i>
-                        <span>Messages</span>
-                    </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
-                    </button>
+<!--                    <button type="button" class="layout-topbar-action" @click="toggleDarkMode()">-->
+<!--                        <i class="pi pi-calendar"></i>-->
+<!--                        <span>Calendar</span>-->
+<!--                    </button>-->
+                    <Chip label="Terminal" icon="pi pi-twitch" @click="toggleTrading()" style="cursor: pointer" />
                 </div>
             </div>
         </div>

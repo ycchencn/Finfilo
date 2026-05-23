@@ -5,5 +5,6 @@
 """
 
 from service.datagigi_api import DataGigi
+from config import datajiji_host
 
-datagigi = DataGigi(api_key='')
+datagigi = DataGigi(api_key='', base_url=datajiji_host)

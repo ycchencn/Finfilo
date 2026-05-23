@@ -4,7 +4,6 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from datetime import datetime
 from flask import request, jsonify, Blueprint
 from app import api_prefix, cache, trading_cache_key
 from service import StockService, FactorValueService
@@ -168,7 +167,9 @@ def get_stock_history(stock_code):
     # 获取查询参数
     start_date = request.args.get('start_date', default=get_date_by_years(years=-3))
     end_date = request.args.get('end_date', default=get_today())
-    securities_data = datagigi.get_history(stock_code, start_date, end_date)
+    period = request.args.get('period', default='d')
+
+    securities_data = datagigi.get_history(stock_code, start_date, end_date, period)
 
     # 将DataFrame转换为字典列表
     securities_data_dict = securities_data.to_dict(orient='records')

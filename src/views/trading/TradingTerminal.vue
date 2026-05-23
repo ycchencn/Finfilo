@@ -5,14 +5,15 @@ import ChartArea from '@/components/trading/ChartArea.vue'
 import StatusBar from '@/components/trading/StatusBar.vue'
 import router from "@/router";
 
-const selectedSymbol = ref(null)
+const STORAGE_KEY_SELECTED_SYMBOL = 'trading_terminal_selected_symbol';
+const selectedSymbol = ref(localStorage.getItem(STORAGE_KEY_SELECTED_SYMBOL) || '');
 const currentSymbol = ref(selectedSymbol.value)
 const refreshing = ref(false)
 
 function handleSymbolChange(symbol) {
-    console.log(symbol)
     selectedSymbol.value = symbol
     currentSymbol.value = symbol
+    localStorage.setItem(STORAGE_KEY_SELECTED_SYMBOL, symbol)
     simulateDataRefresh()
 }
 
@@ -64,14 +65,15 @@ onUnmounted(() => {
         </span>
             </div>
             <div class="flex items-center gap-2">
-                <Button size="small" variant="text" icon="pi pi-sync" @click="simulateDataRefresh" :loading="refreshing"/>
+                <Button size="small" variant="text" icon="pi pi-sync" @click="simulateDataRefresh"
+                        :loading="refreshing"/>
                 <Button size="small" variant="text" icon="pi pi-cog"/>
                 <Button size="small" variant="text" icon="pi pi-home" @click="toggleHome()"/>
             </div>
         </header>
         <!-- 主网格区域：h-full 占满剩余高度 -->
         <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
-            <WatchlistPanel @update:symbol="handleSymbolChange" :selected-symbol="selectedSymbol" />
+            <WatchlistPanel @update:symbol="handleSymbolChange" :selected-symbol="selectedSymbol"/>
             <ChartArea :symbol="selectedSymbol" v-if="selectedSymbol"/>
         </main>
         <!-- 底部状态栏 -->

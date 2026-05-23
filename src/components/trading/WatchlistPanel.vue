@@ -60,9 +60,6 @@ onBeforeMount(() => {
                     }}
                 </button>
             </div>
-            <!-- 搜索框 -->
-            <input type="text" placeholder="输入代码..."
-                   class="w-full bg-gray-800 text-sm px-2 py-1 rounded outline-none focus:border-blue-500 border border-transparent transition-colors"/>
         </div>
 
         <!-- 2. 列表区域：flex-1 撑满剩余空间，overflow-y-auto 允许滚动 -->

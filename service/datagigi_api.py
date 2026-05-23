@@ -9,10 +9,12 @@ import pandas as pd
 
 
 class DataGigi:
+
     BASE_URL = "https://api.finfilo.com"  # 可根据实际部署调整
 
-    def __init__(self, api_key: str) -> None:
+    def __init__(self, api_key: str, base_url: str) -> None:
         self.api_key = api_key
+        self.BASE_URL = base_url if base_url else self.BASE_URL
 
     def get_market_sector(
             self,
@@ -227,6 +229,7 @@ class DataGigi:
             symbol: str,
             start_date: str,
             end_date: str,
+            period: str,
             market: str = "cn"
     ) -> pandas.DataFrame:
         """
@@ -235,6 +238,7 @@ class DataGigi:
         :param symbol: 股票代码，如 "000001"
         :param start_date: 开始日期，格式 YYYYMMDD，如 "20260101"
         :param end_date: 结束日期，格式 YYYYMMDD，如 "20260115"
+        :param period: 周期，默认 "day"
         :param market: 市场代码，默认 "cn"（中国）
         :return: API 返回的原始文本（JSON 字符串），失败时返回 None
         """
@@ -242,6 +246,7 @@ class DataGigi:
         params = {
             "start_date": start_date,
             "end_date": end_date,
+            "period": period,
             "symbol": symbol
         }
         headers = {

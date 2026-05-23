@@ -8,9 +8,9 @@ const props = defineProps<{ symbol: string }>()
 const stock_info = ref({name: '', concepts: ''})
 
 const PERIODS = [
-    {id: 'day', containerId: 'chart-day', type: 'day', span: 1},
-    {id: 'week', containerId: 'chart-week', type: 'week', span: 1},
-    {id: 'month', containerId: 'chart-month', type: 'month', span: 1},
+    {id: 'm', containerId: 'chart-month', type: 'month', span: 1},
+    {id: 'w', containerId: 'chart-week', type: 'week', span: 1},
+    {id: 'd', containerId: 'chart-day', type: 'day', span: 1}
 ] as const
 
 const chartInstances = ref<Record<string, any>>({})
@@ -21,7 +21,7 @@ let isRebuilding = false
 const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
     // ✅ 数据获取恢复：若无缓存则拉取
     if (!dataCache.value[cfg.id]) {
-        dataCache.value[cfg.id] = await fetchStockMarketData(props.symbol)
+        dataCache.value[cfg.id] = await fetchStockMarketData(props.symbol, null, null, cfg.id)
     }
 
     await nextTick()
@@ -29,18 +29,6 @@ const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
     if (!el) return
 
     let chart = chartInstances.value[cfg.id]
-
-    // 如果实例存在且未销毁，且容器匹配，则仅更新参数（避免重复 init）
-    if (chart && !chart.destroyed && chart.getContainerElement() === el) {
-        chart.setSymbol({ticker: props.symbol})
-        chart.setPeriod({span: cfg.span, type: cfg.type})
-        chart.setDataLoader({
-            getBars: async ({callback}) => {
-                callback(dataCache.value[cfg.id] || [])
-            }
-        })
-        return
-    }
 
     // 销毁旧实例（容器不匹配或已标记为无效）
     if (chart) {
@@ -64,6 +52,8 @@ const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
             callback(dataCache.value[cfg.id] || [])
         }
     })
+    chart.createIndicator('MA', {pane: {id: 'candle_pane'}, isStack: true})
+    chart.createIndicator('MACD', true, {id: 'candle_pane_1'});
 }
 
 // 批量重建三张图（仅用于 symbol 切换或初次挂载）
@@ -111,12 +101,13 @@ onUnmounted(() => {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 0;
     background: #1a1a1a;
 }
 
 .chart-obj{
-    height: 30vh;
-    background: #222
+    height: 31.5vh;
+    background: #222;
+    margin: 5px 5px 0;;
 }
 </style>

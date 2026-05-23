@@ -192,18 +192,19 @@ const getDefaultDateRange = () => {
     };
 };
 
-export const fetchStockMarketData = async (stockCode, startDate, endDate) => {
+export const fetchStockMarketData = async (stockCode, startDate, endDate, Period) => {
     try {
         // 1. 获取默认日期或使用传入的参数
         const { start_date: defaultStart, end_date: defaultEnd } = getDefaultDateRange();
         const start_date = startDate || defaultStart;
         const end_date = endDate || defaultEnd;
+        const period = Period || 'day';
         const version = '1.1'
 
         let response = null;
 
         // 2. 构建带查询参数的 URL
-        const params = new URLSearchParams({ start_date, end_date, version });
+        const params = new URLSearchParams({ start_date, end_date, period, version });
 
         response = await fetch(`/api/v1/stock_history/${stockCode}?${params}`);
 

@@ -5,6 +5,7 @@
 """
 
 import ipaddress
+from datetime import datetime
 from flask import Flask, request
 from models import db
 from config import database_conn_str, redis_host, redis_port
@@ -114,6 +115,19 @@ def json_resp(ctx):
         json.dumps(ctx, ensure_ascii=False),
         mimetype='application/json'
     )
+
+
+def trading_cache_key(*args, **kwargs):
+    """
+    动态生成缓存键：盘前/交易中正常缓存，盘后(15:00~09:00)强制换Key回源
+    ⚠️ 注意：使用自定义 make_cache_key 后，decorator 中的 query_string=True 将失效
+    """
+    now = datetime.now()
+    # 盘后时段判定
+    is_after_hours = now.hour >= 15 or now.hour < 9
+    # 基于当前请求的完整路径+查询参数生成键（无需依赖内部参数）
+    base = request.full_path or request.path
+    return f"{base}_{'PH' if is_after_hours else 'TRD'}"
 
 
 cache = Cache(app)

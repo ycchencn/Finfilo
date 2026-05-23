@@ -6,7 +6,7 @@
 
 from datetime import datetime
 from flask import request, jsonify, Blueprint
-from app import api_prefix, cache
+from app import api_prefix, cache, trading_cache_key
 from service import StockService, FactorValueService
 from service import JobService, ResearchReportService
 from service.stock_fear_greed_service import StockFearGreedService
@@ -15,17 +15,6 @@ from utils.common import get_today, get_date_by_years, validate_stock_code
 
 stock_bp = Blueprint('stock', __name__)
 
-def trading_cache_key(*args, **kwargs):
-    """
-    动态生成缓存键：盘前/交易中正常缓存，盘后(15:00~09:00)强制换Key回源
-    ⚠️ 注意：使用自定义 make_cache_key 后，decorator 中的 query_string=True 将失效
-    """
-    now = datetime.now()
-    # 盘后时段判定
-    is_after_hours = now.hour >= 15 or now.hour < 9
-    # 基于当前请求的完整路径+查询参数生成键（无需依赖内部参数）
-    base = request.full_path or request.path
-    return f"{base}_{'PH' if is_after_hours else 'TRD'}"
 
 def get_main_force_behavior_phase(code):
     greed_data = StockFearGreedService.get_latest_by_index(index_code=code)

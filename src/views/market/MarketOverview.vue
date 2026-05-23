@@ -5,6 +5,7 @@ import Card from 'primevue/card'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import axios from "axios";
+import ProgressBar200p from "@/components/ProgressBar200p.vue";
 
 // ========================
 // 类型定义
@@ -38,8 +39,7 @@ const indices = ref<IndexItem[]>([
     {name: '深证成指', code: '399001', price: 10796.58, change: +28.47, changePercent: +0.26},
     {name: '创业板指', code: '399006', price: 2158.63, change: +5.12, changePercent: +0.24},
     {name: '科创50', code: '000688', price: 1089.76, change: +12.34, changePercent: +1.15},
-    {name: '科创200', code: '000692', price: 1487.32, change: +7.89, changePercent: +0.53},
-    {name: '创业板成长', code: '399296', price: 4521.18, change: -23.45, changePercent: -0.52}
+    {name: '科创200', code: '000692', price: 1487.32, change: +7.89, changePercent: +0.53}
 ])
 
 // 板块数据
@@ -270,30 +270,9 @@ const handleRowClick = (rowData) => {
                     @row-click="handleRowClick"
                 >
                     <!-- 板块名称列 -->
-                    <Column
-                        field="sector_name"
-                        header="板块"
-                        :filter="true"
-                        filterPlaceholder="搜索板块"
-                        style="min-width: 80px"
-                    />
-                    <!-- 涨跌幅列（带进度条+箭头） -->
-                    <Column
-                        field="change_pct"
-                        header="涨跌幅"
-                        sortable
-                    >
-                        <template #body="{ data }">
-                            <div class="flex items-center gap-2">
-                                <!-- 涨跌幅数值+箭头 -->
-                                <span class="font-medium" :class="getPctColorClass(data.change_pct)">
-                                    {{ data.change_pct.toFixed(2) }}%
-                                </span>
-                            </div>
-                        </template>
-                    </Column>
+                    <Column field="sector_name" header="板块" :filter="true" filterPlaceholder="搜索板块" />
                     <!-- 领涨股列 -->
-                    <Column field="top_stock" header="领涨股" style="min-width: 140px">
+                    <Column field="top_stock" header="领涨股">
                         <template #body="{ data }">
                             <span class="text-up">
                               {{ data.top_stock || '--' }}
@@ -302,11 +281,7 @@ const handleRowClick = (rowData) => {
                         </template>
                     </Column>
                     <!-- 领跌股列（新增） -->
-                    <Column
-                        field="bottom_stock"
-                        header="领跌股"
-                        style="min-width: 140px"
-                    >
+                    <Column field="bottom_stock" header="领跌股">
                         <template #body="{ data }">
                             <span class="text-down">
                               {{ data.bottom_stock || '--' }}
@@ -314,13 +289,14 @@ const handleRowClick = (rowData) => {
                             </span>
                         </template>
                     </Column>
+                    <!-- 涨跌幅列（带进度条+箭头） -->
+                    <Column field="change_pct" header="涨跌幅" style="min-width: 120px;" sortable>
+                        <template #body="{ data }">
+                            <ProgressBar200p :barHeight="20" :value="data.change_pct.toFixed(2)" :times="10" readonly />
+                        </template>
+                    </Column>
                     <!-- 涨跌家数列（新增） -->
-                    <Column
-                        field="up_count"
-                        header="上涨/平盘/下跌"
-                        sortable
-                        style="min-width: 120px"
-                    >
+                    <Column field="up_count" header="上涨/平盘/下跌" sortable>
                         <template #body="{ data }">
                             <span class="text-up">{{ data.up_count }}</span> /
                             <span class="text-flat">{{ data.flat_count }}</span> /
@@ -344,12 +320,11 @@ const handleRowClick = (rowData) => {
                         header="涨跌比"
                         sortable
                         class="hidden md:table-cell"
-                        style="min-width: 80px"
                     >
                         <template #body="{ data }">
-                                <span :class="getPctColorClass(data.up_down_ratio - 1)">
-                                  {{ data.up_down_ratio?.toFixed(2) || '--' }}
-                                </span>
+                            <span :class="getPctColorClass(data.up_down_ratio - 1)">
+                              {{ data.up_down_ratio?.toFixed(2) || '--' }}
+                            </span>
                         </template>
                     </Column>
                     <!-- 空状态 -->
@@ -384,7 +359,6 @@ const handleRowClick = (rowData) => {
     padding: 1.5rem;
     background: #f5f7fb;
     min-height: 100vh;
-    font-family: 'Microsoft YaHei', sans-serif;
 }
 
 // 头部
@@ -415,6 +389,7 @@ const handleRowClick = (rowData) => {
     margin-bottom: 1.5rem;
 
     .index-card {
+        border-radius: 2px;
         flex: 1 1 calc(16.66% - 1rem); // 6个一行，留出间距
         min-width: 160px;
         transition: all 0.2s ease;
@@ -475,6 +450,7 @@ const handleRowClick = (rowData) => {
     .sector-card-custom {
         flex: 1;
         height: 100%; // 关键：允许父级 align-items: stretch 锁定实际高度
+        border-radius: 5px;
 
         // 覆盖 PrimeVue Card 默认盒模型，让内容区参与垂直分配
         .p-card-body {
@@ -605,10 +581,4 @@ const handleRowClick = (rowData) => {
     color: var(--color-flat);
 }
 
-/* 响应式适配 */
-@media (max-width: 768px) {
-    .hidden.md\\:table-cell {
-        display: none !important;
-    }
-}
 </style>

@@ -649,8 +649,4 @@ onUnmounted(() => {
     font-size: 12px;
 }
 
-.stock-price {
-    font-family: "Sans Serif Collection";
-}
-
 </style>

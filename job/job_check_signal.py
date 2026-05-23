@@ -18,8 +18,6 @@ from utils.data_loader import datagigi
 # 获取当前 Python 文件所在目录
 CURRENT_DIR = Path(__file__).parent
 
-prompt_quant_decision2 = ""
-
 prompt_template = Path(CURRENT_DIR / './prompt_stock_tech_analysis.md').read_text(encoding='utf-8')
 
 # 定义映射字典：将中文阶段映射为数字
@@ -49,7 +47,6 @@ def job_check_signal(_stock_code):
     staff.set_response_json()
 
     trade_date = FactorValueService.get_latest_trading_date()
-    staff.role_base = prompt_quant_decision2
     stock_name = stock_info.get('name')
     start_date = get_date_by_n(-360, _format='%Y%m%d') # 获取120天的行情
     end_date = FactorValueService.get_latest_trading_date().strftime('%Y%m%d')
@@ -107,6 +104,8 @@ def job_check_signal(_stock_code):
         value=main_force_behavior_phase_int
     )
 
+    print(content_json)
+
     # 刷新概念
     StockService.upsert_stock({
         'symbol': _stock_code,
@@ -144,7 +143,8 @@ def job_check_signal_daily(override=False):
 
 if __name__ == '__main__':
 
-    # stock_code = '002015'
-    # job_check_signal(_stock_code=stock_code)
+    stock_code = '002015'
 
-    job_check_signal_daily()
+    job_check_signal(_stock_code=stock_code)
+
+    # job_check_signal_daily()

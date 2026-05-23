@@ -1,6 +1,6 @@
 <template>
-    <article :class="$style.markdownWrapper">
-        <!-- 警告：如果公式渲染失败，可能会显示原始 LaTeX 代码 -->
+    <!-- 通过 inline style 注入 CSS 变量，兼容所有 Vue 3 版本 -->
+    <article :class="$style.markdownWrapper" :style="{ '--md-font-size': fontSize }">
         <div :class="$style.markdownContent" v-html="compiledMarkdown"></div>
     </article>
 </template>
@@ -9,13 +9,12 @@
 import {ref, watch} from 'vue';
 import {marked} from 'marked';
 import markedKatex from 'marked-katex-extension';
-// 确保已在 main.js 或此处引入了 katex 的 CSS: import 'katex/dist/katex.min.css';
 
 // 配置 marked
 marked.use(markedKatex({
-    throwOnError: false, // 公式错误时不抛出异常，而是显示原始文本
-    inlineDelimiters: [['$', '$'], ['\\(', '\\)']], // 行内公式分隔符
-    blockDelimiters: [['$$', '$$'], ['\\[', '\\]']]  // 块级公式分隔符
+    throwOnError: false,
+    inlineDelimiters: [['$', '$'], ['\\(', '\\)']],
+    blockDelimiters: [['$$', '$$'], ['\\[', '\\]']]
 }));
 
 export default {
@@ -24,6 +23,11 @@ export default {
         markdown: {
             type: String,
             required: true
+        },
+        // 🆕 新增：基础字体大小控制
+        fontSize: {
+            type: String,
+            default: '12px'
         }
     },
     setup(props) {
@@ -35,7 +39,6 @@ export default {
                 return;
             }
             try {
-                // marked.parse 会自动处理 LaTeX 并生成 HTML
                 compiledMarkdown.value = marked.parse(text);
             } catch (e) {
                 console.error('Markdown/KaTeX parsing error:', e);
@@ -47,46 +50,71 @@ export default {
             renderMarkdown(newVal);
         }, {immediate: true});
 
-        return {
-            compiledMarkdown
-        };
+        return {compiledMarkdown};
     }
 };
 </script>
 
 <style module>
+/* 变量作用域容器，设置默认回退值 */
+.markdownWrapper {
+    --md-font-size: var(--md-font-size, 12px);
+}
+
 .markdownContent {
-    font-size: 12px; /* 主字体缩小 */
+    font-size: var(--md-font-size);
     line-height: 1.5;
     color: #333;
-    max-width: none; /* 取消居中限制 */
-    margin: 0; /* 确保不居中 */
+    max-width: none;
+    margin: 0;
     padding: 0;
-    text-align: left; /* 明确左对齐 */
+    text-align: left;
 }
 
-/* 标题：进一步缩小并弱化层级差异（适合数据展示） */
-.markdownContent h1,
-.markdownContent h2,
-.markdownContent h3,
-.markdownContent h4,
-.markdownContent h5,
-.markdownContent h6 {
-    font-weight: 600;
+/* 标题：改为相对单位，层级差异更自然 */
+.markdownContent h1 {
+    font-size: 1.75em;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+}
+
+.markdownContent h2 {
+    font-size: 1.5em;
     margin-top: 1em;
     margin-bottom: 0.5em;
+}
+
+.markdownContent h3 {
+    font-size: 1.3em;
+    margin-top: 0.9em;
+    margin-bottom: 0.4em;
+}
+
+.markdownContent h4 {
+    font-size: 1.2em;
+    margin-top: 0.8em;
+    margin-bottom: 0.3em;
+}
+
+.markdownContent h5, .markdownContent h6 {
+    font-size: 1.1em;
+    margin-top: 0.7em;
+    margin-bottom: 0.3em;
+}
+
+.markdownContent h1, .markdownContent h2, .markdownContent h3,
+.markdownContent h4, .markdownContent h5, .markdownContent h6 {
+    font-weight: 600;
     color: #2c3e50;
     line-height: 1.3;
-    border-bottom: none; /* 移除下划线 */
+    border-bottom: none;
     padding: 0;
 }
 
-/* 段落 */
 .markdownContent p {
     margin: 0 0 0.8em 0;
 }
 
-/* 链接 */
 .markdownContent a {
     color: #007bff;
     text-decoration: none;
@@ -99,10 +127,9 @@ export default {
 /* 行内代码 */
 .markdownContent code {
     background-color: #f6f8fa;
-    padding: 0.15em 0.3em;
+    padding: 0.2em 0.4em;
     border-radius: 3px;
-    font-family: 'SFMono-Regular', Consolas, monospace;
-    font-size: 12px;
+    font-size: 0.9em;
     color: #d73a49;
 }
 
@@ -111,10 +138,10 @@ export default {
     background-color: #f6f8fa;
     border: 1px solid #eaecef;
     border-radius: 4px;
-    padding: 10px;
+    padding: 0.8em;
     overflow-x: auto;
     margin: 0.8em 0;
-    font-size: 12px;
+    font-size: 0.9em;
     line-height: 1.4;
 }
 
@@ -128,24 +155,23 @@ export default {
 /* 引用 */
 .markdownContent blockquote {
     margin: 0.8em 0;
-    padding-left: 12px;
+    padding-left: 0.75em;
     border-left: 3px solid #007bff;
     background-color: #fafafa;
     color: #555;
-    font-style: normal; /* 不用斜体，更清晰 */
-    font-size: 12px;
+    font-style: normal;
+    font-size: inherit;
 }
 
 .markdownContent blockquote p {
     margin: 0;
 }
 
-/* 列表：紧凑布局 */
-.markdownContent ul,
-.markdownContent ol {
-    padding-left: 1.5em; /* 适当缩进 */
+/* 列表 */
+.markdownContent ul, .markdownContent ol {
+    padding-left: 1.5em;
     margin: 0 0 0.8em 0;
-    font-size: 12px;
+    font-size: inherit;
 }
 
 .markdownContent li {
@@ -153,17 +179,16 @@ export default {
     list-style: circle;
 }
 
-/* 表格：紧凑型 */
+/* 表格 */
 .markdownContent table {
     width: 100%;
     border-collapse: collapse;
     margin: 0.8em 0;
-    font-size: 12px;
+    font-size: inherit;
 }
 
-.markdownContent th,
-.markdownContent td {
-    padding: 6px 8px;
+.markdownContent th, .markdownContent td {
+    padding: 0.45em 0.6em;
     text-align: left;
     border: 1px solid #eaecef;
 }
@@ -177,13 +202,12 @@ export default {
     background-color: #fcfcfc;
 }
 
-/* 确保公式在行内垂直对齐 */
+/* 公式 */
 .markdownContent .katex {
-    font-size: 1.1em; /* 稍微放大公式以匹配正文 */
+    font-size: 1.1em;
     vertical-align: middle;
 }
 
-/* 块级公式居中且增加间距 */
 .markdownContent .katex-display {
     margin: 1.2em 0;
     overflow-x: auto;
@@ -191,11 +215,9 @@ export default {
     padding: 0.5em 0;
 }
 
-/* 防止公式在小屏幕上溢出 */
 .markdownContent .katex-display > .katex {
     max-width: 100%;
     overflow-x: auto;
     display: block;
 }
-
 </style>

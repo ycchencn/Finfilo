@@ -6,18 +6,16 @@
 
 from datetime import datetime
 from flask import jsonify, Blueprint, request
-from app import api_prefix, cache, json_resp
+from app import api_prefix, cache, json_resp, trading_cache_key
 from service import MarketNewsService
 from utils.common import logger
 from utils.data_loader import datagigi
-
-# from job.job_news_feed_analysis import search_digest_keyword
 
 market_bp = Blueprint('market', __name__)
 
 
 @market_bp.route(f'{api_prefix}/market/sectors', methods=['GET'])
-@cache.cached(timeout=3600, query_string=True)
+@cache.cached(timeout=3600, query_string=True, make_cache_key=trading_cache_key)
 def get_market_sectors():
     """
     获取沪深板块涨跌幅数据

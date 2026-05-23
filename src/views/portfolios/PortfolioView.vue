@@ -771,12 +771,12 @@ async function updatePortfolioPrompt() {
 
 <style scoped>
 .p-card{
-    border-radius: 6px;
-    border: 1px solid #eee;
+    border-radius: 5px;
+    border: 1px solid #dedede;
     box-shadow: none;
-}
-.p-card .p-card-title {
-    font-weight: 600;
-    color: #1f2937;
+    transition: all 0.2s ease;
+    &:hover {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
 }
 </style>

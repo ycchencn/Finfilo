@@ -16,6 +16,12 @@ const router = createRouter({
                     redirect: '/auth/login'
                 },
                 {
+                    path: '/quant/trading_terminal',
+                    name: 'trading-terminal',
+                    component: () => import('@/views/trading/TradingTerminal.vue'),
+                    meta: { title: '量化交易终端', requiresAuth: true, layoutCompact: true } // ⬅️ 关键标记
+                },
+                {
                     path: '/uikit/market-temperature',
                     name: 'market-temperature',
                     component: () => import('@/views/market/MarketTemperature.vue'),

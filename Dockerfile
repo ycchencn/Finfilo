@@ -1,5 +1,5 @@
 FROM finfilo-base
 WORKDIR /app
 # 安装pip包
-COPY ../docker .
+COPY install .
 CMD ["python3","run_app.py"]

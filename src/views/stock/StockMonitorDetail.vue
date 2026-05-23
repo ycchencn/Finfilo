@@ -4,7 +4,7 @@ import {onMounted, onUnmounted, watch} from 'vue';
 import {init, dispose} from 'klinecharts';
 import {ref} from 'vue';
 import {useRoute} from 'vue-router';
-import {styles} from '@/utils/constants.js';
+import {chartConfigs} from '@/utils/constants.js';
 import StockValuationChart from '@/components/StockValuationChart.vue'
 import {
     fetchStockMarketData,
@@ -24,6 +24,7 @@ import {useToast} from 'primevue/usetoast';
 import {useNotification} from '@/composables/useNotification';
 import PriceRange52Week from '@/components/PriceRange52Week.vue';
 import router from '@/router'
+import Card from "primevue/card";
 
 let chart = ref(null)
 const toast = useToast();
@@ -160,7 +161,7 @@ onMounted(async () => {
     chart = init('chart');
     // 3. 使用从本地存储读取的值来初始化图表样式
     chart.setStyles({
-        ...styles, // 如果有其他全局配置，展开它
+        ...chartConfigs, // 如果有其他全局配置，展开它
     });
 
     // 触发一次k线设置
@@ -350,7 +351,7 @@ onUnmounted(() => {
         v-model:visible="dcf_research_report_drawer"
         header="DCF估值模型分析报告"
         position="right"
-        class="!w-full md:!w-200 lg:!w-[60rem]"
+        class="!w-full md:!w-200 lg:!w-[75rem]"
         :footer="false"
         body-class="p-0"
     >
@@ -363,7 +364,11 @@ onUnmounted(() => {
                 <span class="text-sm">大模型：{{ dcf_research_report.broker_name }}</span>
                 <Divider/>
                 <!-- 注意：如果内容很长，确保 MarkdownRenderer 内部没有设置固定高度 -->
-                <MarkdownRenderer :markdown="dcf_research_report?.content_text || '暂无报告内容'"/>
+                <MarkdownRenderer fontSize="11px" :markdown="dcf_research_report?.content_text || '暂无报告内容'"/>
+                <Divider/>
+                <div class="text-center text-sm">
+                    <b>本报告基于公开数据和特定假设模型构建，不构成任何投资建议。股市有风险，投资需谨慎。</b>
+                </div>
                 <!-- 底部占位符，防止内容被底部按钮栏遮挡 (如果按钮栏是 absolute/fixed) -->
                 <div class="h-4"></div>
             </div>
@@ -537,31 +542,21 @@ onUnmounted(() => {
 
     </div>
 
-
-    <div class="pd-2-0 mt-5 flex flex-col md:flex-row gap-6">
-
-        <!-- 左侧 -->
-        <div class="w-full md:w-1/2 flex flex-col min-h-0">
-            <div class="font-semibold text-lg">
-                <i class="pi pi-chart-line text-green-500"></i> 技术面分析
-            </div>
-            <Divider/>
-            <div class="mb-4 markdown-content" v-if="tech_report">
-                <MarkdownRenderer
-                    :markdown="dictToMarkdownRecursive(tech_report.content_json['技术面深度诊断'])">
-                </MarkdownRenderer>
-            </div>
+    <div class="pd-2-0 mt-5" v-if="tech_report">
+        <div class="font-semibold text-lg">
+            <i class="pi pi-sun text-orange-500"></i> 技术面深度诊断
         </div>
-
-        <!-- 右侧 -->
-        <div class="w-full md:w-1/2 flex flex-col min-h-0">
-
+        <Divider/>
+        <div class="overflow-y-auto flex-1" v-if="greed_data">
+            <MarkdownRenderer
+                fontSize="11px"
+                :markdown="dictToMarkdownRecursive(tech_report.content_json['技术面深度诊断'])">
+            </MarkdownRenderer>
         </div>
-
     </div>
 
     <div class="pd-2-0 mt-5">
-        <div class="font-semibold text-xl"><i class="pi pi-wave-pulse text-blue-500"></i> 事件关联</div>
+        <div class="font-semibold text-lg"><i class="pi pi-wave-pulse text-blue-500"></i> 事件关联</div>
         <div class="mb-4 markdown-content">
             <DataTable
                 tableStyle="font-size:12px"

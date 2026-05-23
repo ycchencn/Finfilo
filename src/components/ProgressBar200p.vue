@@ -1,5 +1,5 @@
 <template>
-    <div class="progress-bar" :style="{ width: '100%', height: barHeight + 'px' }">
+    <div class="progress-bar" :style="{ width: '100px', height: barHeight + 'px' }">
         <div class="progress-bar-fill" :style="fillStyle"></div>
         <span class="progress-bar-value">{{ value }} %</span>
     </div>
@@ -81,7 +81,7 @@ export default {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #333;
+    color: #555;
     font-weight: normal;
     z-index: 1; /* 确保文字在进度条之上 */
     font-size: 12px;

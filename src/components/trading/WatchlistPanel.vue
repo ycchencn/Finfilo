@@ -3,6 +3,11 @@ import {onBeforeMount, ref} from 'vue'
 import axios from "axios";
 import {fearGreedToText, getMarketByCode} from "@/utils/function";
 
+// 接收来自父组件的当前选中股票
+const props = defineProps({
+  selectedSymbol: { type: String, default: null }
+})
+
 const activeTab = ref('全部')
 const tabs = ['全部', '持仓', '自选', '监控']
 const stock_list = ref([])
@@ -28,6 +33,12 @@ function loadStockList() {
         console.error('加载股票列表失败:', error);
     });
 }
+
+// 事件传递
+const emit = defineEmits(['update:symbol']);
+const selectStock = (code) => {
+    emit('update:symbol', code);
+};
 
 onBeforeMount(() => {
     // 获取个股数据
@@ -56,7 +67,9 @@ onBeforeMount(() => {
 
         <!-- 2. 列表区域：flex-1 撑满剩余空间，overflow-y-auto 允许滚动 -->
         <div class="flex-1 overflow-y-auto min-w-0 custom-scrollbar">
-            <div v-for="(stock, index) in stock_list" :key="stock.code"
+            <div v-for="(stock, index) in stock_list" :key="stock.symbol"
+                 :class="{ 'bg-gray-800': selectedSymbol === stock.symbol }"
+                  @click="selectStock(stock.symbol)"
                  class="px-4 py-3 hover:bg-gray-800 cursor-pointer border-b border-gray-800/40 group transition-colors">
                 <div class="flex justify-between items-start">
                     <div>

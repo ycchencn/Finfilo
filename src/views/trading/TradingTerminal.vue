@@ -5,11 +5,12 @@ import ChartArea from '@/components/trading/ChartArea.vue'
 import StatusBar from '@/components/trading/StatusBar.vue'
 import router from "@/router";
 
-const selectedSymbol = ref('603296')
+const selectedSymbol = ref(null)
 const currentSymbol = ref(selectedSymbol.value)
 const refreshing = ref(false)
 
 function handleSymbolChange(symbol) {
+    console.log(symbol)
     selectedSymbol.value = symbol
     currentSymbol.value = symbol
     simulateDataRefresh()
@@ -70,7 +71,8 @@ onUnmounted(() => {
         </header>
         <!-- 主网格区域：h-full 占满剩余高度 -->
         <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
-            <WatchlistPanel @update:symbol="handleSymbolChange"/>
+            <WatchlistPanel @update:symbol="handleSymbolChange" :selected-symbol="selectedSymbol" />
+            <ChartArea :symbol="selectedSymbol" v-if="selectedSymbol"/>
         </main>
         <!-- 底部状态栏 -->
         <StatusBar/>

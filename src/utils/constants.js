@@ -13,16 +13,16 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
     const isDark = theme === 'dark';
 
     // ---------- 涨跌颜色映射 ----------
-    const upColor = isGreenUp ? '#2DC08E' : '#F92855';
-    const downColor = isGreenUp ? '#F92855' : '#2DC08E';
-    const upBorderColor = isGreenUp ? '#2DC08E' : '#F92855';
-    const downBorderColor = isGreenUp ? '#F92855' : '#2DC08E';
-    const upWickColor = isGreenUp ? '#2DC08E' : '#F92855';
-    const downWickColor = isGreenUp ? '#F92855' : '#2DC08E';
+    const upColor = isGreenUp ? '#2DC08E' : '#f13e3a';
+    const downColor = isGreenUp ? '#f13e3a' : '#2DC08E';
+    const upBorderColor = isGreenUp ? '#2DC08E' : '#f13e3a';
+    const downBorderColor = isGreenUp ? '#f13e3a' : '#2DC08E';
+    const upWickColor = isGreenUp ? '#2DC08E' : '#f13e3a';
+    const downWickColor = isGreenUp ? '#f13e3a' : '#2DC08E';
     const noChangeColor = '#888888';
 
-    const upColorAlpha = isGreenUp ? 'rgba(45, 192, 142, .7)' : 'rgba(249, 40, 85, .7)';
-    const downColorAlpha = isGreenUp ? 'rgba(249, 40, 85, .7)' : 'rgba(45, 192, 142, .7)';
+    const upColorAlpha = isGreenUp ? '#f13e3a' : '#f13e3a';
+    const downColorAlpha = isGreenUp ? '#f13e3a' : 'rgba(45, 192, 142, .7)';
 
     // ---------- 主题颜色映射 ----------
     const themeColors = {
@@ -60,13 +60,13 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
             bar: {
                 compareRule: 'current_open',
                 upColor: '#2DC08E',
-                downColor: '#F92855',
+                downColor: '#f13e3a',
                 noChangeColor: '#888888',
                 upBorderColor: '#2DC08E',
-                downBorderColor: '#F92855',
+                downBorderColor: '#f13e3a',
                 noChangeBorderColor: '#888888',
                 upWickColor: '#2DC08E',
-                downWickColor: '#F92855',
+                downWickColor: '#f13e3a',
                 noChangeWickColor: '#888888'
             },
             area: {
@@ -109,7 +109,7 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
                     show: true,
                     compareRule: 'current_open',
                     upColor: '#2DC08E',
-                    downColor: '#F92855',
+                    downColor: '#f13e3a',
                     noChangeColor: '#888888',
                     line: {
                         show: true,
@@ -197,7 +197,7 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
             ohlc: {
                 compareRule: 'current_open',
                 upColor: 'rgba(45, 192, 142, .7)',
-                downColor: 'rgba(249, 40, 85, .7)',
+                downColor: '#f13e3a',
                 noChangeColor: '#888888'
             },
             bars: [
@@ -207,7 +207,7 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
                     borderSize: 1,
                     borderDashedValue: [2, 2],
                     upColor: 'rgba(45, 192, 142, .7)',
-                    downColor: 'rgba(249, 40, 85, .7)',
+                    downColor: '#f13e3a',
                     noChangeColor: '#888888'
                 }
             ],
@@ -225,7 +225,7 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
                     borderSize: 1,
                     borderDashedValue: [2, 2],
                     upColor: 'rgba(45, 192, 142, .7)',
-                    downColor: 'rgba(249, 40, 85, .7)',
+                    downColor: '#f13e3a',
                     noChangeColor: '#888888'
                 }
             ],

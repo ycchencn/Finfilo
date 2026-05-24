@@ -2,7 +2,6 @@
 import {computed, onBeforeMount, ref} from 'vue'
 import axios from "axios"
 
-// 接收来自父组件的当前选中股票
 const props = defineProps({
     selectedSymbol: {type: String, default: null},
     realtimeQuotes: {type: Object, default: () => ({})}   // 从父组件传入的实时行情
@@ -12,11 +11,9 @@ const page_size = 150
 const activeTab = ref('全部')
 const tabs = ['全部', '持仓', '自选', '监控']
 const stock_list = ref([])
+const sortOrder = ref('desc')   // 排序状态：'asc' | 'desc' | 'none'
 
-// 排序状态：'none' | 'asc' | 'desc'
-const sortOrder = ref('desc')
-
-function loadStockList() {
+function loadStockList() {s
     axios.get(`/api/v1/stocks_monitored?page_size=${page_size}&page=1&market=cn&v=1.2`)
         .then(response => {
             stock_list.value = response.data.map(item => {
@@ -27,7 +24,8 @@ function loadStockList() {
                     close: ohlc?.close ?? null,
                     open: ohlc?.open ?? null,
                     high: ohlc?.high ?? null,
-                    low: ohlc?.low ?? null
+                    low: ohlc?.low ?? null,
+                    lastClose: ohlc?.pre_close ?? ohlc?.lastClose ?? null,   // 昨日收盘价，用于计算实时涨跌幅
                 }
             })
         })
@@ -36,7 +34,6 @@ function loadStockList() {
         })
 }
 
-// 根据 sortOrder 排序后的列表
 const sortedStocks = computed(() => {
     const merged = stock_list.value.map(stock => {
         const rt = props.realtimeQuotes[stock.symbol]
@@ -62,18 +59,13 @@ const sortedStocks = computed(() => {
     })
 })
 
-// 切换排序模式：none -> desc -> asc -> none ...
+// 点击表头切换排序
 function toggleSort() {
-    if (sortOrder.value === 'none') {
-        sortOrder.value = 'desc'
-    } else if (sortOrder.value === 'desc') {
-        sortOrder.value = 'asc'
-    } else {
-        sortOrder.value = 'none'
-    }
+    if (sortOrder.value === 'none') sortOrder.value = 'desc'
+    else if (sortOrder.value === 'desc') sortOrder.value = 'asc'
+    else sortOrder.value = 'none'
 }
 
-// 事件传递
 const emit = defineEmits(['update:symbol'])
 const selectStock = (code) => {
     emit('update:symbol', code)
@@ -87,58 +79,73 @@ onBeforeMount(() => {
 <template>
     <aside class="w-80 h-full border-r border-gray-800 bg-neutral-900 flex flex-col shrink-0"
            style="height: 96vh; margin-top: 1px;">
-
         <!-- 头部区域 -->
         <div class="px-3 pt-3 pb-2 border-b border-gray-800 shrink-0">
-            <!-- Tab切换 -->
             <div class="flex gap-1 text-xs mb-2 text-gray-400">
                 <button v-for="t in tabs" :key="t" :class="{'!text-white': activeTab === t}" @click="activeTab = t">
                     {{ t }}
                 </button>
             </div>
-
-            <!-- 涨幅排序按钮 -->
-            <button
-                @click="toggleSort"
-                class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer select-none"
-            >
-                <span :class="{ 'text-blue-400': sortOrder !== 'none' }">涨幅</span>
-                <span v-if="sortOrder === 'asc'" class="text-blue-400">↑</span>
-                <span v-else-if="sortOrder === 'desc'" class="text-blue-400">↓</span>
-                <span v-else class="text-gray-600">↕</span>
-            </button>
         </div>
 
-        <!-- 列表区域 -->
-        <div class="flex-1 overflow-y-auto min-w-0 custom-scrollbar">
-            <div
-                v-for="stock in sortedStocks"
-                :key="stock.symbol"
-                :class="{ 'bg-gray-800': selectedSymbol === stock.symbol }"
-                @click="selectStock(stock.symbol)"
-                class="px-4 py-3 hover:bg-gray-800 cursor-pointer border-b border-gray-800/40 group transition-colors"
-            >
-                <div class="flex justify-between items-start">
-                    <div>
-                        <div class="font-semibold text-sm">{{ stock.name }}</div>
-                        <div><span class="text-[10px] text-gray-500">{{ stock.symbol }}</span></div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm font-mono">{{ stock.close?.toFixed(2) ?? '-' }}</div>
-                        <div
-                            :class="(stock.chg_pct ?? 0) >= 0 ? 'text-red-500' : 'text-green-500'"
-                            class="text-xs font-medium mt-0.5"
-                        >
-                            {{ (stock.chg_pct ?? 0) >= 0 ? '+' : '' }}{{ stock.chg_pct?.toFixed(2) ?? '0.00' }}%
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- 表格区域 -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <table class="w-full text-sm">
+                <thead>
+                <tr class="text-gray-400 text-xs border-b border-gray-800 sticky top-0 bg-neutral-900">
+                    <th class="text-left py-2 px-4 font-medium">名称</th>
+                    <th class="text-center py-2 px-2 font-medium"></th>
+                    <th class="text-right py-2 px-4 font-medium">最新价</th>
+                    <th class="text-right py-2 px-4 font-medium cursor-pointer select-none"
+                        @click="toggleSort">
+                        涨跌幅
+                        <span v-if="sortOrder === 'asc'" class="text-blue-400 ml-1">↑</span>
+                        <span v-else-if="sortOrder === 'desc'" class="text-blue-400 ml-1">↓</span>
+                        <span v-else class="text-gray-600 ml-1">↕</span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="stock in sortedStocks"
+                    :key="stock.symbol"
+                    :class="{ 'bg-gray-800': selectedSymbol === stock.symbol }"
+                    @click="selectStock(stock.symbol)"
+                    class="hover:bg-gray-800 cursor-pointer border-b border-gray-800/40 transition-colors">
+                    <td class="py-2 px-4">
+                        <div style="color: #ffc53f">{{ stock.name }}</div>
+                        <div class="text-[10px] text-gray-500">{{ stock.symbol }}</div>
+                    </td>
+                    <td class="py-2 px-2 text-right">
+                      <span :class="(stock.chg_pct ?? 0) >= 0 ? 'text-red-500' : 'text-green-500'">
+                        {{ (stock.chg_pct ?? 0) >= 0 ? '▲' : '▼' }}
+                      </span>
+                    </td>
+                    <td class="py-2 px-4 text-right font-mono text-[10px]" :class="(stock.chg_pct ?? 0) >= 0 ? 'text-red-500' : 'text-green-500'">
+                        {{ stock.close?.toFixed(2) ?? '-' }}
+                    </td>
+                    <td class="py-2 px-4 text-right">
+                      <span class="inline-block px-2 py-0.5 text-white font-medium text-center text-[10px]" style="width: 55px"
+                            :class="(stock.chg_pct ?? 0) >= 0 ? 'bg-red-500' : 'bg-green-500'">
+                        {{ (stock.chg_pct ?? 0) >= 0 ? '+' : '' }}{{ stock.chg_pct?.toFixed(2) ?? '0.00' }}%
+                      </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </aside>
 </template>
 
 <style scoped>
+
+.bg-red-500{
+    background: #ac312e;
+}
+
+.bg-green-500{
+    background: #12783c;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
 }

@@ -13,7 +13,7 @@ const tabs = ['全部', '持仓', '自选', '监控']
 const stock_list = ref([])
 const sortOrder = ref('desc')   // 排序状态：'asc' | 'desc' | 'none'
 
-function loadStockList() {s
+function loadStockList() {
     axios.get(`/api/v1/stocks_monitored?page_size=${page_size}&page=1&market=cn&v=1.2`)
         .then(response => {
             stock_list.value = response.data.map(item => {

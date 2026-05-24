@@ -10,30 +10,60 @@ const props = defineProps({
     realtimeQuotes: {type: Object, default: () => ({})}   // 从父组件传入的实时行情
 })
 
-// 监听实时行情变化
-watch(() => props.realtimeQuotes, (newRt) => {
-    if (newRt) {
+// 获取今日 0 点时间戳（毫秒）
+function getTodayStartTimestamp(): number {
+    const d = new Date()
+    d.setHours(0, 0, 0, 0)
+    return d.getTime()
+}
 
-    }
-})
-
-// 处理实时数据更新（由父组件传入的 realtimeQuote 触发）
-function applyRealtimeUpdate() {
+// 根据实时报价更新或追加日线数据
+function updateDailyDataWithRealtime(symbol: string) {
+    const dailyBars = symbolDataCache[symbol]
+    if (!dailyBars || dailyBars.length === 0) return
     const rt = props.realtimeQuotes
     if (!rt) return
-    // 获取日线缓存
-    const dailyBars = symbolDataCache[props.symbol]
-    if (!dailyBars || dailyBars.length === 0) return
-    // 简单处理：更新最后一条日线的 close、high、low、volume 等
+    const todayStart = getTodayStartTimestamp()
     const lastBar = dailyBars[dailyBars.length - 1]
-    lastBar.close = rt.lastPrice
-    if (rt.high !== undefined) lastBar.high = Math.max(lastBar.high, rt.high)
-    if (rt.low !== undefined) lastBar.low = Math.min(lastBar.low, rt.low)
-    lastBar.volume = rt.volume ?? lastBar.volume
-    lastBar.chg_pct = rt.chg_pct  // 如果服务端提供
-    // 重新聚合（通常只需更新最后一条聚合K线，但为了方便这里全量聚合）
-    // updateAggregatedBars(props.symbol)
-    // 刷新图表
+    const lastDate = new Date(lastBar.timestamp).setHours(0, 0, 0, 0)
+    if (lastDate === todayStart) {
+        // 更新当日 K 线
+        lastBar.close = rt.lastPrice
+        if (rt.high != null) lastBar.high = Math.max(lastBar.high ?? rt.lastPrice, rt.high)
+        if (rt.low != null) lastBar.low = Math.min(lastBar.low ?? rt.lastPrice, rt.low)
+        lastBar.volume = rt.volume ?? lastBar.volume
+        lastBar.chg_pct = rt.chg_pct  // 如果源数据提供了涨跌幅
+    } else if (lastDate < todayStart) {
+        // 没有今日 K 线，新建一根
+        const prevClose = lastBar.close
+        const newBar = {
+            timestamp: todayStart,
+            open: rt.open ?? rt.lastPrice,
+            high: rt.high ?? rt.lastPrice,
+            low: rt.low ?? rt.lastPrice,
+            close: rt.lastPrice,
+            volume: rt.volume ?? 0,
+            chg_pct: prevClose ? Number(((rt.lastPrice - prevClose) / prevClose * 100).toFixed(2)) : 0
+        }
+        dailyBars.push(newBar)
+    }
+}
+
+// 重新聚合周/月数据
+function updateAggregatedBars(symbol: string) {
+    const dailyBars = symbolDataCache[symbol]
+    if (!dailyBars) return
+    PERIODS.forEach(cfg => {
+        if (cfg.type === 'day') {
+            dataCache[cfg.id] = dailyBars
+        } else {
+            dataCache[cfg.id] = aggregateBars(dailyBars, cfg.type as 'week' | 'month')
+        }
+    })
+}
+
+// 刷新所有图表
+function refreshCharts() {
     PERIODS.forEach(cfg => {
         const chart = chartInstances.value[cfg.id]
         if (!chart) return
@@ -42,6 +72,17 @@ function applyRealtimeUpdate() {
         chart.applyNewData([bars[bars.length - 1]], false)
     })
 }
+
+// 实时行情变化时更新图表
+function applyRealtimeUpdate() {
+    updateDailyDataWithRealtime(props.symbol)
+    updateAggregatedBars(props.symbol)
+    refreshCharts()
+}
+
+watch(() => props.realtimeQuotes, (newRt) => {
+    if (newRt) applyRealtimeUpdate()
+})
 
 const PERIODS = [
     {id: 'm', containerId: 'chart-month', type: 'month', span: 1},

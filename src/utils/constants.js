@@ -160,7 +160,7 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
                     color: '#FEFEFE'
                 },
                 title: {
-                    show: true,
+                    show: false,
                     size: 10,
                     family: 'Helvetica Neue',
                     weight: 'normal',

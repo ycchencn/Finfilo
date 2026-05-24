@@ -5,7 +5,6 @@ import {fetchStockMarketData, fetchStockInfo} from '@/utils/function.js'
 import {init} from 'klinecharts'
 
 const props = defineProps<{ symbol: string }>()
-// const stock_info = ref({name: '', concepts: ''})
 
 const PERIODS = [
     {id: 'm', containerId: 'chart-month', type: 'month', span: 1},
@@ -16,8 +15,9 @@ const PERIODS = [
 const symbolDataCache: Record<string, any[]> = {}
 const dataCache: Record<string, any[]> = {}
 const chartInstances = ref<Record<string, any>>({})
-// ✅ 改为模块级 Map（放在 <script setup> 上方）
 let isRebuilding = false
+
+const loading = ref(false) // 加载状态
 
 interface OHLC {
     timestamp: number
@@ -29,38 +29,29 @@ interface OHLC {
     chg_pct?: number
 }
 
-/**
- * 按周/月聚合日线数据（自然周/自然月）
- * @param dailyBars 升序日线数据
- * @param mode 'week' | 'month'
- */
 function aggregateBars(dailyBars: OHLC[], mode: 'week' | 'month'): OHLC[] {
     const result: OHLC[] = []
     let idx = 0
-    let prevClose: number | null = null  // 前一根聚合K线的收盘价
+    let prevClose: number | null = null
 
     while (idx < dailyBars.length) {
         const group: OHLC[] = []
         const date = new Date(dailyBars[idx].timestamp)
 
         if (mode === 'week') {
-            // 确定本周结束时间（下周一的00:00:00）
             const startDate = new Date(dailyBars[idx].timestamp)
             startDate.setHours(0, 0, 0, 0)
             const endOfWeek = new Date(startDate)
             endOfWeek.setDate(startDate.getDate() + (7 - startDate.getDay()))
 
-            // 收集本周内所有日线数据
             while (idx < dailyBars.length && new Date(dailyBars[idx].timestamp) < endOfWeek) {
                 group.push(dailyBars[idx])
                 idx++
             }
             if (group.length === 0) continue
-
         } else if (mode === 'month') {
             const year = date.getFullYear()
             const month = date.getMonth()
-            // 收集同一月份的所有日线数据
             while (idx < dailyBars.length) {
                 const bar = dailyBars[idx]
                 const barDate = new Date(bar.timestamp)
@@ -74,52 +65,35 @@ function aggregateBars(dailyBars: OHLC[], mode: 'week' | 'month'): OHLC[] {
             if (group.length === 0) continue
         }
 
-        // 聚合OHLCV
         const open = group[0].open
         const close = group[group.length - 1].close
         const high = Math.max(...group.map(b => b.high))
         const low = Math.min(...group.map(b => b.low))
         const volume = group.reduce((sum, b) => sum + b.volume, 0)
 
-        // 计算涨跌幅（相对前一根K线收盘价）
         let chg_pct = 0
         if (prevClose !== null && prevClose !== 0) {
             chg_pct = Number(((close - prevClose) / prevClose * 100).toFixed(2))
         }
 
-        // 构建聚合后的K线对象
-        const bar: OHLC = {
-            timestamp: group[0].timestamp,
-            open,
-            high,
-            low,
-            close,
-            volume,
-            chg_pct
-        }
-
-        result.push(bar)
-        prevClose = close  // 更新前一根收盘价
+        result.push({timestamp: group[0].timestamp, open, high, low, close, volume, chg_pct})
+        prevClose = close
     }
 
     return result
 }
 
-// 独立初始化单周期图表
 const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
-
-    // 始终先获取日线数据（可以复用 symbol 缓存）
     if (!symbolDataCache[props.symbol] || symbolDataCache[props.symbol].length === 0) {
         symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
     }
 
-    // let bars = await fetchStockMarketData(props.symbol, null, null, 'd')
     if (cfg.type === 'week') {
         dataCache[cfg.id] = aggregateBars(symbolDataCache[props.symbol], 'week')
     } else if (cfg.type === 'month') {
         dataCache[cfg.id] = aggregateBars(symbolDataCache[props.symbol], 'month')
-    } else if (cfg.type === 'day') {
-        dataCache[cfg.id] = symbolDataCache[props.symbol];
+    } else {
+        dataCache[cfg.id] = symbolDataCache[props.symbol]
     }
 
     await nextTick()
@@ -127,18 +101,14 @@ const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
     if (!el) return
 
     let chart = chartInstances.value[cfg.id]
-
-    // 销毁旧实例（容器不匹配或已标记为无效）
     if (chart) {
         try {
             chart.destroy()
         } catch {
-
         }
         chartInstances.value[cfg.id] = null
     }
 
-    // 创建新实例
     chart = init(cfg.containerId)
     chart.setStyles(createChartConfig('redUp', 'dark'))
     chartInstances.value[cfg.id] = chart
@@ -151,36 +121,41 @@ const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
         }
     })
     chart.createIndicator('MA', {pane: {id: 'candle_pane'}, isStack: true})
-    chart.createIndicator('MACD', true, {id: 'candle_pane_1'});
+    chart.createIndicator('MACD', true, {id: 'candle_pane_1'})
 }
 
-// 批量重建三张图（仅用于 symbol 切换或初次挂载）
 const rebuildCharts = async () => {
     if (isRebuilding) return
     isRebuilding = true
 
-    // 彻底清空旧实例和数据
     Object.values(chartInstances.value).forEach(c => c?.destroy())
     chartInstances.value = {}
 
-    await Promise.all(PERIODS.map(cfg => initPeriodChart(cfg)))
-
-    isRebuilding = false
+    try {
+        await Promise.all(PERIODS.map(cfg => initPeriodChart(cfg)))
+    } finally {
+        isRebuilding = false
+    }
 }
 
-// 专门在 symbol 变化时清除对应缓存
 watch(() => props.symbol, async (newSym, oldSym) => {
+    loading.value = true
     symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
     if (newSym !== oldSym) {
-        // 清除旧标的缓存（避免内存无限增长）
         delete symbolDataCache[oldSym]
         await rebuildCharts()
     }
+    loading.value = false
 })
 
 onMounted(async () => {
-    symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
-    await rebuildCharts()
+    loading.value = true
+    try {
+        symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
+        await rebuildCharts()
+    } finally {
+        loading.value = false
+    }
 })
 
 onUnmounted(() => {
@@ -190,7 +165,22 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="vertical-charts">
+    <div class="relative vertical-charts">
+        <!-- 加载遮盖层 -->
+        <div v-if="loading"
+             class="absolute inset-0 z-50 flex items-center justify-center bg-neutral-950/70 backdrop-blur-sm">
+            <div class="flex flex-col items-center gap-3">
+                <svg class="animate-spin h-8 w-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                     viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-sm text-gray-300">加载数据中...</span>
+            </div>
+        </div>
+
+        <!-- 图表区域 -->
         <div v-for="p in PERIODS" :key="p.id" class="chart-item">
             <div :id="p.containerId" class="chart-obj"></div>
         </div>
@@ -203,12 +193,11 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 0;
-    //background: #1a1a1a;
+    position: relative; // 确保遮盖层定位基准
 }
 
 .chart-obj {
     height: 31.5vh;
-    //background: #222;
-    margin: 5px 5px 0;;
+    margin: 5px 5px 0;
 }
 </style>

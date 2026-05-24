@@ -98,7 +98,6 @@ function initFilters1() {
             <Column field="name" filterField="name" header="名称">
                 <template #body="{ data }">
                     <router-link class="text-blue-500"
-                                 target="_blank"
                                  :to="{ name: 'stock-monitor-detail', params: { symbol: data.symbol } }">{{
                             data.symbol
                         }}

@@ -10,7 +10,7 @@ from service import StockService, FactorValueService
 from service import JobService, ResearchReportService
 from service.stock_fear_greed_service import StockFearGreedService
 from utils.data_loader import datagigi
-from utils.common import get_today, get_date_by_years, validate_stock_code
+from utils.common import get_today, get_date_by_n, validate_stock_code
 
 stock_bp = Blueprint('stock', __name__)
 
@@ -164,12 +164,15 @@ def get_stock_history(stock_code):
     if not validate_stock_code(stock_code):
         return jsonify({'code': -1, 'message': 'invalid stock code!'}), 500
 
-    # 获取查询参数
-    start_date = request.args.get('start_date', default=get_date_by_years(years=-3))
-    end_date = request.args.get('end_date', default=get_today())
+    # 获取查询参数，默认一年数据
+    dayn = 365 * 1
     period = request.args.get('period', default='d')
+    start_date = request.args.get('start_date', default=get_date_by_n(-1 * dayn))
+    end_date = request.args.get('end_date', default=get_today())
 
     securities_data = datagigi.get_history(stock_code, start_date, end_date, period)
+    securities_data.reset_index(inplace=True)
+    securities_data['date'] = securities_data['date'].dt.strftime('%Y-%m-%d')
 
     # 将DataFrame转换为字典列表
     securities_data_dict = securities_data.to_dict(orient='records')

@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import {ref, watch, onMounted, onUnmounted, nextTick} from 'vue'
 import {createChartConfig} from '@/utils/constants.js'
@@ -5,7 +6,7 @@ import {fetchStockMarketData, fetchStockInfo} from '@/utils/function.js'
 import {init} from 'klinecharts'
 
 const props = defineProps<{ symbol: string }>()
-const stock_info = ref({name: '', concepts: ''})
+// const stock_info = ref({name: '', concepts: ''})
 
 const PERIODS = [
     {id: 'm', containerId: 'chart-month', type: 'month', span: 1},
@@ -13,15 +14,107 @@ const PERIODS = [
     {id: 'd', containerId: 'chart-day', type: 'day', span: 1}
 ] as const
 
+const symbolDataCache: Record<string, any[]> = {}
+const dataCache: Record<string, any[]> = {}
 const chartInstances = ref<Record<string, any>>({})
-const dataCache = ref<Record<string, any[]>>({})
+// ✅ 改为模块级 Map（放在 <script setup> 上方）
 let isRebuilding = false
+
+interface OHLC {
+    timestamp: number
+    open: number
+    high: number
+    low: number
+    close: number
+    volume: number
+}
+
+/**
+ * 按周/月聚合日线数据（自然周/自然月）
+ * @param dailyBars 升序日线数据
+ * @param mode 'week' | 'month'
+ */
+function aggregateBars(dailyBars: OHLC[], mode: 'week' | 'month'): OHLC[] {
+    const result: OHLC[] = []
+    let idx = 0
+    while (idx < dailyBars.length) {
+        const group: OHLC[] = []
+        const date = new Date(dailyBars[idx].timestamp)
+
+        if (mode === 'week') {
+            const dayOfWeek = date.getDay()
+            // 周一或第一个可用日线开始新周
+            const start = idx
+            // 寻找本周的下一个周一（即周一切换标志）
+            const startDate = new Date(dailyBars[idx].timestamp)
+            startDate.setHours(0, 0, 0, 0)
+            const endOfWeek = new Date(startDate)
+            endOfWeek.setDate(startDate.getDate() + (7 - startDate.getDay()))
+
+            // 收集本周所有数据（timestamp < endOfWeek）
+            while (idx < dailyBars.length && new Date(dailyBars[idx].timestamp) < endOfWeek) {
+                group.push(dailyBars[idx])
+                idx++
+            }
+            // 若该周无有效数据则跳过
+            if (group.length === 0) continue
+
+            const weekOpen = group[0].open
+            const weekClose = group[group.length - 1].close
+            const weekHigh = Math.max(...group.map(b => b.high))
+            const weekLow = Math.min(...group.map(b => b.low))
+            const weekVolume = group.reduce((sum, b) => sum + b.volume, 0)
+            result.push({
+                timestamp: group[0].timestamp, // 周初时间戳
+                open: weekOpen,
+                high: weekHigh,
+                low: weekLow,
+                close: weekClose,
+                volume: weekVolume
+            })
+        } else if (mode === 'month') {
+            const year = date.getFullYear()
+            const month = date.getMonth()
+            // 同一月份的数据
+            while (idx < dailyBars.length) {
+                const bar = dailyBars[idx]
+                const barDate = new Date(bar.timestamp)
+                if (barDate.getFullYear() === year && barDate.getMonth() === month) {
+                    group.push(bar)
+                    idx++
+                } else {
+                    break
+                }
+            }
+            if (group.length === 0) continue
+            result.push({
+                timestamp: group[0].timestamp,
+                open: group[0].open,
+                high: Math.max(...group.map(b => b.high)),
+                low: Math.min(...group.map(b => b.low)),
+                close: group[group.length - 1].close,
+                volume: group.reduce((sum, b) => sum + b.volume, 0)
+            })
+        }
+    }
+    return result
+}
 
 // 独立初始化单周期图表
 const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
-    // ✅ 数据获取恢复：若无缓存则拉取
-    if (!dataCache.value[cfg.id]) {
-        dataCache.value[cfg.id] = await fetchStockMarketData(props.symbol, null, null, cfg.id)
+
+    // 始终先获取日线数据（可以复用 symbol 缓存）
+    if (symbolDataCache[props.symbol].length === 0) {
+        symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
+    }
+
+    // let bars = await fetchStockMarketData(props.symbol, null, null, 'd')
+    if (cfg.type === 'week') {
+        dataCache[cfg.id] = aggregateBars(symbolDataCache[props.symbol], 'week')
+    } else if (cfg.type === 'month') {
+        dataCache[cfg.id] = aggregateBars(symbolDataCache[props.symbol], 'month')
+    } else if (cfg.type === 'day') {
+        dataCache[cfg.id] = symbolDataCache[props.symbol];
     }
 
     await nextTick()
@@ -49,7 +142,7 @@ const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
     chart.setPeriod({span: cfg.span, type: cfg.type})
     chart.setDataLoader({
         getBars: async ({callback}) => {
-            callback(dataCache.value[cfg.id] || [])
+            callback(dataCache[cfg.id] || [])
         }
     })
     chart.createIndicator('MA', {pane: {id: 'candle_pane'}, isStack: true})
@@ -64,21 +157,24 @@ const rebuildCharts = async () => {
     // 彻底清空旧实例和数据
     Object.values(chartInstances.value).forEach(c => c?.destroy())
     chartInstances.value = {}
-    dataCache.value = {}
 
     await Promise.all(PERIODS.map(cfg => initPeriodChart(cfg)))
-
-    // stock_info.value = await fetchStockInfo(props.symbol)
 
     isRebuilding = false
 }
 
-// 无 immediate，避免 onMounted 与 watch 同时触发
-watch(() => props.symbol, async () => {
-    await rebuildCharts()
+// 专门在 symbol 变化时清除对应缓存
+watch(() => props.symbol, async (newSym, oldSym) => {
+    symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
+    if (newSym !== oldSym) {
+        // 清除旧标的缓存（避免内存无限增长）
+        delete symbolDataCache[oldSym]
+        await rebuildCharts()
+    }
 })
 
 onMounted(async () => {
+    symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
     await rebuildCharts()
 })
 
@@ -102,12 +198,12 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 0;
-    background: #1a1a1a;
+    //background: #1a1a1a;
 }
 
-.chart-obj{
+.chart-obj {
     height: 31.5vh;
-    background: #222;
+    //background: #222;
     margin: 5px 5px 0;;
 }
 </style>

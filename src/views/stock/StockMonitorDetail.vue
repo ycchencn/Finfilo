@@ -238,7 +238,7 @@ onMounted(async () => {
 });
 
 const chartFilterOptions = [
-    {label: 'K线', value: 'candle_up_stroke'},
+    {label: 'K线', value: 'candle_down_stroke'},
     {label: '美国线', value: 'ohlc'},
     {label: '面积图', value: 'area'},
 ];

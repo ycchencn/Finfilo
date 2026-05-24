@@ -8,13 +8,14 @@ const props = defineProps({
   selectedSymbol: { type: String, default: null }
 })
 
+const page_size = 50;
 const activeTab = ref('全部')
 const tabs = ['全部', '持仓', '自选', '监控']
 const stock_list = ref([])
 
 function loadStockList() {
     // 获取个股数据
-    axios.get(`/api/v1/stocks_monitored?page_size=300&page=1&market=cn&v=1.2`).then(response => {
+    axios.get(`/api/v1/stocks_monitored?page_size=${page_size}&page=1&market=cn&v=1.2`).then(response => {
         stock_list.value = response.data.map(item => {
             const ohlc = item.ohlc_last; // 可能为 null 或 undefined
             return {

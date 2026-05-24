@@ -186,7 +186,8 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
                         {title: 'high', value: '{high}'},
                         {title: 'low', value: '{low}'},
                         {title: 'close', value: '{close}'},
-                        {title: 'volume', value: '{volume}'}
+                        {title: 'volume', value: '{volume}'},
+                        {title: 'ChangePct: ', value: '{chg_pct}%'}
                     ]
                 },
                 features: []
@@ -292,14 +293,28 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
             horizontal: {
                 show: true,
                 line: {
-                    show: true, style: 'dashed', dashedValue: [4, 2], size: 1, color: '#888888'
+                    show: true,
+                    style: 'dashed',
+                    dashedValue: [4, 2],
+                    size: 1,
+                    color: '#888888'
                 },
                 text: {
-                    show: true, style: 'fill', color: '#FFFFFF', size: 10,
-                    family: 'Helvetica Neue', weight: 'normal',
-                    borderStyle: 'solid', borderDashedValue: [2, 2], borderSize: 1,
-                    borderColor: '#686D76', borderRadius: 2,
-                    paddingLeft: 4, paddingRight: 4, paddingTop: 4, paddingBottom: 4,
+                    show: true,
+                    style: 'fill',
+                    color: '#FFFFFF',
+                    size: 10,
+                    family: 'Helvetica Neue',
+                    weight: 'normal',
+                    borderStyle: 'solid',
+                    borderDashedValue: [2, 2],
+                    borderSize: 1,
+                    borderColor: '#686D76',
+                    borderRadius: 2,
+                    paddingLeft: 4,
+                    paddingRight: 4,
+                    paddingTop: 4,
+                    paddingBottom: 4,
                     backgroundColor: '#686D76'
                 },
                 features: []
@@ -307,14 +322,28 @@ export function createChartConfig(colorMode = 'greenUp', theme = 'light') {
             vertical: {
                 show: true,
                 line: {
-                    show: true, style: 'dashed', dashedValue: [4, 2], size: 1, color: '#888888'
+                    show: true,
+                    style: 'dashed',
+                    dashedValue: [4, 2],
+                    size: 1,
+                    color: '#888888'
                 },
                 text: {
-                    show: true, style: 'fill', color: '#FFFFFF', size: 10,
-                    family: 'Helvetica Neue', weight: 'normal',
-                    borderStyle: 'solid', borderDashedValue: [2, 2], borderSize: 1,
-                    borderColor: '#686D76', borderRadius: 2,
-                    paddingLeft: 4, paddingRight: 4, paddingTop: 4, paddingBottom: 4,
+                    show: true,
+                    style: 'fill',
+                    color: '#FFFFFF',
+                    size: 10,
+                    family: 'Helvetica Neue',
+                    weight: 'normal',
+                    borderStyle: 'solid',
+                    borderDashedValue: [2, 2],
+                    borderSize: 1,
+                    borderColor: '#686D76',
+                    borderRadius: 2,
+                    paddingLeft: 4,
+                    paddingRight: 4,
+                    paddingTop: 4,
+                    paddingBottom: 4,
                     backgroundColor: '#686D76'
                 }
             }

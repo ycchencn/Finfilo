@@ -247,7 +247,8 @@ class DataGigi:
             "start_date": start_date,
             "end_date": end_date,
             "period": period,
-            "symbol": symbol
+            "symbol": symbol,
+            "v": "1.0"
         }
         headers = {
             "Authorization": f"Bearer {self.api_key}",  # 如果你的 API 需要 token 鉴权

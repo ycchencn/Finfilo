@@ -184,8 +184,7 @@ export const fetchStockProfile = async (stockCode) => {
 const getDefaultDateRange = () => {
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setFullYear(endDate.getFullYear() - 3);
-
+    startDate.setFullYear(endDate.getFullYear() - 10);
     return {
         start_date: formatDate(startDate),
         end_date: formatDate(endDate)
@@ -198,8 +197,8 @@ export const fetchStockMarketData = async (stockCode, startDate, endDate, Period
         const { start_date: defaultStart, end_date: defaultEnd } = getDefaultDateRange();
         const start_date = startDate || defaultStart;
         const end_date = endDate || defaultEnd;
-        const period = Period || 'day';
-        const version = '1.1'
+        const period = Period || 'd';
+        const version = '1.2'
 
         let response = null;
 

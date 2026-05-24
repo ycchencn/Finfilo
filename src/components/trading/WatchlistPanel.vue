@@ -1,84 +1,124 @@
 <script setup>
-import {onBeforeMount, ref} from 'vue'
-import axios from "axios";
-import {fearGreedToText, getMarketByCode} from "@/utils/function";
+import {computed, onBeforeMount, ref} from 'vue'
+import axios from "axios"
 
 // 接收来自父组件的当前选中股票
 const props = defineProps({
-  selectedSymbol: { type: String, default: null }
+    selectedSymbol: {type: String, default: null}
 })
 
-const page_size = 50;
+const page_size = 150
 const activeTab = ref('全部')
 const tabs = ['全部', '持仓', '自选', '监控']
 const stock_list = ref([])
 
+// 排序状态：'none' | 'asc' | 'desc'
+const sortOrder = ref('desc')
+
 function loadStockList() {
-    // 获取个股数据
-    axios.get(`/api/v1/stocks_monitored?page_size=${page_size}&page=1&market=cn&v=1.2`).then(response => {
-        stock_list.value = response.data.map(item => {
-            const ohlc = item.ohlc_last; // 可能为 null 或 undefined
-            return {
-                ...item,
-                fear_greed: item.greed_data?.fear_greed ?? null,
-                fear_greed_text: fearGreedToText(item.greed_data?.fear_greed ?? null),
-                chg_pct: ohlc?.chg_pct ?? null,
-                close: ohlc?.close ?? null,
-                open: ohlc?.open ?? null,
-                high: ohlc?.high ?? null,
-                low: ohlc?.low ?? null,
-                market: getMarketByCode(item.symbol) ?? null
-            };
-        });
-    }).catch(error => {
-        console.error('加载股票列表失败:', error);
-    });
+    axios.get(`/api/v1/stocks_monitored?page_size=${page_size}&page=1&market=cn&v=1.2`)
+        .then(response => {
+            stock_list.value = response.data.map(item => {
+                const ohlc = item.ohlc_last
+                return {
+                    ...item,
+                    chg_pct: ohlc?.chg_pct ?? null,
+                    close: ohlc?.close ?? null,
+                    open: ohlc?.open ?? null,
+                    high: ohlc?.high ?? null,
+                    low: ohlc?.low ?? null
+                }
+            })
+        })
+        .catch(error => {
+            console.error('加载股票列表失败:', error)
+        })
+}
+
+// 根据 sortOrder 排序后的列表
+const sortedStocks = computed(() => {
+    if (sortOrder.value === 'none') {
+        return stock_list.value
+    }
+    return [...stock_list.value].sort((a, b) => {
+        const aVal = a.chg_pct ?? 0
+        const bVal = b.chg_pct ?? 0
+        if (sortOrder.value === 'asc') {
+            return aVal - bVal
+        } else {
+            return bVal - aVal
+        }
+    })
+})
+
+// 切换排序模式：none -> desc -> asc -> none ...
+function toggleSort() {
+    if (sortOrder.value === 'none') {
+        sortOrder.value = 'desc'
+    } else if (sortOrder.value === 'desc') {
+        sortOrder.value = 'asc'
+    } else {
+        sortOrder.value = 'none'
+    }
 }
 
 // 事件传递
-const emit = defineEmits(['update:symbol']);
+const emit = defineEmits(['update:symbol'])
 const selectStock = (code) => {
-    emit('update:symbol', code);
-};
+    emit('update:symbol', code)
+}
 
 onBeforeMount(() => {
-    // 获取个股数据
     loadStockList()
-});
-
+})
 </script>
 
 <template>
     <aside class="w-80 h-full border-r border-gray-800 bg-neutral-900 flex flex-col shrink-0"
            style="height: 96vh; margin-top: 1px;">
 
-        <!-- 1. 头部区域：shrink-0 确保不会被压缩 -->
+        <!-- 头部区域 -->
         <div class="px-3 pt-3 pb-2 border-b border-gray-800 shrink-0">
             <!-- Tab切换 -->
             <div class="flex gap-1 text-xs mb-2 text-gray-400">
-                <button v-for="t in tabs" :key="t" :class="{'!text-white': activeTab === t}" @click="activeTab = t">{{
-                        t
-                    }}
+                <button v-for="t in tabs" :key="t" :class="{'!text-white': activeTab === t}" @click="activeTab = t">
+                    {{ t }}
                 </button>
             </div>
+
+            <!-- 涨幅排序按钮 -->
+            <button
+                @click="toggleSort"
+                class="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer select-none"
+            >
+                <span :class="{ 'text-blue-400': sortOrder !== 'none' }">涨幅</span>
+                <span v-if="sortOrder === 'asc'" class="text-blue-400">↑</span>
+                <span v-else-if="sortOrder === 'desc'" class="text-blue-400">↓</span>
+                <span v-else class="text-gray-600">↕</span>
+            </button>
         </div>
 
-        <!-- 2. 列表区域：flex-1 撑满剩余空间，overflow-y-auto 允许滚动 -->
+        <!-- 列表区域 -->
         <div class="flex-1 overflow-y-auto min-w-0 custom-scrollbar">
-            <div v-for="(stock, index) in stock_list" :key="stock.symbol"
-                 :class="{ 'bg-gray-800': selectedSymbol === stock.symbol }"
-                  @click="selectStock(stock.symbol)"
-                 class="px-4 py-3 hover:bg-gray-800 cursor-pointer border-b border-gray-800/40 group transition-colors">
+            <div
+                v-for="stock in sortedStocks"
+                :key="stock.symbol"
+                :class="{ 'bg-gray-800': selectedSymbol === stock.symbol }"
+                @click="selectStock(stock.symbol)"
+                class="px-4 py-3 hover:bg-gray-800 cursor-pointer border-b border-gray-800/40 group transition-colors"
+            >
                 <div class="flex justify-between items-start">
                     <div>
                         <div class="font-semibold text-sm">{{ stock.name }}</div>
                         <div><span class="text-[10px] text-gray-500">{{ stock.symbol }}</span></div>
                     </div>
                     <div class="text-right">
-                        <div class="text-sm font-mono">{{ stock.close.toFixed(2) }}</div>
-                        <div :class="stock.chg_pct >= 0 ? 'text-red-500' : 'text-green-500'"
-                             class="text-xs font-medium mt-0.5">
-                            {{ stock.chg_pct >= 0 ? '+' : '' }}{{ stock.chg_pct.toFixed(2) }}%
+                        <div class="text-sm font-mono">{{ stock.close?.toFixed(2) ?? '-' }}</div>
+                        <div
+                            :class="(stock.chg_pct ?? 0) >= 0 ? 'text-red-500' : 'text-green-500'"
+                            class="text-xs font-medium mt-0.5"
+                        >
+                            {{ (stock.chg_pct ?? 0) >= 0 ? '+' : '' }}{{ stock.chg_pct?.toFixed(2) ?? '0.00' }}%
                         </div>
                     </div>
                 </div>
@@ -88,7 +128,6 @@ onBeforeMount(() => {
 </template>
 
 <style scoped>
-/* 自定义暗色滚动条 */
 .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
 }

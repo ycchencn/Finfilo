@@ -4,7 +4,44 @@ import {createChartConfig} from '@/utils/constants.js'
 import {fetchStockMarketData, fetchStockInfo} from '@/utils/function.js'
 import {init} from 'klinecharts'
 
-const props = defineProps<{ symbol: string }>()
+// 接收来自父组件的当前选中股票
+const props = defineProps({
+    symbol: {type: String, default: null},
+    realtimeQuotes: {type: Object, default: () => ({})}   // 从父组件传入的实时行情
+})
+
+// 监听实时行情变化
+watch(() => props.realtimeQuotes, (newRt) => {
+    if (newRt) {
+
+    }
+})
+
+// 处理实时数据更新（由父组件传入的 realtimeQuote 触发）
+function applyRealtimeUpdate() {
+    const rt = props.realtimeQuotes
+    if (!rt) return
+    // 获取日线缓存
+    const dailyBars = symbolDataCache[props.symbol]
+    if (!dailyBars || dailyBars.length === 0) return
+    // 简单处理：更新最后一条日线的 close、high、low、volume 等
+    const lastBar = dailyBars[dailyBars.length - 1]
+    lastBar.close = rt.lastPrice
+    if (rt.high !== undefined) lastBar.high = Math.max(lastBar.high, rt.high)
+    if (rt.low !== undefined) lastBar.low = Math.min(lastBar.low, rt.low)
+    lastBar.volume = rt.volume ?? lastBar.volume
+    lastBar.chg_pct = rt.chg_pct  // 如果服务端提供
+    // 重新聚合（通常只需更新最后一条聚合K线，但为了方便这里全量聚合）
+    // updateAggregatedBars(props.symbol)
+    // 刷新图表
+    PERIODS.forEach(cfg => {
+        const chart = chartInstances.value[cfg.id]
+        if (!chart) return
+        const bars = dataCache[cfg.id]
+        if (!bars || bars.length === 0) return
+        chart.applyNewData([bars[bars.length - 1]], false)
+    })
+}
 
 const PERIODS = [
     {id: 'm', containerId: 'chart-month', type: 'month', span: 1},

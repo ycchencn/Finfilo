@@ -4,7 +4,8 @@ import axios from "axios"
 
 // 接收来自父组件的当前选中股票
 const props = defineProps({
-    selectedSymbol: {type: String, default: null}
+    selectedSymbol: {type: String, default: null},
+    realtimeQuotes: {type: Object, default: () => ({})}   // 从父组件传入的实时行情
 })
 
 const page_size = 150
@@ -37,17 +38,27 @@ function loadStockList() {
 
 // 根据 sortOrder 排序后的列表
 const sortedStocks = computed(() => {
-    if (sortOrder.value === 'none') {
-        return stock_list.value
-    }
-    return [...stock_list.value].sort((a, b) => {
+    const merged = stock_list.value.map(stock => {
+        const rt = props.realtimeQuotes[stock.symbol]
+        if (!rt) return stock
+        let chg_pct = rt.chg_pct ?? null
+        if (chg_pct === null && stock.lastClose != null && stock.lastClose !== 0) {
+            chg_pct = Number(((rt.lastPrice - stock.lastClose) / stock.lastClose * 100).toFixed(2))
+        }
+        return {
+            ...stock,
+            close: rt.lastPrice ?? stock.close,
+            chg_pct: chg_pct ?? stock.chg_pct,
+            high: rt.high ?? stock.high,
+            low: rt.low ?? stock.low,
+            open: rt.open ?? stock.open,
+        }
+    })
+    if (sortOrder.value === 'none') return merged
+    return [...merged].sort((a, b) => {
         const aVal = a.chg_pct ?? 0
         const bVal = b.chg_pct ?? 0
-        if (sortOrder.value === 'asc') {
-            return aVal - bVal
-        } else {
-            return bVal - aVal
-        }
+        return sortOrder.value === 'desc' ? bVal - aVal : aVal - bVal
     })
 })
 

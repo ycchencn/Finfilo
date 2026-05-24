@@ -10,6 +10,39 @@ const selectedSymbol = ref(localStorage.getItem(STORAGE_KEY_SELECTED_SYMBOL) || 
 const currentSymbol = ref(selectedSymbol.value)
 const refreshing = ref(false)
 
+// ---------- 实时行情 ----------
+const realtimeQuotes = ref({})   // 所有股票的最新行情
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8765'
+let ws = null
+
+function connectRealtime() {
+    if (ws) ws.close()
+    ws = new WebSocket(WS_URL)   // 你的转发服务端地址
+    ws.onopen = () => {
+        ws.send(JSON.stringify({role: 'viewer', symbol: '*'}))
+        console.log('📡 终端已订阅全部行情')
+    }
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data)
+            console.log(data)
+            if (data.type === 'subscribed') return
+            // 更新对应 symbol 的实时数据
+            realtimeQuotes.value = {
+                ...realtimeQuotes.value,
+                [data.symbol]: data
+            }
+        } catch (e) {
+            console.warn('WS 消息解析失败', e)
+        }
+    }
+    ws.onerror = (e) => console.error('WS 错误', e)
+    ws.onclose = () => {
+        console.log('🔌 行情连接断开，5秒后重连...')
+        setTimeout(connectRealtime, 5000)
+    }
+}
+
 function handleSymbolChange(symbol) {
     selectedSymbol.value = symbol
     currentSymbol.value = symbol
@@ -42,10 +75,14 @@ const toggleHome = () => {
 
 onMounted(() => {
     window.addEventListener('keydown', handleKeyDown)
+    connectRealtime()
 })
 onUnmounted(() => {
     window.removeEventListener('keydown', handleKeyDown)
-    // ⚠️ 必须在此处销毁图表实例 & 清理 WebSocket，防止内存泄漏
+    if (ws) {
+        ws.close()
+        ws = null
+    }
 })
 </script>
 
@@ -73,8 +110,16 @@ onUnmounted(() => {
         </header>
         <!-- 主网格区域：h-full 占满剩余高度 -->
         <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
-            <WatchlistPanel @update:symbol="handleSymbolChange" :selected-symbol="selectedSymbol"/>
-            <ChartArea :symbol="selectedSymbol" v-if="selectedSymbol"/>
+            <WatchlistPanel
+                @update:symbol="handleSymbolChange"
+                :selected-symbol="selectedSymbol"
+                :realtime-quotes="realtimeQuotes"
+            />
+            <ChartArea
+                :symbol="selectedSymbol"
+                :realtime-quotes="realtimeQuotes"
+                v-if="selectedSymbol"
+            />
         </main>
         <!-- 底部状态栏 -->
         <StatusBar/>

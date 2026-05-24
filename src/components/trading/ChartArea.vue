@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import {ref, watch, onMounted, onUnmounted, nextTick} from 'vue'
 import {createChartConfig} from '@/utils/constants.js'
@@ -27,6 +26,7 @@ interface OHLC {
     low: number
     close: number
     volume: number
+    chg_pct?: number
 }
 
 /**
@@ -37,45 +37,30 @@ interface OHLC {
 function aggregateBars(dailyBars: OHLC[], mode: 'week' | 'month'): OHLC[] {
     const result: OHLC[] = []
     let idx = 0
+    let prevClose: number | null = null  // 前一根聚合K线的收盘价
+
     while (idx < dailyBars.length) {
         const group: OHLC[] = []
         const date = new Date(dailyBars[idx].timestamp)
 
         if (mode === 'week') {
-            const dayOfWeek = date.getDay()
-            // 周一或第一个可用日线开始新周
-            const start = idx
-            // 寻找本周的下一个周一（即周一切换标志）
+            // 确定本周结束时间（下周一的00:00:00）
             const startDate = new Date(dailyBars[idx].timestamp)
             startDate.setHours(0, 0, 0, 0)
             const endOfWeek = new Date(startDate)
             endOfWeek.setDate(startDate.getDate() + (7 - startDate.getDay()))
 
-            // 收集本周所有数据（timestamp < endOfWeek）
+            // 收集本周内所有日线数据
             while (idx < dailyBars.length && new Date(dailyBars[idx].timestamp) < endOfWeek) {
                 group.push(dailyBars[idx])
                 idx++
             }
-            // 若该周无有效数据则跳过
             if (group.length === 0) continue
 
-            const weekOpen = group[0].open
-            const weekClose = group[group.length - 1].close
-            const weekHigh = Math.max(...group.map(b => b.high))
-            const weekLow = Math.min(...group.map(b => b.low))
-            const weekVolume = group.reduce((sum, b) => sum + b.volume, 0)
-            result.push({
-                timestamp: group[0].timestamp, // 周初时间戳
-                open: weekOpen,
-                high: weekHigh,
-                low: weekLow,
-                close: weekClose,
-                volume: weekVolume
-            })
         } else if (mode === 'month') {
             const year = date.getFullYear()
             const month = date.getMonth()
-            // 同一月份的数据
+            // 收集同一月份的所有日线数据
             while (idx < dailyBars.length) {
                 const bar = dailyBars[idx]
                 const barDate = new Date(bar.timestamp)
@@ -87,16 +72,36 @@ function aggregateBars(dailyBars: OHLC[], mode: 'week' | 'month'): OHLC[] {
                 }
             }
             if (group.length === 0) continue
-            result.push({
-                timestamp: group[0].timestamp,
-                open: group[0].open,
-                high: Math.max(...group.map(b => b.high)),
-                low: Math.min(...group.map(b => b.low)),
-                close: group[group.length - 1].close,
-                volume: group.reduce((sum, b) => sum + b.volume, 0)
-            })
         }
+
+        // 聚合OHLCV
+        const open = group[0].open
+        const close = group[group.length - 1].close
+        const high = Math.max(...group.map(b => b.high))
+        const low = Math.min(...group.map(b => b.low))
+        const volume = group.reduce((sum, b) => sum + b.volume, 0)
+
+        // 计算涨跌幅（相对前一根K线收盘价）
+        let chg_pct = 0
+        if (prevClose !== null && prevClose !== 0) {
+            chg_pct = Number(((close - prevClose) / prevClose * 100).toFixed(2))
+        }
+
+        // 构建聚合后的K线对象
+        const bar: OHLC = {
+            timestamp: group[0].timestamp,
+            open,
+            high,
+            low,
+            close,
+            volume,
+            chg_pct
+        }
+
+        result.push(bar)
+        prevClose = close  // 更新前一根收盘价
     }
+
     return result
 }
 
@@ -104,7 +109,7 @@ function aggregateBars(dailyBars: OHLC[], mode: 'week' | 'month'): OHLC[] {
 const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
 
     // 始终先获取日线数据（可以复用 symbol 缓存）
-    if (symbolDataCache[props.symbol].length === 0) {
+    if (!symbolDataCache[props.symbol] || symbolDataCache[props.symbol].length === 0) {
         symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
     }
 

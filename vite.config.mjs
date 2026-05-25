@@ -39,7 +39,7 @@ export default defineConfig({
         viteCompression({
             verbose: true,          // 显示压缩日志
             disable: false,         // 是否禁用
-            threshold: 10240,       // 只压缩大于 10KB 的文件
+            threshold: 614400,       // 只压缩大于 600KB 的文件
             algorithm: 'gzip',      // gzip | brotliCompress | deflate | deflateRaw
             ext: '.gz',             // 生成的文件后缀
             deleteOriginFile: false // 是否删除源文件

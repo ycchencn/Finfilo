@@ -1,0 +1,6 @@
+# ===== 阶段一：构建 Vue 前端 =====
+FROM node:24-slim
+WORKDIR /build
+# ✅ 第一步：只复制依赖清单，安装依赖（缓存命中关键）
+COPY package*.json ./
+RUN npm install --registry=https://registry.npmmirror.com

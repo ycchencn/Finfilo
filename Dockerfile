@@ -1,5 +1,5 @@
 # ===== 阶段一：构建 Vue 前端 =====
-FROM finfilo-fe-base
+FROM finfilo-fe-base as frontend-builder
 WORKDIR /build
 COPY . .
 RUN npm run build

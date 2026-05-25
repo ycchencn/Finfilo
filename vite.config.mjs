@@ -1,10 +1,11 @@
-import { fileURLToPath, URL } from 'node:url';
+import {fileURLToPath, URL} from 'node:url';
 
-import { PrimeVueResolver } from '@primevue/auto-import-resolver';
+import {PrimeVueResolver} from '@primevue/auto-import-resolver';
 import vue from '@vitejs/plugin-vue';
 import Components from 'unplugin-vue-components/vite';
-import { defineConfig } from 'vite';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
+import {defineConfig} from 'vite';
+import {viteStaticCopy} from 'vite-plugin-static-copy';
+import viteCompression from 'vite-plugin-compression'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -33,6 +34,15 @@ export default defineConfig({
                     dest: 'vs'
                 }
             ]
+        }),
+        // ✅ gzip 压缩
+        viteCompression({
+            verbose: true,          // 显示压缩日志
+            disable: false,         // 是否禁用
+            threshold: 10240,       // 只压缩大于 10KB 的文件
+            algorithm: 'gzip',      // gzip | brotliCompress | deflate | deflateRaw
+            ext: '.gz',             // 生成的文件后缀
+            deleteOriginFile: false // 是否删除源文件
         })
     ],
     resolve: {

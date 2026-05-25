@@ -7,7 +7,7 @@ const props = defineProps({
     realtimeQuotes: {type: Object, default: () => ({})}   // 从父组件传入的实时行情
 })
 
-const page_size = 150
+const page_size = 300
 const activeTab = ref('全部')
 const tabs = ['全部', '持仓', '自选', '监控']
 const stock_list = ref([])

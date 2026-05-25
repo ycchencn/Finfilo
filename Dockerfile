@@ -1,5 +1,16 @@
+# ===== 阶段一：构建 Vue 前端 =====
+FROM node:24-slim AS frontend-builder
+WORKDIR /build
+COPY ./package*.json ./
+RUN npm config set registry https://mirrors.cloud.tencent.com/npm/
+RUN npm install
+COPY . .
+RUN npm run build
+
+# ===== 阶段二：构建 Python 后端 =====
 FROM finfilo-base
 WORKDIR /app
 # 安装pip包
-COPY install .
+COPY . .
+COPY --from=frontend-builder /build/dist /app/dist
 CMD ["python3","run_app.py"]

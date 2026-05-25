@@ -39,8 +39,9 @@ const sortedStocks = computed(() => {
         const rt = props.realtimeQuotes[stock.symbol]
         if (!rt) return stock
         let chg_pct = rt.chg_pct ?? null
-        if (chg_pct === null && stock.lastClose != null && stock.lastClose !== 0) {
-            chg_pct = Number(((rt.lastPrice - stock.lastClose) / stock.lastClose * 100).toFixed(2))
+        // 从行情计算最新的涨跌幅
+        if (chg_pct === null && rt.lastClose != null && rt.lastClose !== 0) {
+            chg_pct = Number(((rt.lastPrice - rt.lastClose) / rt.lastClose * 100).toFixed(2))
         }
         return {
             ...stock,

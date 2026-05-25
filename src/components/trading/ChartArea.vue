@@ -81,7 +81,7 @@ function applyRealtimeUpdate() {
 }
 
 watch(() => props.realtimeQuotes, (newRt) => {
-    if (newRt) applyRealtimeUpdate()
+    // if (newRt) applyRealtimeUpdate()
 })
 
 const PERIODS = [

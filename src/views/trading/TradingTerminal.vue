@@ -25,7 +25,7 @@ function connectRealtime() {
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data)
-            console.log(data)
+            // console.log(data)
             if (data.type === 'subscribed') return
             // 更新对应 symbol 的实时数据
             realtimeQuotes.value = {

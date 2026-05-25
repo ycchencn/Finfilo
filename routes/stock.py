@@ -107,10 +107,13 @@ def get_stocks_monitored():
     page = request.args.get('page', default=1, type=int)
     market = request.args.get('market', default='cn', type=str)
     page_size = request.args.get('page_size', default=300, type=int)
+    simple = request.args.get('simple', default=0, type=int)
     stocks = StockService.get_monitoring_stock_pool(per_page=page_size, market=market)
 
     for stock in stocks:
         # 获取恐惧贪婪数据
+        if simple == 1:
+            continue
         stock['greed_data'], stock['main_force_behavior_phase'] = get_main_force_behavior_phase(stock['symbol'])
         stock['52week_low'] = FactorValueService.get_latest_factor_value(
             ticker=stock['symbol'],

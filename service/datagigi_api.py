@@ -229,7 +229,7 @@ class DataGigi:
             symbol: str,
             start_date: str,
             end_date: str,
-            period: str,
+            period: str = 'd',
             market: str = "cn"
     ) -> pandas.DataFrame:
         """

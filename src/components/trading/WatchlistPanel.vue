@@ -7,14 +7,14 @@ const props = defineProps({
     realtimeQuotes: {type: Object, default: () => ({})}   // 从父组件传入的实时行情
 })
 
-const page_size = 300
+const page_size = 200
 const activeTab = ref('全部')
 const tabs = ['全部', '持仓', '自选', '监控']
 const stock_list = ref([])
 const sortOrder = ref('desc')   // 排序状态：'asc' | 'desc' | 'none'
 
 function loadStockList() {
-    axios.get(`/api/v1/stocks_monitored?page_size=${page_size}&page=1&market=cn&v=1.2`)
+    axios.get(`/api/v1/stocks_monitored?page_size=${page_size}&page=1&market=cn&simple=1`)
         .then(response => {
             stock_list.value = response.data.map(item => {
                 const ohlc = item.ohlc_last
@@ -112,8 +112,8 @@ onBeforeMount(() => {
                     :class="{ 'bg-gray-800': selectedSymbol === stock.symbol }"
                     @click="selectStock(stock.symbol)"
                     class="hover:bg-gray-800 cursor-pointer border-b border-gray-800/40 transition-colors">
-                    <td class="py-2 px-4">
-                        <div style="color: #ffc53f">{{ stock.name }}</div>
+                    <td class="py-2 px-2">
+                        <div style="color: #ffc53f; width: 55px;">{{ stock.name }}</div>
                         <div class="text-[10px] text-gray-500">{{ stock.symbol }}</div>
                     </td>
                     <td class="py-2 px-2 text-right">
@@ -121,11 +121,11 @@ onBeforeMount(() => {
                         {{ (stock.chg_pct ?? 0) >= 0 ? '▲' : '▼' }}
                       </span>
                     </td>
-                    <td class="py-2 px-4 text-right font-mono text-[10px]" :class="(stock.chg_pct ?? 0) >= 0 ? 'text-red-500' : 'text-green-500'">
+                    <td class="py-2 px-2 text-right font-mono text-[10px]" :class="(stock.chg_pct ?? 0) >= 0 ? 'text-red-500' : 'text-green-500'">
                         {{ stock.close?.toFixed(2) ?? '-' }}
                     </td>
-                    <td class="py-2 px-4 text-right">
-                      <span class="inline-block px-2 py-0.5 text-white font-medium text-center text-[10px]" style="width: 55px"
+                    <td class="py-2 text-center">
+                      <span class="inline-block px-2 py-0.5 text-white font-medium text-center text-[10px]" style="width: 52px"
                             :class="(stock.chg_pct ?? 0) >= 0 ? 'bg-red-500' : 'bg-green-500'">
                         {{ (stock.chg_pct ?? 0) >= 0 ? '+' : '' }}{{ stock.chg_pct?.toFixed(2) ?? '0.00' }}%
                       </span>

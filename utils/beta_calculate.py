@@ -29,7 +29,7 @@ def calculate_beta(stock_code, index_code='000001', start_date="20200101", end_d
         index_close = index_df['close']
 
         # 获取ETF价格
-        stock_df = datagigi.get_history(stock_code, start_date, end_date, stock.get('market'))
+        stock_df = datagigi.get_history(stock_code, start_date, end_date, 'd', stock.get('market'))
         stock_close = stock_df.loc[start_date:end_date]["close"]
 
         if stock_close is None or stock_close.empty:

@@ -23,7 +23,7 @@ class FactorCalService:
         else:
             stock = StockService.get_stock_by_symbol(stock_code)
             assert stock is not None
-            df = datagigi.get_history(stock_code, start_date, end_date, stock.get('market'))
+            df = datagigi.get_history(stock_code, start_date, end_date, period='d', market='cn')
 
         df = df.reset_index()
 

@@ -238,7 +238,7 @@ class DataGigi:
         :param symbol: 股票代码，如 "000001"
         :param start_date: 开始日期，格式 YYYYMMDD，如 "20260101"
         :param end_date: 结束日期，格式 YYYYMMDD，如 "20260115"
-        :param period: 周期，默认 "day"
+        :param period: 周期，默认 "d"
         :param market: 市场代码，默认 "cn"（中国）
         :return: API 返回的原始文本（JSON 字符串），失败时返回 None
         """

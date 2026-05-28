@@ -68,13 +68,13 @@
                 <div class="mb-4" v-for="msg in currentAgent.messages" :key="msg.id">
                     <!-- 用户消息 -->
                     <div class="flex justify-end mb-2" v-if="msg.role === 'user'">
-                        <div class="bg-primary text-white rounded-lg px-4 py-2 max-w-[80%]">
+                        <div class="bg-primary text-white rounded-lg px-4 py-2 max-w-[95%]">
                             <p>{{ msg.content }}</p>
                         </div>
                     </div>
                     <!-- AI消息 -->
                     <div class="flex justify-start mb-2" v-else>
-                        <div class="bg-white border border-gray-200 rounded-lg px-2 py-2 max-w-[80%]">
+                        <div class="px-2 py-2 w-[95%]">
                             <MarkdownRenderer fontSize="11px" :markdown="msg.content || ''"/>
                             <Skeleton v-if="msg.isLoading" style="width: 12px" class="inline-block"/>
                         </div>

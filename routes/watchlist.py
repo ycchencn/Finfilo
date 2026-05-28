@@ -40,7 +40,7 @@ def get_main_force_behavior_phase(code):
 
 
 @watchlist_bp.route(f'{api_prefix}/watchlist', methods=['GET'])
-@cache.cached(timeout=60*15, query_string=True)
+@cache.cached(timeout=3600, query_string=True)
 def get_watchlist():
     """
     获取自选股列表

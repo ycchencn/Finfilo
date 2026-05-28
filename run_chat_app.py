@@ -21,6 +21,9 @@ from utils.common import get_today
 
 init_prompt = f"今天是：{get_today()}\n"
 
+# -------------------------- 最大上下文消息数限制 --------------------------
+MAX_CONTEXT_MESSAGES = 20  # 保留的系统提示 + 最近19条对话消息
+
 
 # -------------------------- FastAPI生命周期事件（替换on_event） --------------------------
 @asynccontextmanager
@@ -86,8 +89,28 @@ def get_session_history(session_id: str) -> List[Dict]:
         }]
 
 
-# 保存会话历史
+# 保存会话历史（增加最大上下文限制）
 def save_session_history(session_id: str, history: List[Dict]):
+    # 上下文长度限制：保留第一条 system 消息 + 最近的 (MAX_CONTEXT_MESSAGES-1) 条消息
+    if len(history) > MAX_CONTEXT_MESSAGES:
+        # 查找 system 消息
+        system_msg = None
+        for msg in history:
+            if msg.get("role") == "system":
+                system_msg = msg
+                break
+
+        trimmed = []
+        if system_msg:
+            trimmed.append(system_msg)
+            # 排除所有 system 消息，保留最近的 N-1 条
+            non_system = [msg for msg in history if msg.get("role") != "system"]
+            trimmed.extend(non_system[-(MAX_CONTEXT_MESSAGES - 1):])
+        else:
+            # 如果没有 system 消息，直接保留最近 N 条
+            trimmed = history[-MAX_CONTEXT_MESSAGES:]
+        history = trimmed
+
     redis_obj.setex(f"chat_session:{session_id}", 86400, json.dumps(history))
 
 

@@ -229,7 +229,7 @@ class LLMBase:
         prompt_tokens = usage.prompt_tokens
         completion_tokens = usage.completion_tokens
         total_tokens = usage.total_tokens
-        print(f"📊 Token统计：输入{prompt_tokens} | 输出{completion_tokens} | 总计{total_tokens}")
+        print(f"📊 Token统计：输入{prompt_tokens} | 输出{completion_tokens} | 总计{total_tokens}，模型：{self.model}")
         return {
             'prompt_tokens': prompt_tokens,
             'completion_tokens': completion_tokens,

@@ -124,7 +124,7 @@
                 <div>
                     <label class="font-medium text-sm">提示词（System Prompt）</label>
                     <Textarea
-                        v-model="editingAgent.model"
+                        v-model="editingAgent.systemPrompt"
                         rows="16"
                         class="w-full mt-1"
                         placeholder="请输入系统提示词..."
@@ -157,6 +157,7 @@ const agents = ref([
         name: '量化助手',
         avatar: '📊',
         model: 'deepseek-v4-flash',
+        systemPrompt: '你是一个量化交易金融机构的专家，请以JSON格式输出。',
         messages: [
             {id: 1, role: 'assistant', content: '你好！我是量化助手，有什么可以帮你的？'}
         ]
@@ -166,6 +167,7 @@ const agents = ref([
         name: '代码助手',
         avatar: '💻',
         model: 'qwen3.6-plus',
+        systemPrompt: '你是一个编程专家，擅长多种语言。',
         messages: [
             {id: 1, role: 'assistant', content: 'Hello! I am your coding assistant.'}
         ]
@@ -175,6 +177,7 @@ const agents = ref([
         name: 'DeepSeek操盘手',
         avatar: '🤖',
         model: 'deepseek-v4-flash',
+        systemPrompt: '你是一个通用AI助手，回答一切问题。',
         messages: [
             {id: 1, role: 'assistant', content: '嗨！我是通用助手，有什么问题吗？'}
         ]
@@ -184,6 +187,7 @@ const agents = ref([
         name: '投资明见',
         avatar: '🤖',
         model: 'qwen-max',
+        systemPrompt: '你是一个通用AI助手，回答一切问题。',
         messages: [
             {id: 1, role: 'assistant', content: '嗨！我是通用助手，有什么问题吗？'}
         ]
@@ -241,6 +245,7 @@ function saveAgent() {
         agents.value[index] = {...editingAgent.value}
         toast.add({severity: 'success', summary: '成功', detail: '智能体已更新', life: 2000})
     }
+    // 如果当前正在对话的智能体被编辑，则更新当前对话的system prompt已实时生效（因为后面发送请求时使用currentAgent.systemPrompt）
     showEditDialog.value = false
     editingAgent.value = {}
 }
@@ -252,6 +257,7 @@ function addAgent() {
         name: '新智能体',
         avatar: '🧠',
         model: 'deepseek-v4-flash',
+        systemPrompt: '你是一个乐于助人的助手。',
         messages: [
             {id: generateId(), role: 'assistant', content: '你好！我是新智能体，请问有什么需要帮助的吗？'}
         ]
@@ -262,7 +268,7 @@ function addAgent() {
     toast.add({severity: 'info', summary: '新建成功', detail: `智能体"${newAgent.name}"已创建`, life: 2000})
 }
 
-// 发送消息（复用原逻辑，但使用currentAgent的model）
+// 发送消息（复用原逻辑，但使用currentAgent的model和systemPrompt）
 const sendMessage = async () => {
     if (!inputMessage.value.trim() || isLoading.value) return
 
@@ -274,7 +280,7 @@ const sendMessage = async () => {
     currentAgent.value.messages.push(userMsg)
     inputMessage.value = ''
     scrollToBottom()
-r
+
     const aiMsgId = generateId()
     const loadingMsg = {
         id: aiMsgId,

@@ -916,3 +916,29 @@ class ScheduledTask(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
+class LlmConversationContext(Base):
+    __tablename__ = 'llm_conversation_context'
+    # 表级别字符集与排序规则（对应原来的 COLLATE utf8mb4_bin）
+    __table_args__ = {
+        'mysql_charset': 'utf8mb4',
+        'mysql_collate': 'utf8mb4_bin',
+    }
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chat_id = Column(String(50, collation='utf8mb4_bin'), nullable=True, default=None)
+    chat_context = Column(JSON, nullable=True, default=None)
+    created_at = Column(DateTime, nullable=True, default=None)
+    updated_at = Column(DateTime, nullable=True, default=None)
+
+    def __repr__(self):
+        return f"<LlmConversationContext(id={self.id}, chat_id='{self.chat_id}')>"
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "chat_id": self.chat_id,
+            "chat_context": self.chat_context,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

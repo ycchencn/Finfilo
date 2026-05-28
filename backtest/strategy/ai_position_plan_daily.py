@@ -7,14 +7,14 @@
 import json
 from llms import get_model_by_setting
 from service import FactorValueService
-from service import InvestmentPortfolioService, PortfolioAssetsService, StockService, IndexDailyDataService, MarketNewsService
+from service import InvestmentPortfolioService, PortfolioAssetsService, StockService, MarketNewsService
 from utils.common import get_today, logger, get_date_by_n
 from string import Template
-from utils.common import df_to_compact_csv, send_feishu_markdown_message
+from utils.common import send_feishu_markdown_message
 from typing import List, Dict
 from utils.gen_feishu_report import generate_feishu_report
-from prompts.prompt_generator import load_prompt_template_by_name
 from config import strategy_setting
+from utils.data_loader import datagigi
 
 prompt_quant_decision = """
 '你现在是一名金融分析师，你对股票市场、金融市场、投资策略和财务规划有深厚的理解。'
@@ -70,12 +70,7 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     if portfolio_id is None:
         return False
 
-    # 获取大盘数据
-    # market_data = IndexDailyDataService.get_history(
-    #     symbol="000001",
-    #     start_date=get_date_by_n(-1 * strategy_setting.get('max_market_limit', 120)),
-    #     end_date=get_today()
-    # )
+    index_data = datagigi.get_index_history(index_code='000001', start_date=get_date_by_n(-30), end_date=get_today())
 
     # 获取持仓信息
     investment_info = InvestmentPortfolioService.get_by_portfolio_id(portfolio_id)
@@ -105,28 +100,14 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     # 近期新闻
     recent_news = MarketNewsService.get_by_time_range(limit=strategy_setting.get('news_limit'))
 
-    # market_csv = df_to_compact_csv(market_data, max_rows=strategy_setting.get('max_market_limit', 120))
     template = Template(llm_prompt_str)
-    # template_sys = load_prompt_template_by_name('prompt_strategy_template')
     holdings_text = format_holdings_text(holding_assets)
     stock_pool_text = format_stock_pool_text(stock_pool)
-
-    # 系统预设 prompt
-    # prompt_sys = template_sys.safe_substitute(
-    #     current_date=get_today(),
-    #     market_data_csv=market_csv,
-    #     holdings_text=holdings_text,
-    #     stock_pool_text=stock_pool_text,
-    #     available_money=available_money,
-    #     stock_position_limit=strategy_setting.get('stock_position_limit', 8),
-    #     position_plan=position_plan,
-    #     recent_news=json.dumps(recent_news, ensure_ascii=False)
-    # )
 
     # 用户预设 prompt
     prompt = template.safe_substitute(
         current_date=get_today(),
-        market_data_csv=None,
+        market_data_csv=index_data,
         holdings_text=holdings_text,
         stock_pool_text=stock_pool_text,
         available_money=available_money,

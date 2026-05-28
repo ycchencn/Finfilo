@@ -67,7 +67,7 @@ export default {
     color: #333;
     max-width: none;
     margin: 0;
-    padding: 0;
+    padding: 5px;
     text-align: left;
 }
 

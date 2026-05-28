@@ -4,7 +4,6 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-import redis
 import json
 import asyncio
 from fastapi import FastAPI, HTTPException
@@ -68,7 +67,7 @@ class ChatRequest(BaseModel):
 
 # 获取会话历史
 def get_session_history(session_id: str) -> List[Dict]:
-    history = redis_obj.get(f"session:{session_id}")
+    history = redis_obj.get(f"chat_session:{session_id}")
     if not history:
         return [{
             "role": "system",
@@ -85,7 +84,7 @@ def get_session_history(session_id: str) -> List[Dict]:
 
 # 保存会话历史
 def save_session_history(session_id: str, history: List[Dict]):
-    redis_obj.setex(f"session:{session_id}", 86400, json.dumps(history))
+    redis_obj.setex(f"chat_session:{session_id}", 86400, json.dumps(history))
 
 
 # -------------------------- 流式对话接口 --------------------------

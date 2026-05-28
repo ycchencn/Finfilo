@@ -5,7 +5,6 @@
 """
 
 import random
-from llms.qianwen_trader import QianWenTrader
 from llms.llm_base_doubao import LLMBaseDoubao
 from llms.llm_base_volcengine import LLMBaseVolcEngine
 from llms.llm_base_zhipu import LLMBaseZhipu

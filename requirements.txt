@@ -55,3 +55,6 @@ python-dotenv
 elasticsearch
 websockets
 flask_cors
+fastapi
+aiohttp
+uvicorn

@@ -17,6 +17,8 @@ from typing import Optional, Dict, List
 from config import aliyun_bailian_apikey
 from llms.llm_base_async import LLMBaseAsync
 from contextlib import asynccontextmanager  # 新增导入
+from utils.redis_obj import redis_obj
+
 
 # -------------------------- FastAPI生命周期事件（替换on_event） --------------------------
 @asynccontextmanager
@@ -48,15 +50,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Redis会话存储
-redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
-
 # 全局LLM客户端实例（仅初始化OpenAI，不创建aiohttp会话）
 llm_client = AsyncOpenAI(
     api_key=aliyun_bailian_apikey,
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
 llm_base = LLMBaseAsync(llm_client)
+
 
 # -------------------------- 请求模型 --------------------------
 class ChatRequest(BaseModel):
@@ -65,9 +65,10 @@ class ChatRequest(BaseModel):
     response_format: Optional[str] = Field("text", description="返回格式：json_object/text")
     model: Optional[str] = Field("qwen3.6-plus", description="模型名称")
 
+
 # 获取会话历史
 def get_session_history(session_id: str) -> List[Dict]:
-    history = redis_client.get(f"session:{session_id}")
+    history = redis_obj.get(f"session:{session_id}")
     if not history:
         return [{
             "role": "system",
@@ -81,9 +82,11 @@ def get_session_history(session_id: str) -> List[Dict]:
             "content": llm_base.role_base
         }]
 
+
 # 保存会话历史
 def save_session_history(session_id: str, history: List[Dict]):
-    redis_client.setex(f"session:{session_id}", 86400, json.dumps(history))
+    redis_obj.setex(f"session:{session_id}", 86400, json.dumps(history))
+
 
 # -------------------------- 流式对话接口 --------------------------
 @app.post("/chat/stream")
@@ -126,6 +129,7 @@ async def chat_stream(request: ChatRequest):
         logger.error(f"对话处理失败：{str(e)}")
         raise HTTPException(status_code=500, detail=f"服务异常：{str(e)}")
 
+
 # -------------------------- 工具调用历史查询接口 --------------------------
 @app.get("/chat/tool-history/{session_id}")
 async def get_tool_history(session_id: str):
@@ -137,6 +141,8 @@ async def get_tool_history(session_id: str):
         logger.error(f"查询工具历史失败：{str(e)}")
         raise HTTPException(status_code=500, detail=f"查询失败：{str(e)}")
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

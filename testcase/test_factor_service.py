@@ -5,9 +5,6 @@
 """
 
 import unittest
-from service import MarketDataService, FactorSelectorService, factor_descriptions, financial_factor_descriptions
-from llms.quant_agent_coder import QuantAgentCoder
-from datetime import date, datetime
 from job.job_update_factors import update_financial_factor
 from utils.beta_calculate import calculate_beta
 from utils.common import get_today
@@ -26,46 +23,6 @@ from utils.common import get_today
 """
 
 class TestFactorService(unittest.TestCase):
-
-    def test_llm_factor_selector(self):
-
-        asof_date = date(2025, 12, 19)
-        sample_code = ""
-        with open('../job/quant_agent_sample.py', 'r', encoding='utf-8') as file:
-            sample_code = file.read()
-        staff = QuantAgentCoder()
-        staff.role_base = f"""
-        你是一个专业的量化策略工程师，请根据用户的策略描述，生成符合以下规范的 Python 策略代码：
-        你可以在备注里面提出还需要哪些信息
-        能成功运行的代码：
-        ------------
-        {sample_code}
-        ------------
-        以下是动量因子的定义：{factor_descriptions}
-        以下是财务因子的定义：{financial_factor_descriptions}""" + """
-
-        选股方法：FactorSelectorService.select_stocks_by_factors_asof(asof_date, conditions, limit=5)
-        conditions 格式：{'roe': {'operator': '>=', 'value': 15}}'}
-
-        【平台规则】
-        - 回测函数 def run_strategy(data: dict) -> dict
-        - 只能使用 pandas, numpy, sklearn（如需）
-        - 禁止使用：os, sys, eval, exec, requests
-
-        【输出格式】
-        ```python
-        # YOUR CODE HERE
-
-        """
-
-        question = """
-        高分红低波动策略，高ROE
-        毛利率要求10%以上，净利润不能为负数
-        技术指标是底部反转的走势
-        """
-
-        content = staff.ask(question=question)
-        print(content)
 
     def test_update_financial_factor(self):
         stock_code = '002555'

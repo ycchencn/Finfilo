@@ -17,72 +17,18 @@ function getTodayStartTimestamp(): number {
     return d.getTime()
 }
 
-// 根据实时报价更新或追加日线数据
-function updateDailyDataWithRealtime(symbol: string) {
-    const dailyBars = symbolDataCache[symbol]
-    if (!dailyBars || dailyBars.length === 0) return
-    const rt = props.realtimeQuotes
-    if (!rt) return
-    const todayStart = getTodayStartTimestamp()
-    const lastBar = dailyBars[dailyBars.length - 1]
-    const lastDate = new Date(lastBar.timestamp).setHours(0, 0, 0, 0)
-    if (lastDate === todayStart) {
-        // 更新当日 K 线
-        lastBar.close = rt.lastPrice
-        if (rt.high != null) lastBar.high = Math.max(lastBar.high ?? rt.lastPrice, rt.high)
-        if (rt.low != null) lastBar.low = Math.min(lastBar.low ?? rt.lastPrice, rt.low)
-        lastBar.volume = rt.volume ?? lastBar.volume
-        lastBar.chg_pct = rt.chg_pct  // 如果源数据提供了涨跌幅
-    } else if (lastDate < todayStart) {
-        // 没有今日 K 线，新建一根
-        const prevClose = lastBar.close
-        const newBar = {
-            timestamp: todayStart,
-            open: rt.open ?? rt.lastPrice,
-            high: rt.high ?? rt.lastPrice,
-            low: rt.low ?? rt.lastPrice,
-            close: rt.lastPrice,
-            volume: rt.volume ?? 0,
-            chg_pct: prevClose ? Number(((rt.lastPrice - prevClose) / prevClose * 100).toFixed(2)) : 0
-        }
-        dailyBars.push(newBar)
-    }
-}
-
 // 重新聚合周/月数据
 function updateAggregatedBars(symbol: string) {
     const dailyBars = symbolDataCache[symbol]
     if (!dailyBars) return
     PERIODS.forEach(cfg => {
         if (cfg.type === 'day') {
-            dataCache[cfg.id] = dailyBars
+            dataCache[cfg.type] = dailyBars
         } else {
-            dataCache[cfg.id] = aggregateBars(dailyBars, cfg.type as 'week' | 'month')
+            dataCache[cfg.type] = aggregateBars(dailyBars, cfg.type as 'week' | 'month')
         }
     })
 }
-
-// 刷新所有图表
-function refreshCharts() {
-    PERIODS.forEach(cfg => {
-        const chart = chartInstances.value[cfg.id]
-        if (!chart) return
-        const bars = dataCache[cfg.id]
-        if (!bars || bars.length === 0) return
-        chart.applyNewData([bars[bars.length - 1]], false)
-    })
-}
-
-// 实时行情变化时更新图表
-function applyRealtimeUpdate() {
-    updateDailyDataWithRealtime(props.symbol)
-    updateAggregatedBars(props.symbol)
-    refreshCharts()
-}
-
-watch(() => props.realtimeQuotes, (newRt) => {
-    // if (newRt) applyRealtimeUpdate()
-})
 
 const PERIODS = [
     {id: 'm', containerId: 'chart-month', type: 'month', span: 1},
@@ -165,38 +111,67 @@ const initPeriodChart = async (cfg: typeof PERIODS[number]) => {
     if (!symbolDataCache[props.symbol] || symbolDataCache[props.symbol].length === 0) {
         symbolDataCache[props.symbol] = await fetchStockMarketData(props.symbol)
     }
-
     if (cfg.type === 'week') {
-        dataCache[cfg.id] = aggregateBars(symbolDataCache[props.symbol], 'week')
+        dataCache[cfg.type] = aggregateBars(symbolDataCache[props.symbol], 'week')
     } else if (cfg.type === 'month') {
-        dataCache[cfg.id] = aggregateBars(symbolDataCache[props.symbol], 'month')
+        dataCache[cfg.type] = aggregateBars(symbolDataCache[props.symbol], 'month')
     } else {
-        dataCache[cfg.id] = symbolDataCache[props.symbol]
+        dataCache[cfg.type] = symbolDataCache[props.symbol]
+        const todayStart = getTodayStartTimestamp()
+        const lastBar = dataCache[cfg.type][dataCache[cfg.type].length - 1]
+        const lastDate = new Date(lastBar.timestamp).setHours(0, 0, 0, 0)
+        if (lastDate < todayStart) {
+            dataCache[cfg.type].push({
+                timestamp: getTodayStartTimestamp(),
+                date: '2026-05-27',
+                open: lastBar.close,
+                high: lastBar.close,
+                low: lastBar.close,
+                close: lastBar.close,
+                volume: 0
+            })
+        }
     }
 
     await nextTick()
     const el = document.getElementById(cfg.containerId)
     if (!el) return
 
-    let chart = chartInstances.value[cfg.id]
+    let chart = chartInstances.value[cfg.type]
     if (chart) {
         try {
             chart.destroy()
         } catch {
         }
-        chartInstances.value[cfg.id] = null
+        chartInstances.value[cfg.type] = null
     }
 
     chart = init(cfg.containerId)
     chart.setStyles(createChartConfig('redUp', 'dark'))
-    chartInstances.value[cfg.id] = chart
+    chartInstances.value[cfg.type] = chart
 
     chart.setSymbol({ticker: props.symbol})
     chart.setPeriod({span: cfg.span, type: cfg.type})
     chart.setDataLoader({
         getBars: async ({callback}) => {
-            callback(dataCache[cfg.id] || [])
-        }
+            callback(dataCache[cfg.type] || [])
+        },
+        subscribeBar: async (params) => {
+            watch(() => props.realtimeQuotes, (newRt) => {
+                if (params['period']['type'] != 'day') {
+                    return
+                }
+                const rt = props.realtimeQuotes[props.symbol]
+                if (!rt) return
+                const lastK = dataCache[params['period']['type']][dataCache[params['period']['type']].length - 1]
+                lastK['close'] = rt['lastPrice']
+                lastK['open'] = rt['open']
+                lastK['high'] = rt['high']
+                lastK['low'] = rt['low']
+                lastK['volume'] = rt['volume']
+                params['callback'](lastK)
+            })
+        },
     })
     chart.createIndicator('MA', {pane: {id: 'candle_pane'}, isStack: true})
     chart.createIndicator('MACD', true, {id: 'candle_pane_1'})

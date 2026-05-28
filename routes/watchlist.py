@@ -54,12 +54,11 @@ def get_watchlist():
         stock_list = []
 
         for item in watchlist:
-            _stock = StockService.get_stock_by_symbol(item['stock_code'], fields=[
+            _stock_local = StockService.get_stock_by_symbol(item['stock_code'], fields=[
                 'symbol',
                 'name',
                 'market',
-                'concepts',
-                'ohlc_last'
+                'concepts'
             ])
             _stock = datagigi.get_stock_info(symbol=item['stock_code'], market='cn')
             if _stock is None:
@@ -68,6 +67,7 @@ def get_watchlist():
             _stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_low')
             _stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_high')
             _stock['last_tick'] = datagigi.get_last_tick(symbol=_stock['symbol'])
+            _stock['concepts'] = _stock_local.get('concepts')
             stock_list.append(_stock)
 
         return jsonify(stock_list)

@@ -19,8 +19,6 @@ const images = [
 ]
 const currentIndex = ref(Math.floor(Math.random() * (images.length)))
 
-// https://q6.itc.cn/images01/20241026/d632cc9569da46b99ade0b45d10ffabf.jpeg
-
 function handleLogin() {
     // 去除前后空格后判断是否为空
     const username = email.value?.trim();

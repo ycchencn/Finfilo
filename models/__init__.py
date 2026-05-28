@@ -364,6 +364,7 @@ class InvestmentPortfolio(Base):
     risk_metrics = relationship("RiskMetrics", back_populates="portfolio")
     desc = Column(Text)
     enable = Column(Integer, nullable=False, default=1)
+    market = Column(String(50), nullable=False, default='cn')
 
     def to_dict(self):
         """将对象转换为字典格式"""
@@ -383,7 +384,8 @@ class InvestmentPortfolio(Base):
             'llm_setting': self.llm_setting,
             'desc': self.desc,
             'enable': self.enable,
-            'strategy_type': int(self.strategy_type)
+            'strategy_type': int(self.strategy_type),
+            'market': self.market,
         }
 
 

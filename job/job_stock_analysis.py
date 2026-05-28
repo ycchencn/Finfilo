@@ -15,7 +15,8 @@ from utils.data_loader import datagigi
 
 def job_stock_analysis(stock_code, send_notification=False):
 
-    stock = datagigi.get_stock_info(stock_code)
+    stock_local = StockService.get_stock_by_symbol(stock_code)
+    stock = datagigi.get_stock_info(stock_code, market=stock_local.get('market'))
     assert stock is not None
     if not StockService.exists(stock_code):
         StockService.upsert_stock({

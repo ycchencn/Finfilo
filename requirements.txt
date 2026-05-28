@@ -13,7 +13,6 @@ flask-sqlalchemy
 apscheduler
 backtrader~=1.9.78.123
 markdown2~=2.5.5
-attrs~=23.1.0
 distro~=1.9.0
 wheel~=0.46.3
 protobuf~=4.24.3
@@ -28,7 +27,6 @@ rich~=13.5.3
 httpcore~=1.0.7
 httpx~=0.28.1
 pydantic~=2.10.5
-anyio~=4.8.0
 numpy
 requests
 urllib3
@@ -56,3 +54,4 @@ tushare
 python-dotenv
 elasticsearch
 websockets
+flask_cors

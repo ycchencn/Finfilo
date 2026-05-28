@@ -16,6 +16,10 @@ export default defineConfig({
             '/api': {
                 target: 'http://127.0.0.1:8080', // 后端服务器地址
                 changeOrigin: true // 是否改变请求的源头
+            },
+            '/chat': {
+                target: 'http://127.0.0.1:8000', // 后端服务器地址
+                changeOrigin: true // 是否改变请求的源头
             }
         }
     },

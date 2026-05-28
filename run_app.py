@@ -29,6 +29,7 @@ app.register_blueprint(watchlist_bp)
 app.register_blueprint(etf_bp)
 app.register_blueprint(quant_bp)
 
+
 @app.route('/api/v1/auth/login', methods=['POST'])
 def auth_login_action():
     data = request.get_json()

@@ -71,7 +71,7 @@ const model = ref([
             {
                 label: '智能体',
                 icon: 'pi pi-fw pi-wave-pulse',
-                to: '/market/sector_sentiment',
+                to: '/ai/chat',
                 enable: true,
             },
             {

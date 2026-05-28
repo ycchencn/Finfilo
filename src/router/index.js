@@ -134,6 +134,12 @@ const router = createRouter({
                     name: 'system_log_view',
                     component: () => import('@/views/system/SystemLog.vue'),
                     meta: { title: '系统日志', requiresAuth: true }
+                },
+                {
+                    path: '/ai/chat/',
+                    name: 'ai_chat_view',
+                    component: () => import('@/views/ai/chat.vue'),
+                    meta: { title: '智能体', requiresAuth: true }
                 }
             ]
         },

@@ -17,6 +17,9 @@ from config import aliyun_bailian_apikey
 from llms.llm_base_async import LLMBaseAsync
 from contextlib import asynccontextmanager  # 新增导入
 from utils.redis_obj import redis_obj
+from utils.common import get_today
+
+init_prompt = f"今天是：{get_today()}\n"
 
 
 # -------------------------- FastAPI生命周期事件（替换on_event） --------------------------
@@ -40,6 +43,15 @@ app = FastAPI(
     lifespan=lifespan  # 替换原来的on_event
 )
 
+
+# -------------------------- 请求模型 --------------------------
+class ChatRequest(BaseModel):
+    message: str = Field(..., description="用户文本消息")
+    session_id: str = Field(..., description="会话ID")
+    response_format: Optional[str] = Field("text", description="返回格式：json_object/text")
+    model: Optional[str] = Field("qwen3.6-plus", description="模型名称")
+
+
 # 跨域配置
 app.add_middleware(
     CORSMiddleware,
@@ -57,28 +69,20 @@ llm_client = AsyncOpenAI(
 llm_base = LLMBaseAsync(llm_client)
 
 
-# -------------------------- 请求模型 --------------------------
-class ChatRequest(BaseModel):
-    message: str = Field(..., description="用户文本消息")
-    session_id: str = Field(..., description="会话ID")
-    response_format: Optional[str] = Field("text", description="返回格式：json_object/text")
-    model: Optional[str] = Field("qwen3.6-plus", description="模型名称")
-
-
 # 获取会话历史
 def get_session_history(session_id: str) -> List[Dict]:
     history = redis_obj.get(f"chat_session:{session_id}")
     if not history:
         return [{
             "role": "system",
-            "content": llm_base.role_base
+            "content": init_prompt + llm_base.role_base
         }]
     try:
         return json.loads(history)
     except:
         return [{
             "role": "system",
-            "content": llm_base.role_base
+            "content": init_prompt + llm_base.role_base
         }]
 
 

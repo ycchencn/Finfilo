@@ -357,7 +357,6 @@ class InvestmentPortfolio(Base):
     current_cash = Column(DECIMAL(5, 2), nullable=False)
     create_time = Column(DateTime, default=datetime.now, comment='创建时间')
     update_time = Column(DateTime, onupdate=datetime.now, comment='更新时间')
-    llm_base = Column(String(50), default='doubao', comment='llm base')
     llm_prompt = Column(Text, default='')
     llm_setting = Column(JSON, nullable=True)
     portfolio_assets = relationship("PortfolioAssets", back_populates="portfolio")
@@ -379,7 +378,6 @@ class InvestmentPortfolio(Base):
             'update_time': self.create_time.isoformat() if self.update_time else None,
             'init_cash': self.init_cash,
             'current_cash': self.current_cash,
-            'llm_base': self.llm_base,
             'llm_prompt': self.llm_prompt,
             'llm_setting': self.llm_setting,
             'desc': self.desc,

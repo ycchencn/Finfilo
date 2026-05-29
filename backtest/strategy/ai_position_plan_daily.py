@@ -173,13 +173,13 @@ def job_position_plan_daily_all(trade_day_override=False):
 
     for prof in portfolios:
         # 跳过没有设置大模型的策略
-        if prof.get('llm_base') == '':
+        if prof.get('llm_setting') is None:
             continue
         job_position_plan_daily(portfolio_id=prof.get('portfolio_id'))
 
 
 if __name__ == '__main__':
 
-    job_position_plan_daily_all(trade_day_override=True)
+    # job_position_plan_daily_all(trade_day_override=True)
 
-    # job_position_plan_daily(portfolio_id=6, send_feishu=False)
+    job_position_plan_daily(portfolio_id=6, send_feishu=False)

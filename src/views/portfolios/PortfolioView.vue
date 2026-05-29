@@ -353,7 +353,7 @@ async function updatePortfolioPrompt() {
         </div>
     </Dialog>
 
-    <div class="card mx-auto relative">
+    <div class="card mx-auto relative" style="padding-top: 20px;">
 
         <!-- 右上角操作按钮 -->
         <div class="absolute top-8 right-8">
@@ -770,13 +770,5 @@ async function updatePortfolioPrompt() {
 </template>
 
 <style scoped>
-.p-card{
-    border-radius: 5px;
-    border: 1px solid #dedede;
-    box-shadow: none;
-    transition: all 0.2s ease;
-    &:hover {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-}
+
 </style>

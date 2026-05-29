@@ -57,6 +57,12 @@ const model = ref([
                 enable: true,
             },
             {
+                label: '智能体',
+                icon: 'pi pi-fw pi-wave-pulse',
+                to: '/ai/chat',
+                enable: true,
+            },
+            {
                 label: 'DCF估值',
                 icon: 'pi pi-fw pi-clone',
                 to: '/quant/dcf_insight',
@@ -68,12 +74,6 @@ const model = ref([
         label: '系统设置',
         enable: true, // 若设为 false，则整个系统设置分组不显示
         items: [
-            {
-                label: '智能体',
-                icon: 'pi pi-fw pi-wave-pulse',
-                to: '/ai/chat',
-                enable: true,
-            },
             {
                 label: '系统日志',
                 icon: 'pi pi-fw pi-stopwatch',

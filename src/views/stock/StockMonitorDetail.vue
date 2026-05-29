@@ -391,7 +391,7 @@ onUnmounted(() => {
         </div>
     </Drawer>
 
-    <div class="card relative mb-0 pb-0">
+    <div class="card relative mb-0 pb-0" style="padding-top: 20px;">
 
         <!-- 标题 -->
         <h1 class="text-2xl font-bold mb-3 text-gray-800">

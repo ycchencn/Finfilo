@@ -16,6 +16,7 @@ from routes.portfolio import portfolio_bp
 from routes.watchlist import watchlist_bp
 from routes.etf import etf_bp
 from routes.quant import quant_bp
+from routes.index import index_bp
 from service.log_service import LogService
 
 # 指定时区为北京时间
@@ -28,6 +29,7 @@ app.register_blueprint(portfolio_bp)
 app.register_blueprint(watchlist_bp)
 app.register_blueprint(etf_bp)
 app.register_blueprint(quant_bp)
+app.register_blueprint(index_bp)
 
 
 @app.route('/api/v1/auth/login', methods=['POST'])

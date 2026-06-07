@@ -186,7 +186,8 @@ class LLMBase:
 
             # -------------------------- 统一处理工具调用 --------------------------
             if tool_calls:
-                # 5. 处理工具调用（与原有逻辑完全一致）
+                # 收集所有工具调用结果
+                tool_call_results = []  # 保存 (tool_call, tool_result) 对
                 for tool_call in tool_calls:
                     function_name = tool_call.function.name
                     try:
@@ -195,26 +196,33 @@ class LLMBase:
                         print(f"工具参数解析失败：{str(e)}")
                         tool_result = {"code": 400, "msg": "参数格式错误", "data": None}
                     else:
-                        # 调用MCP工具
                         tool_result = self._call_mcp_tool(function_name, function_args)
-                        tool_call_history.append({
-                            "function_name": function_name,
-                            "parameters": function_args,
-                            "result": tool_result
-                        })
 
-                    # 6. 将工具结果添加到对话历史，继续请求大模型
-                    current_messages.extend([
-                        assistant_message,
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "content": json.dumps(
-                                tool_result['data'] if tool_result['code'] == 0 else tool_result['msg'],
-                                ensure_ascii=False
-                            )
-                        }
-                    ])
+                    # print(f"tool_call, {function_name}, {tool_result}")
+
+                    tool_call_history.append({
+                        "function_name": function_name,
+                        "parameters": function_args,
+                        "result": tool_result
+                    })
+
+                    tool_call_results.append((tool_call, tool_result))
+
+                # 构建要追加的消息：先 assistant_message，再逐一添加 tool 消息
+                new_messages = [assistant_message]
+                for tool_call, tool_result in tool_call_results:
+                    new_messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": json.dumps(
+                            tool_result['data'] if tool_result['code'] == 0 else tool_result['msg'],
+                            ensure_ascii=False
+                        )
+                    })
+
+                # 一次性扩展消息列表
+                current_messages.extend(new_messages)
+                # 继续循环，让模型处理工具返回结果
             else:
                 # 无工具调用，返回最终回答
                 return {

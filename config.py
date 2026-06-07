@@ -94,6 +94,10 @@ llm_model_setting = {
     'news_analysis': {
         'platform': 'volcengine',
         'model': ['doubao-seed-1-6-flash-250828', 'glm-4-7-251222']
+    },
+    'chat_app': {
+        'platform': 'deepseek',
+        'model': 'deepseek-v4-pro'
     }
 }
 

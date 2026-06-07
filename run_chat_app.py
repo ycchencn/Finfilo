@@ -4,6 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
+import os
 import json
 import asyncio
 from fastapi import FastAPI, HTTPException
@@ -13,7 +14,7 @@ from pydantic import BaseModel, Field
 from openai import AsyncOpenAI
 from utils.common import logger, get_today
 from typing import Optional, Dict, List
-from config import aliyun_bailian_apikey
+# from config import aliyun_bailian_apikey
 from llms.llm_base_async import LLMBaseAsync
 from contextlib import asynccontextmanager  # 新增导入
 from utils.redis_obj import redis_obj
@@ -65,8 +66,8 @@ app.add_middleware(
 
 # 全局LLM客户端实例（仅初始化OpenAI，不创建aiohttp会话）
 llm_client = AsyncOpenAI(
-    api_key=aliyun_bailian_apikey,
-    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+    api_key=os.environ.get('DEEPSEEK_APIKEY'),
+    base_url="https://api.deepseek.com"
 )
 llm_base = LLMBaseAsync(llm_client)
 

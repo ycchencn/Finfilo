@@ -21,7 +21,7 @@ def export_dcf_to_excel(
         ascending=False
 ):
     """从监控股票池获取DCF估值信息，输出为Excel文件（纯数值，百分比列设置Excel格式，首行筛选，左对齐垂直居中）"""
-    stocks = StockService.get_monitoring_stock_pool(market='cn', per_page=300)
+    stocks = StockService.get_monitoring_stock_pool(market='cn', per_page=500)
 
     # 中英列名映射
     column_mapping_cn_to_en = {
@@ -33,7 +33,8 @@ def export_dcf_to_excel(
         '中性估值': 'mid_valuation',
         '中性空间': 'mid_space',
         '保守估值': 'cons_valuation',
-        '保守空间': 'cons_space'
+        '保守空间': 'cons_space',
+        '行业概念': 'concepts'
     }
     # 反向映射（英文 -> 中文）
     column_mapping_en_to_cn = {v: k for k, v in column_mapping_cn_to_en.items()}
@@ -70,7 +71,12 @@ def export_dcf_to_excel(
                 print(f"[错误] {symbol} 估值数据格式异常: {e}")
                 continue
 
+            # 获取最新报价
             last_tick = datagigi.get_last_tick(symbol=symbol)
+
+            # 获取公司信息
+            com_info = StockService.get_stock_by_symbol(symbol)
+            concepts = com_info.get('concepts')
 
             if last_tick and 'lastPrice' in last_tick:
                 current_price = float(last_tick['lastPrice'])
@@ -105,6 +111,7 @@ def export_dcf_to_excel(
                 'mid_space': round(mid_space, 2),
                 'cons_valuation': cons,
                 'cons_space': round(cons_space, 2),
+                'concepts': concepts,
                 'update_time': get_now()
             })
 

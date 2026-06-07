@@ -53,7 +53,7 @@ def manual_analysis():
 
 if __name__ == '__main__':
 
-    stock_codes = ['603663']
+    stock_codes = ['688295']
 
     for stock_code in stock_codes:
 

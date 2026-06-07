@@ -11,13 +11,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from openai import AsyncOpenAI
-from utils.common import logger
+from utils.common import logger, get_today
 from typing import Optional, Dict, List
 from config import aliyun_bailian_apikey
 from llms.llm_base_async import LLMBaseAsync
 from contextlib import asynccontextmanager  # 新增导入
 from utils.redis_obj import redis_obj
-from utils.common import get_today
 
 init_prompt = f"今天是：{get_today()}\n"
 

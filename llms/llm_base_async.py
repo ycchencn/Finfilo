@@ -8,7 +8,7 @@ import json
 import aiohttp
 from openai import AsyncOpenAI
 from typing import Optional, Dict, List, Any
-from config import datajiji_host
+from config import mcp_host
 
 class LLMBaseAsync:
     role_base = (
@@ -19,7 +19,7 @@ class LLMBaseAsync:
     model: str = 'deepseek-v4-flash'
     enable_search = True
     response_format = 'text'
-    mcp_base_url = f"{datajiji_host}/mcp"
+    mcp_base_url = mcp_host
     _cached_tools: Optional[List[Dict[str, Any]]] = None
     session: Optional[aiohttp.ClientSession] = None  # 初始化为None
 

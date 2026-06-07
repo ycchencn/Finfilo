@@ -88,8 +88,8 @@ llm_model_setting = {
         'model': 'deepseek-v4-flash'
     },
     'stock_tech_analysis': {
-        'platform': 'aliyun',
-        'model': 'deepseek-v4-flash'
+        'platform': 'volcengine',
+        'model': 'doubao-seed-1-8-251228'
     },
     'news_analysis': {
         'platform': 'volcengine',
@@ -99,6 +99,9 @@ llm_model_setting = {
 
 # 数据接口地址
 datajiji_host = os.getenv('DATAJIJI_HOST')
+
+# mcp 服务器地址
+mcp_host = os.getenv('MCP_HOST')
 
 # 策略设置
 strategy_setting = {

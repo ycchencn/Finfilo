@@ -25,7 +25,15 @@ class TestLLMStaffs(unittest.TestCase):
     def test_qwen_mcp_call(self):
         llm = LLMBaseAliyun()
         # 直接调用ask方法，自动完成工具调用+最终回答生成
-        final_answer = llm.ask('获取股票A股的股票列表，返回前50支的代码和名称')
+        prompt = '获取股票A股的股票列表，返回前50支的代码和名称'
+
+        completion_resp = llm.create_completion_with_tools(messages=[
+            {'role': 'system', 'content': llm.role_base},
+            {'role': 'user', 'content': prompt}
+        ], )
+
+        final_answer = completion_resp.get('final_answer')
+
         print("最终回答：\n", final_answer)
 
         # 验证回答是否包含有效数据（可根据实际业务调整断言）

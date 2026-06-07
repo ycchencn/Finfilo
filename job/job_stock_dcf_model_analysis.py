@@ -109,8 +109,8 @@ def check_analysis_interval(stock_code, interval=3):
         # 可在此处添加日志记录到文件
         return True
 
-def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notification=False):
 
+def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notification=False):
     if not skip_interval and not check_analysis_interval(_stock_code, interval=1):
         logger.info(f"下一次分析间隔未到，跳过分析，{_stock_code}")
         return False
@@ -166,7 +166,13 @@ def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notifica
 
     logger.info(f"传入大模型进行DCF分析：{stock_name}【{_stock_code}】，大模型版本：{staff.model}")
 
-    content = staff.ask(question=prompt)
+    # content = staff.ask(question=prompt)
+    completion_resp = staff.create_completion_with_tools(messages=[
+        {'role': 'system', 'content': staff.role_base},
+        {'role': 'user', 'content': prompt}
+    ], )
+
+    content = completion_resp.get('final_answer')
 
     # 提取报告里面的股价预测数据
     report_extra = dcf_report_extra(_stock_code, content)
@@ -239,8 +245,7 @@ def dcf_report_extra(_stock_code, report_content):
 
 
 if __name__ == '__main__':
-
-    stock_code = '688388'
+    stock_code = '300308'
 
     job_stock_dcf_model_analysis(stock_code, skip_interval=True)
 

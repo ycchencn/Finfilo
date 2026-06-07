@@ -8,7 +8,7 @@ import json
 import requests
 from openai import OpenAI
 from typing import Optional, Dict, List, Any
-from config import databull_host
+from config import mcp_host
 
 
 class LLMBase:
@@ -26,7 +26,7 @@ class LLMBase:
     response_format = 'json_object'
 
     # MCP服务配置（可根据环境修改）
-    mcp_base_url = f"{databull_host}/mcp"
+    mcp_base_url = mcp_host
 
     # 缓存工具元数据，避免重复请求MCP
     _cached_tools: Optional[List[Dict[str, Any]]] = None
@@ -138,16 +138,15 @@ class LLMBase:
         valid_function_names = {tool["function"]["name"] for tool in mcp_tools} if mcp_tools else set()
 
         while True:
-            # 1. 获取MCP工具元数据
-            tools = mcp_tools
-            # 2. 调用大模型
+            # 调用大模型
             completion = self.client.chat.completions.create(
                 model=self.model,
                 messages=current_messages,
                 response_format={"type": self.response_format},
-                tools=tools,
-                tool_choice="auto" if tools else "none",
-                extra_body={"enable_search": self.enable_search}
+                tools=mcp_tools,
+                tool_choice="auto" if mcp_tools else "none",
+                extra_body={"enable_search": self.enable_search},
+                stream=False
             )
 
             assistant_message = completion.choices[0].message

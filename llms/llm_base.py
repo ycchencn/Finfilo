@@ -8,7 +8,7 @@ import json
 import requests
 from openai import OpenAI
 from typing import Optional, Dict, List, Any
-from config import datajiji_host
+from config import databull_host
 
 
 class LLMBase:
@@ -26,7 +26,7 @@ class LLMBase:
     response_format = 'json_object'
 
     # MCP服务配置（可根据环境修改）
-    mcp_base_url = f"{datajiji_host}/mcp"
+    mcp_base_url = f"{databull_host}/mcp"
 
     # 缓存工具元数据，避免重复请求MCP
     _cached_tools: Optional[List[Dict[str, Any]]] = None

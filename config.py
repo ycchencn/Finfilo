@@ -98,7 +98,7 @@ llm_model_setting = {
 }
 
 # 数据接口地址
-datajiji_host = os.getenv('DATAJIJI_HOST')
+databull_host = os.getenv('DATAJIJI_HOST')
 
 # mcp 服务器地址
 mcp_host = os.getenv('MCP_HOST')

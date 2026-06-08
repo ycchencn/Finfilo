@@ -194,7 +194,7 @@ const getDefaultDateRange = () => {
 export const fetchStockMarketData = async (stockCode, startDate, endDate, Period) => {
     try {
         // 1. 获取默认日期或使用传入的参数
-        const { start_date: defaultStart, end_date: defaultEnd } = getDefaultDateRange();
+        const {start_date: defaultStart, end_date: defaultEnd} = getDefaultDateRange();
         const start_date = startDate || defaultStart;
         const end_date = endDate || defaultEnd;
         const period = Period || 'd';
@@ -203,7 +203,7 @@ export const fetchStockMarketData = async (stockCode, startDate, endDate, Period
         let response = null;
 
         // 2. 构建带查询参数的 URL
-        const params = new URLSearchParams({ start_date, end_date, period, version });
+        const params = new URLSearchParams({start_date, end_date, period, version});
 
         response = await fetch(`/api/v1/stock_history/${stockCode}?${params}`);
 
@@ -262,11 +262,11 @@ export function getTradeSeverity(tradeString) {
 
 // 定义常量，方便维护
 const FEAR_GREED_LEVELS = {
-    EXTREME_FEAR: { range: [0, 20], text: '极度恐惧', color: '#b3132b', advice: '市场过度恐慌' },
-    FEAR: { range: [20, 50], text: '恐惧', color: '#ef4444', advice: '市场情绪偏谨慎' },
-    NEUTRAL: { range: [50, 50], text: '中立', color: '#3b82f6', advice: '市场情绪中性' },
-    GREED: { range: [50, 80], text: '贪婪', color: '#22c55e', advice: '市场情绪偏向乐观' },
-    EXTREME_GREED: { range: [80, 100], text: '极度贪婪', color: '#15803d', advice: '市场过度狂热，警惕风险' }
+    EXTREME_FEAR: {range: [0, 20], text: '极度恐惧', color: '#b3132b', advice: '市场过度恐慌'},
+    FEAR: {range: [20, 50], text: '恐惧', color: '#ef4444', advice: '市场情绪偏谨慎'},
+    NEUTRAL: {range: [50, 50], text: '中立', color: '#3b82f6', advice: '市场情绪中性'},
+    GREED: {range: [50, 80], text: '贪婪', color: '#22c55e', advice: '市场情绪偏向乐观'},
+    EXTREME_GREED: {range: [80, 100], text: '极度贪婪', color: '#15803d', advice: '市场过度狂热，警惕风险'}
 };
 
 /**
@@ -275,21 +275,21 @@ const FEAR_GREED_LEVELS = {
  * @returns {String} 格式化后的字符串，如"123.45万"、"2.34亿"
  */
 export function formatStockTradeAmount(value) {
-  // 非法值兼容
-  if (typeof value !== 'number' || isNaN(value) || value < 0) {
-    return '--'
-  }
-  // 分档处理
-  if (value < 10000) {
-    // 小于1万：显示元，保留2位小数
-    return value.toFixed(2) + ' 元'
-  } else if (value < 100000000) {
-    // 1万到1亿：显示万
-    return (value / 10000).toFixed(2) + ' 万'
-  } else {
-    // 大于等于1亿：显示亿
-    return (value / 100000000).toFixed(2) + ' 亿'
-  }
+    // 非法值兼容
+    if (typeof value !== 'number' || isNaN(value) || value < 0) {
+        return '--'
+    }
+    // 分档处理
+    if (value < 10000) {
+        // 小于1万：显示元，保留2位小数
+        return value.toFixed(2) + ' 元'
+    } else if (value < 100000000) {
+        // 1万到1亿：显示万
+        return (value / 10000).toFixed(2) + ' 万'
+    } else {
+        // 大于等于1亿：显示亿
+        return (value / 100000000).toFixed(2) + ' 亿'
+    }
 }
 
 /**
@@ -298,10 +298,10 @@ export function formatStockTradeAmount(value) {
  * @returns {String} 格式化后的字符串，如"15.00亿"
  */
 export function formatMarketCapToBillions(value) {
-  if (value >= 100000000) {
-    return (value / 100000000).toFixed(2) + ' 亿';
-  }
-  return value.toString();
+    if (value >= 100000000) {
+        return (value / 100000000).toFixed(2) + ' 亿';
+    }
+    return value.toString();
 }
 
 /**
@@ -363,26 +363,6 @@ export function formatDaysAgo(dateString) {
     }
 }
 
-export function formatTradeAction(tradeString) {
-    if (tradeString === 'buy') {
-        return '买';
-    } else {
-        return '卖';
-    }
-}
-
-export function formatStrategyCode(tradeString) {
-    if (tradeString === 'bbs') {
-        return '布林带波段';
-    } else {
-        return '均线多头排列';
-    }
-}
-
-export function isCrypto(stockCode) {
-    return (stockCode.includes('USDT') || stockCode.includes('usdt'));
-}
-
 export function formatCurrency(value, showPlusSign = false) {
     if (value == null) return '—';
 
@@ -390,7 +370,7 @@ export function formatCurrency(value, showPlusSign = false) {
     const formattedValue = new Intl.NumberFormat('zh-CN', {
         style: 'currency',
         currency: 'CNY',
-        minimumFractionDigits: 2
+        minimumFractionDigits: 3
     }).format(value);
 
     // 2. 如果不需要显示 + 号，或者数值本身是负数/0，直接返回

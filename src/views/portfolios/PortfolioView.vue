@@ -617,13 +617,13 @@ async function updatePortfolioPrompt() {
 
                 <Column field="cost_price" header="成本价" style="width: 100px">
                     <template #body="slotProps">
-                        <span>{{ slotProps.data.cost_price?.toFixed(2) || '—' }}</span>
+                        <span>{{ slotProps.data.cost_price?.toFixed(3) || '—' }}</span>
                     </template>
                 </Column>
 
                 <Column field="position_price" header="收盘价" style="width: 100px">
                     <template #body="slotProps">
-                        <span>{{ slotProps.data.position_price?.toFixed(2) || '—' }}</span>
+                        <span>{{ slotProps.data.position_price?.toFixed(3) || '—' }}</span>
                     </template>
                 </Column>
 
@@ -718,7 +718,7 @@ async function updatePortfolioPrompt() {
 
                 <Column field="name" header="成交价">
                     <template #body="slotProps">
-                        <span>{{ formatCurrency(slotProps.data.price) }}</span>
+                        <span>{{ formatCurrency(slotProps.data.price, false, 3) }}</span>
                     </template>
                 </Column>
 

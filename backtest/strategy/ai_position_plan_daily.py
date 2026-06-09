@@ -22,8 +22,6 @@ prompt_quant_decision = """
 '请以JSON格式输出'
 """
 
-doubao_model = 'doubao-seed-1-8-251228'
-
 def adjust_position_plan(position_plan, holding_assets_dict):
 
     assert 'actions' in position_plan
@@ -180,6 +178,6 @@ def job_position_plan_daily_all(trade_day_override=False):
 
 if __name__ == '__main__':
 
-    job_position_plan_daily_all(trade_day_override=True)
+    # job_position_plan_daily_all(trade_day_override=True)
 
-    # job_position_plan_daily(portfolio_id=6, send_feishu=False)
+    job_position_plan_daily(portfolio_id=12, send_feishu=False)

@@ -363,14 +363,14 @@ export function formatDaysAgo(dateString) {
     }
 }
 
-export function formatCurrency(value, showPlusSign = false) {
+export function formatCurrency(value, showPlusSign = false, formateDigits = 2) {
     if (value == null) return '—';
 
     // 1. 先进行基础的货币格式化
     const formattedValue = new Intl.NumberFormat('zh-CN', {
         style: 'currency',
         currency: 'CNY',
-        minimumFractionDigits: 3
+        minimumFractionDigits: formateDigits
     }).format(value);
 
     // 2. 如果不需要显示 + 号，或者数值本身是负数/0，直接返回

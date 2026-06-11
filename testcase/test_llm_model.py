@@ -4,8 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-import unittest, requests, json
-from llms.llm_base_doubao import LLMBaseDoubao
+import unittest
 from llms.llm_base_siliconflow import LLMBaseSiliconflow
 from llms.llm_base_aliyun import LLMBaseAliyun
 from llms.llm_base_deepseek import LLMBaseDeepSeek
@@ -45,10 +44,6 @@ class TestLLMModel(unittest.TestCase):
         news = "中科院化学所汪铭团队构建超分子靶向嵌合体，首次活体动物水平实现可编程蛋白质精准降解，成果发表于《细胞》，为疾病治疗研究开辟新路径。"
         llm = LLMBaseSiliconflow()
         print(llm.ask(question=f'分析这个新闻：{news}'))
-
-    def test_doubao(self):
-        staff_doubao = LLMBaseDoubao()
-        print(staff_doubao.ask(question='今天星期几, 返回JSON'))
 
     def test_deepseek_mcp(self):
         llm = LLMBaseDeepSeek()

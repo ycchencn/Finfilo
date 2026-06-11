@@ -126,7 +126,12 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
             recent_news=json.dumps(recent_news, ensure_ascii=False)
         )
     else:
-        prompt = f"今天是：{get_today()}，继续思考调仓计划"
+        index_last = datagigi.get_last_tick(symbol='000001', tick_type='index')
+        prompt = (f"今天是：{get_today()}\n"
+                  f"当前持仓：{holdings_text}\n"
+                  f"可用资金：{available_money}\n"
+                  f"上证指数最新数据：{index_last}\n"
+                  f"继续思考调仓计划")
 
     # 2. 构建请求消息列表（包含 system 和历史 + 当前消息）
     messages = history.copy()
@@ -207,6 +212,7 @@ def job_position_plan_daily_all(trade_day_override=False):
 
 
 if __name__ == '__main__':
-    # job_position_plan_daily_all(trade_day_override=True)
 
-    job_position_plan_daily(portfolio_id=12, send_feishu=False)
+    job_position_plan_daily_all(trade_day_override=True)
+
+    # job_position_plan_daily(portfolio_id=12, send_feishu=False)

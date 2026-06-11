@@ -6,13 +6,14 @@
 
 from openai import OpenAI
 from config import ark_apikey
+from llms.llm_base import LLMBase
 
 # 定义系统提示词
 system_prompt = """
 你是一个量化交易金融机构的专家，负责解答用户的各种问题。
 """
 
-class LLMBaseVolcEngine:
+class LLMBaseVolcEngine(LLMBase):
 
     role_base = system_prompt
 
@@ -36,6 +37,9 @@ class LLMBaseVolcEngine:
 
     def set_response_text(self):
         self.response_format = 'text'
+
+    def __init__(self):
+        super().__init__(self.client)
 
     def ask(self, question):
         """

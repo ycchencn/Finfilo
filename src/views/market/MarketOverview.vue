@@ -31,16 +31,14 @@ interface StockItem {
     changePercent: number
 }
 
-// ========================
-// Mock 数据 - 指数（扩展为6个）
-// ========================
-const indices = ref<IndexItem[]>([
-    {name: '上证指数', code: '000001', price: 3364.85, change: -11.32, changePercent: -0.34},
-    {name: '深证成指', code: '399001', price: 10796.58, change: +28.47, changePercent: +0.26},
-    {name: '创业板指', code: '399006', price: 2158.63, change: +5.12, changePercent: +0.24},
-    {name: '科创50', code: '000688', price: 1089.76, change: +12.34, changePercent: +1.15},
-    {name: '科创200', code: '000692', price: 1487.32, change: +7.89, changePercent: +0.53}
-])
+const indices_name = ref({
+    '000001': '上证指数',
+    '399001': '深证成指',
+    '399006': '创业板指',
+    '000688': '科创50',
+    '000692': '科创200',
+    '000300': '沪深300'
+})
 
 const index_last_tick = ref([])
 
@@ -77,6 +75,7 @@ const minuteChartOptions = ref({
         y: {grid: {color: '#e5e7eb'}}
     }
 })
+
 const limitUpDownOptions = ref({
     responsive: true,
     maintainAspectRatio: false,
@@ -195,7 +194,15 @@ onMounted(async () => {
         params: {sector_type: 'sw2'}
     });
     sectors.value = res.data;
-    index_last_tick.value = await axios.get('/api/v1/index/last_tick');
+    // 获取指数行情
+    const res2 = await axios.get('/api/v1/index/last_tick');
+    index_last_tick.value = res2.data;
+    index_last_tick.value.forEach((item, idx) => {
+        // 对每个项做自定义处理，比如格式化时间、加字段
+        item.formatTime = new Date(item.tick_time).toLocaleString()
+        item.change = item.lastPrice - item.lastClose
+        item.changePercent = item.change / item.lastClose * 100
+    })
 });
 
 // 工具方法
@@ -221,12 +228,12 @@ const handleRowClick = (rowData) => {
 
         <!-- 指数卡片行 (6个，自动折行) -->
         <div class="indices-row">
-            <Card v-for="item in indices" :key="item.code" class="index-card">
+            <Card v-for="item in index_last_tick" :key="item.code" class="index-card">
                 <template #content>
                     <div class="card-content">
-                        <div class="index-name">{{ item.name }}</div>
-                        <div class="index-code">{{ item.code }}</div>
-                        <div class="index-price">{{ item.price.toFixed(2) }}</div>
+                        <div class="index-name">{{ indices_name[item.index_code] }}</div>
+                        <div class="index-code">{{ item.index_code }}</div>
+                        <div class="index-price">{{ item.lastPrice.toFixed(2) }}</div>
                         <div class="index-change" :style="{ color: getChangeColor(item.change) }">
                             <span>{{ formatSign(item.change) }}</span>
                             <span class="change-percent">{{ formatSign(item.changePercent) }}%</span>
@@ -237,24 +244,16 @@ const handleRowClick = (rowData) => {
         </div>
 
         <!-- 图表行1：分时走势 + 涨跌停家数 -->
-        <div class="grid-row">
-            <Card class="chart-card">
-                <template #title> 上证指数 分时走势</template>
-                <template #content>
-                    <div class="chart-wrapper">
-                        <Chart type="line" :data="minuteChartData" :options="minuteChartOptions"/>
-                    </div>
-                </template>
-            </Card>
-            <Card class="distribution-card">
-                <template #title> 沪深涨跌分布</template>
-                <template #content>
-                    <div class="chart-wrapper">
-                        <Chart type="bar" :data="distributionData" :options="distributionOptions"/>
-                    </div>
-                </template>
-            </Card>
-        </div>
+<!--        <div class="grid-row">-->
+<!--            <Card class="distribution-card">-->
+<!--                <template #title> 沪深涨跌分布</template>-->
+<!--                <template #content>-->
+<!--                    <div class="chart-wrapper">-->
+<!--                        <Chart type="bar" :data="distributionData" :options="distributionOptions"/>-->
+<!--                    </div>-->
+<!--                </template>-->
+<!--            </Card>-->
+<!--        </div>-->
 
         <!-- {"avg_turnover": 0.0, "bottom_stock": "浦发银行", "bottom_stock_pct": -0.89, "change_pct": 0.17, "down_count": 18, "flat_count": 4, "sector_name": "银行", "stock_count": 42, "top_stock": "重庆银行", "top_stock_pct": 3.71, "total_market_cap": 0.0, "total_trade_amount": 241.22, "up_count": 20, "up_down_ratio": 1.11} -->
         <Card class="chart-card sector-card-custom">
@@ -273,7 +272,7 @@ const handleRowClick = (rowData) => {
                     @row-click="handleRowClick"
                 >
                     <!-- 板块名称列 -->
-                    <Column field="sector_name" header="板块" :filter="true" filterPlaceholder="搜索板块" />
+                    <Column field="sector_name" header="板块" :filter="true" filterPlaceholder="搜索板块"/>
                     <!-- 领涨股列 -->
                     <Column field="top_stock" header="领涨股">
                         <template #body="{ data }">
@@ -295,7 +294,7 @@ const handleRowClick = (rowData) => {
                     <!-- 涨跌幅列（带进度条+箭头） -->
                     <Column field="change_pct" header="涨跌幅" style="min-width: 120px;" sortable>
                         <template #body="{ data }">
-                            <ProgressBar200p :barHeight="20" :value="data.change_pct.toFixed(2)" :times="10" readonly />
+                            <ProgressBar200p :barHeight="20" :value="data.change_pct.toFixed(2)" :times="10" readonly/>
                         </template>
                     </Column>
                     <!-- 涨跌家数列（新增） -->

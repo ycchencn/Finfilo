@@ -16,9 +16,9 @@ def get_index_last():
     """
     获取指数最新行情
     """
-    index_codes = ['000001', '000300']
-    index_ticks = {}
+    index_codes = ['000001', '000300', '399001', '399006', '000688', '000692']
+    index_ticks = []
     for code in index_codes:
         res = datagigi.get_last_tick(code, tick_type='index', market='cn')
-        index_ticks[code] = res
+        index_ticks.append(res)
     return jsonify(index_ticks)

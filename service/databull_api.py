@@ -8,7 +8,7 @@ import requests
 import pandas as pd
 
 
-class DataGigi:
+class DataBull:
 
     BASE_URL = "https://api.finfilo.com"  # 可根据实际部署调整
 

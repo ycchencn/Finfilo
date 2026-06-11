@@ -15,6 +15,7 @@ from typing import List, Dict
 from utils.gen_feishu_report import generate_feishu_report
 from config import strategy_setting
 from utils.data_loader import datagigi
+from service.dialogue_manager import DialogueManager
 
 prompt_quant_decision = """
 '你现在是一名金融分析师，你对股票市场、金融市场、投资策略和财务规划有深厚的理解。'
@@ -22,8 +23,8 @@ prompt_quant_decision = """
 '请以JSON格式输出'
 """
 
-def adjust_position_plan(position_plan, holding_assets_dict):
 
+def adjust_position_plan(position_plan, holding_assets_dict):
     assert 'actions' in position_plan
 
     for action in position_plan['actions']:
@@ -56,18 +57,23 @@ def adjust_position_plan(position_plan, holding_assets_dict):
 
     return position_plan
 
+
 def get_lot_size(stock_code):
     """根据股票代码获取市场手数"""
-    if stock_code.startswith('688'): return 200    # 沪市
-    if stock_code.startswith(('6', '9')): return 100    # 沪市
-    elif stock_code.startswith(('0', '3')): return 100  # 深市
-    else: return 100  # 默认
+    if stock_code.startswith('688'): return 200  # 沪市
+    if stock_code.startswith(('6', '9')):
+        return 100  # 沪市
+    elif stock_code.startswith(('0', '3')):
+        return 100  # 深市
+    else:
+        return 100  # 默认
+
 
 def job_position_plan_daily(portfolio_id=None, send_feishu=False):
-
     if portfolio_id is None:
         return False
 
+    chat_id = f"prof_analysis_chat_{portfolio_id}"
     index_data = datagigi.get_index_history(index_code='000001', start_date=get_date_by_n(-30), end_date=get_today())
 
     # 获取持仓信息
@@ -102,22 +108,45 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
     holdings_text = format_holdings_text(holding_assets)
     stock_pool_text = format_stock_pool_text(stock_pool)
 
-    # 用户预设 prompt
-    prompt = template.safe_substitute(
-        current_date=get_today(),
-        market_data_csv=index_data,
-        holdings_text=holdings_text,
-        stock_pool_text=stock_pool_text,
-        available_money=available_money,
-        stock_position_limit=strategy_setting.get('stock_position_limit', 8),
-        position_plan=position_plan_old,
-        recent_news=json.dumps(recent_news, ensure_ascii=False)
-    )
-
     logger.info(f"#{portfolio_id}, 传入大模型进行调仓分析，大模型版本：{staff.model}")
-    ai_resp = staff.ask(question=prompt)
 
-    ai_ans = ai_resp.replace("```json", "")
+    # 1. 获取历史上下文
+    history = DialogueManager.get_context(chat_id)
+
+    if len(history) == 0:
+        # 用户预设 prompt
+        prompt = template.safe_substitute(
+            current_date=get_today(),
+            market_data_csv=index_data,
+            holdings_text=holdings_text,
+            stock_pool_text=stock_pool_text,
+            available_money=available_money,
+            stock_position_limit=strategy_setting.get('stock_position_limit', 8),
+            position_plan=position_plan_old,
+            recent_news=json.dumps(recent_news, ensure_ascii=False)
+        )
+    else:
+        prompt = f"今天是：{get_today()}，继续思考调仓计划"
+
+    # 2. 构建请求消息列表（包含 system 和历史 + 当前消息）
+    messages = history.copy()
+    messages.append({"role": "user", "content": prompt})
+
+    # 请求大模型
+    assistant_reply = staff.create_completion(messages=messages)
+    reply_content = assistant_reply.choices[0].message.content
+
+    # 4. 将新的一轮对话追加到上下文
+    new_messages = [
+        {"role": "user", "content": prompt},
+        {"role": "assistant", "content": reply_content}
+    ]
+    # messages.append({"role": "assistant", "content": reply_content})
+
+    # 记录上下文
+    DialogueManager.append_messages(chat_id, new_messages)
+
+    ai_ans = reply_content.replace("```json", "")
     ai_ans = ai_ans.replace("```", "")
     answer_json = json.loads(ai_ans)
 
@@ -138,6 +167,7 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
 
     return True
 
+
 def format_holdings_text(holdings: List[Dict]) -> str:
     if not holdings:
         return "无持仓。"
@@ -157,8 +187,8 @@ def format_stock_pool_text(stock_pool: List[Dict]) -> str:
     items = [f"{s['symbol']} ({s['name']})" for s in stock_pool]
     return ", ".join(items)
 
-def job_position_plan_daily_all(trade_day_override=False):
 
+def job_position_plan_daily_all(trade_day_override=False):
     """
     交易日运行策略
     """
@@ -177,7 +207,6 @@ def job_position_plan_daily_all(trade_day_override=False):
 
 
 if __name__ == '__main__':
-
     # job_position_plan_daily_all(trade_day_override=True)
 
     job_position_plan_daily(portfolio_id=12, send_feishu=False)

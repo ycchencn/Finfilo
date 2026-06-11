@@ -925,7 +925,7 @@ class LlmConversationContext(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     chat_id = Column(String(50, collation='utf8mb4_bin'), nullable=True, default=None)
-    chat_context = Column(JSON, nullable=True, default=None)
+    chat_context = Column(Text, nullable=True, default=None)
     created_at = Column(DateTime, nullable=True, default=None)
     updated_at = Column(DateTime, nullable=True, default=None)
 

@@ -6,6 +6,7 @@
 
 import requests
 import unittest
+
 from utils.data_loader import datagigi
 
 class TestDatajiji(unittest.TestCase):
@@ -28,6 +29,10 @@ class TestDatajiji(unittest.TestCase):
         # print(res)
         self.assertIsNotNone(res)
 
+    def test_get_tick(self):
+        code = '399001'
+        res = datagigi.get_last_tick(code, tick_type='index')
+        self.assertIsNotNone(res)
 
 if __name__ == '__main__':
     unittest.main()

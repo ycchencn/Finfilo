@@ -42,6 +42,8 @@ const indices = ref<IndexItem[]>([
     {name: '科创200', code: '000692', price: 1487.32, change: +7.89, changePercent: +0.53}
 ])
 
+const index_last_tick = ref([])
+
 // 板块数据
 const sectors = ref([])
 
@@ -193,6 +195,7 @@ onMounted(async () => {
         params: {sector_type: 'sw2'}
     });
     sectors.value = res.data;
+    index_last_tick.value = await axios.get('/api/v1/index/last_tick');
 });
 
 // 工具方法

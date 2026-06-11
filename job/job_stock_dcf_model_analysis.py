@@ -166,13 +166,13 @@ def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notifica
 
     logger.info(f"传入大模型进行DCF分析：{stock_name}【{_stock_code}】，大模型版本：{staff.model}")
 
-    # content = staff.ask(question=prompt)
-    completion_resp = staff.create_completion_with_tools(messages=[
-        {'role': 'system', 'content': staff.role_base},
-        {'role': 'user', 'content': prompt}
-    ], )
+    content = staff.ask(question=prompt)
 
-    content = completion_resp.get('final_answer')
+    # completion_resp = staff.create_completion_with_tools(messages=[
+    #     {'role': 'system', 'content': staff.role_base},
+    #     {'role': 'user', 'content': prompt}
+    # ], )
+    # content = completion_resp.get('final_answer')
 
     # 提取报告里面的股价预测数据
     report_extra = dcf_report_extra(_stock_code, content)
@@ -245,8 +245,8 @@ def dcf_report_extra(_stock_code, report_content):
 
 
 if __name__ == '__main__':
-    stock_code = '300308'
 
+    stock_code = '300308'
     job_stock_dcf_model_analysis(stock_code, skip_interval=True)
 
     # job_stock_dcf_model_analysis_daily(override=True)

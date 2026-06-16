@@ -9,7 +9,7 @@ from app import api_prefix, cache, trading_cache_key
 from service import StockService, FactorValueService
 from service import JobService, ResearchReportService
 from service.stock_fear_greed_service import StockFearGreedService
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 from utils.common import get_today, get_date_by_n, validate_stock_code
 
 stock_bp = Blueprint('stock', __name__)
@@ -71,7 +71,7 @@ def update_stock(symbol):
 
     if not StockService.exists(symbol):
         # 个股不在数据库，查询api获取
-        stock_api = datagigi.get_stock_info(symbol, market=data.get('market', 'cn'))
+        stock_api = databull.get_stock_info(symbol, market=data.get('market', 'cn'))
         # 自动添加
         StockService.upsert_stock({
             'symbol': symbol,
@@ -173,7 +173,7 @@ def get_stock_history(stock_code):
     start_date = request.args.get('start_date', default=get_date_by_n(-1 * dayn))
     end_date = request.args.get('end_date', default=get_today())
 
-    securities_data = datagigi.get_history(stock_code, start_date, end_date, period)
+    securities_data = databull.get_history(stock_code, start_date, end_date, period)
     securities_data.reset_index(inplace=True)
     securities_data['date'] = securities_data['date'].dt.strftime('%Y-%m-%d')
 
@@ -225,7 +225,7 @@ def get_stock_profile(symbol):
     if not validate_stock_code(symbol):
         return jsonify({}), 500
     stock_info = StockService.get_stock_by_symbol(symbol)
-    stock_info_api = datagigi.get_stock_info(symbol, market=stock_info.get('market'))
+    stock_info_api = databull.get_stock_info(symbol, market=stock_info.get('market'))
     profile = stock_info_api.get('profile', {})
     beta = FactorValueService.get_latest_factor_value(ticker=symbol, factor_name='beta')
     profile['beta'] = beta

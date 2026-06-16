@@ -16,14 +16,14 @@ class FactorCalService:
 
         """统一获取并标准化行情数据"""
 
-        from utils.data_loader import datagigi
+        from utils.data_loader import databull
 
         if is_etf(stock_code):
-            df = datagigi.get_etf_history(stock_code, start_date, end_date)
+            df = databull.get_etf_history(stock_code, start_date, end_date)
         else:
             stock = StockService.get_stock_by_symbol(stock_code)
             assert stock is not None
-            df = datagigi.get_history(stock_code, start_date, end_date, period='d', market='cn')
+            df = databull.get_history(stock_code, start_date, end_date, period='d', market='cn')
 
         df = df.reset_index()
 

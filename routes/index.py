@@ -6,7 +6,7 @@
 
 from flask import jsonify, Blueprint
 from app import api_prefix
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 from app import cache
 
 index_bp = Blueprint('index', __name__)
@@ -21,7 +21,7 @@ def get_index_last():
     index_codes = ['000001', '399001', '399006', '000688', '000692']
     index_ticks = []
     for code in index_codes:
-        res = datagigi.get_last_tick(code, tick_type='index', market='cn')
+        res = databull.get_last_tick(code, tick_type='index', market='cn')
         res['index_code'] = code
         index_ticks.append(res)
     return jsonify(index_ticks)

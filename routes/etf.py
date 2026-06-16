@@ -6,7 +6,7 @@
 
 from flask import jsonify, Blueprint
 from app import api_prefix, cache
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 from service import FactorValueService
 from config import cache_setting
 from service.user_watchlist_service import UserWatchlistService
@@ -43,9 +43,9 @@ def get_etfs():
             ticker=etf['symbol'],
             factor_name='52week_high'
         )
-        etf['composition'] = datagigi.get_etf_composition(symbol=etf['symbol'])
+        etf['composition'] = databull.get_etf_composition(symbol=etf['symbol'])
         etf['composition'] = etf['composition']['data']
-        etf['ohlc_last'] = datagigi.get_last_tick(symbol=etf['symbol'], tick_type='etf')
+        etf['ohlc_last'] = databull.get_last_tick(symbol=etf['symbol'], tick_type='etf')
         etf['ohlc_last']['chg_pct'] = (etf['ohlc_last']['lastPrice'] - etf['ohlc_last']['lastClose']) / etf['ohlc_last']['lastClose'] * 100
 
     return jsonify(etfs)

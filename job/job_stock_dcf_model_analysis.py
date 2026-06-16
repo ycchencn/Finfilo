@@ -10,7 +10,8 @@ from utils.common import logger
 from utils.common import get_today, get_date_by_n
 from service import StockService, FactorValueService, MarketNewsService
 from service import ResearchReportService, JobService
-from utils.data_loader import datagigi
+from utils.redis_obj import redis_obj
+from utils.data_loader import databull
 from pathlib import Path
 from string import Template
 
@@ -21,7 +22,7 @@ prompt_template = Path(CURRENT_DIR / './prompt_stock_dcf_analysis.md').read_text
 
 
 def get_stock_detail(_stock_code, market):
-    stock = datagigi.get_stock_info(_stock_code, market)
+    stock = databull.get_stock_info(_stock_code, market)
     profile = stock.get('profile', {})
     return profile
 
@@ -127,7 +128,7 @@ def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notifica
 
     # 1 数据预处理 - 入库行情、新闻、题材、财报、技术因子、动量数据
     try:
-        market_data = datagigi.get_history(
+        market_data = databull.get_history(
             symbol=_stock_code,
             start_date=start_date,
             end_date=end_date)
@@ -143,10 +144,10 @@ def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notifica
     relative_news = MarketNewsService.search(stock_code=_stock_code, page_size=30)
 
     # 获取财务报告数据
-    report_balance = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Balance')
-    report_income = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Income')
-    report_cashflow = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='CashFlow')
-    report_capital = datagigi.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Capital')
+    report_balance = databull.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Balance')
+    report_income = databull.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Income')
+    report_cashflow = databull.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='CashFlow')
+    report_capital = databull.get_stock_financial_data(symbol=_stock_code, start_date=get_date_by_n(-960), end_date=get_today(), report_type='Capital')
 
     # 4 大模型汇总输出分析报告
     template = Template(prompt_template)
@@ -199,6 +200,10 @@ def job_stock_dcf_model_analysis(_stock_code, skip_interval=False, send_notifica
 
 
 def job_stock_dcf_model_analysis_daily(override=False):
+
+    # 删除dcf的缓存
+    redis_obj.delete('dcf_valuation_report')
+
     stocks = StockService.search_stocks(securities_type='stock', monitoring=1, per_page=10000)
 
     # 循环对个股进行每日挖掘

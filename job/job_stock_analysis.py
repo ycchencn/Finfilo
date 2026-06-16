@@ -10,13 +10,13 @@ from job.job_stock_dcf_model_analysis import job_stock_dcf_model_analysis
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data
 from job.job_check_signal import job_check_signal
 from job.job_update_factors import job_update_stock_factor
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 
 
 def job_stock_analysis(stock_code, send_notification=False):
 
     stock_local = StockService.get_stock_by_symbol(stock_code)
-    stock = datagigi.get_stock_info(stock_code, market=stock_local.get('market'))
+    stock = databull.get_stock_info(stock_code, market=stock_local.get('market'))
     assert stock is not None
     if not StockService.exists(stock_code):
         StockService.upsert_stock({

@@ -4,7 +4,7 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 from job.job_update_stock_greedy_data import job_update_stock_greedy_data
 from job.job_update_factors import job_update_stock_factor
 

@@ -9,7 +9,7 @@ from flask import jsonify, Blueprint, request
 from app import api_prefix, cache, json_resp, trading_cache_key
 from service import MarketNewsService
 from utils.common import logger
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 
 market_bp = Blueprint('market', __name__)
 
@@ -22,7 +22,7 @@ def get_market_sectors():
     :return:
     """
     sector_type = request.args.get('sector_type', default='sw1', type=str)
-    market_sector = datagigi.get_market_sector(sector_type=sector_type)
+    market_sector = databull.get_market_sector(sector_type=sector_type)
     return json_resp(market_sector)
 
 

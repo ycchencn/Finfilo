@@ -7,12 +7,12 @@
 import requests
 import unittest
 
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 
 class TestDatajiji(unittest.TestCase):
 
     def test_get_stocks(self):
-        res = datagigi.get_stock_list()
+        res = databull.get_stock_list()
         self.assertIsNotNone(res)
 
     def test_get_history(self):
@@ -25,13 +25,13 @@ class TestDatajiji(unittest.TestCase):
 
     def test_get_index_history(self):
         index_code = '000300'
-        res = datagigi.get_index_history(index_code, start_date='20210101', end_date='20210115')
+        res = databull.get_index_history(index_code, start_date='20210101', end_date='20210115')
         # print(res)
         self.assertIsNotNone(res)
 
     def test_get_tick(self):
         code = '399001'
-        res = datagigi.get_last_tick(code, tick_type='index')
+        res = databull.get_last_tick(code, tick_type='index')
         self.assertIsNotNone(res)
 
 if __name__ == '__main__':

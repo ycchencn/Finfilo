@@ -5,12 +5,12 @@
 """
 
 from service.stock import StockService
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 from utils.common import logger
 
 def job_sync_data():
 
-    stock_list = datagigi.get_stock_list()
+    stock_list = databull.get_stock_list()
 
     for stock in stock_list['data']:
         logger.info(f"更新个股信息, {stock['symbol']}, {stock['name']}")

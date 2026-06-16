@@ -14,7 +14,7 @@ from utils.common import send_feishu_markdown_message
 from typing import List, Dict
 from utils.gen_feishu_report import generate_feishu_report
 from config import strategy_setting
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 from service.dialogue_manager import DialogueManager
 
 prompt_quant_decision = """
@@ -74,7 +74,7 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
         return False
 
     chat_id = f"prof_analysis_chat_{portfolio_id}"
-    index_data = datagigi.get_index_history(index_code='000001', start_date=get_date_by_n(-30), end_date=get_today())
+    index_data = databull.get_index_history(index_code='000001', start_date=get_date_by_n(-30), end_date=get_today())
 
     # 获取持仓信息
     investment_info = InvestmentPortfolioService.get_by_portfolio_id(portfolio_id)
@@ -126,7 +126,7 @@ def job_position_plan_daily(portfolio_id=None, send_feishu=False):
             recent_news=json.dumps(recent_news, ensure_ascii=False)
         )
     else:
-        index_last = datagigi.get_last_tick(symbol='000001', tick_type='index')
+        index_last = databull.get_last_tick(symbol='000001', tick_type='index')
         prompt = (f"今天是：{get_today()}\n"
                   f"当前持仓：{holdings_text}\n"
                   f"可用资金：{available_money}\n"

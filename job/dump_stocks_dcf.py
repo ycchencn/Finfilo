@@ -8,7 +8,7 @@ import json
 import pandas as pd
 import time
 from openpyxl.styles import Alignment
-from utils.data_loader import datagigi
+from utils.data_loader import databull
 from utils.redis_obj import redis_obj
 from service import ResearchReportService
 from service.stock import StockService
@@ -72,7 +72,7 @@ def export_dcf_to_excel(
                 continue
 
             # 获取最新报价
-            last_tick = datagigi.get_last_tick(symbol=symbol)
+            last_tick = databull.get_last_tick(symbol=symbol)
 
             # 获取公司信息
             com_info = StockService.get_stock_by_symbol(symbol)
@@ -88,7 +88,7 @@ def export_dcf_to_excel(
                     print(f"[跳过] {symbol} 无法获取现价")
                     continue
 
-            stock_info = datagigi.get_stock_info(symbol=symbol)
+            stock_info = databull.get_stock_info(symbol=symbol)
             name = stock_info.get('name', 'N/A') if stock_info else 'N/A'
 
             if current_price == 0:

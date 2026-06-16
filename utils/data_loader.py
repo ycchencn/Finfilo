@@ -7,4 +7,4 @@
 from service.databull_api import DataBull
 from config import databull_host
 
-datagigi = DataBull(api_key='', base_url=databull_host)
+databull = DataBull(api_key='', base_url=databull_host)

@@ -112,7 +112,7 @@ strategy_setting = {
     'news_limit': 100,
     'stock_pool': 300,
     'stock_position_limit': 10,
-    'max_market_limit': 120
+    'max_market_limit': 60
 }
 
 # elasticsearch

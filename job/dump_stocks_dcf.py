@@ -12,7 +12,7 @@ from utils.data_loader import datagigi
 from utils.redis_obj import redis_obj
 from service import ResearchReportService
 from service.stock import StockService
-from utils.common import get_now
+from utils.common import get_today
 
 
 def export_dcf_to_excel(
@@ -112,7 +112,7 @@ def export_dcf_to_excel(
                 'cons_valuation': cons,
                 'cons_space': round(cons_space, 2),
                 'concepts': concepts,
-                'update_time': get_now()
+                'update_time': report['created_at']
             })
 
             print(f"处理数据，{symbol}, {name}")
@@ -171,4 +171,4 @@ def export_dcf_to_excel(
 
 if __name__ == '__main__':
 
-    export_dcf_to_excel('./dcf_valuation_report.xlsx', sort_by='中性空间', ascending=False)
+    export_dcf_to_excel(f'./dcf_valuation_report_{get_today()}.xlsx', sort_by='中性空间', ascending=False)

@@ -8,6 +8,7 @@ import unittest
 from llms.llm_base_siliconflow import LLMBaseSiliconflow
 from llms.llm_base_aliyun import LLMBaseAliyun
 from llms.llm_base_deepseek import LLMBaseDeepSeek
+from service import MarketNewsService
 from pathlib import Path
 
 # 获取当前 Python 文件所在目录
@@ -44,6 +45,15 @@ class TestLLMModel(unittest.TestCase):
         news = "中科院化学所汪铭团队构建超分子靶向嵌合体，首次活体动物水平实现可编程蛋白质精准降解，成果发表于《细胞》，为疾病治疗研究开辟新路径。"
         llm = LLMBaseSiliconflow()
         print(llm.ask(question=f'分析这个新闻：{news}'))
+
+    def test_news_can(self):
+        # 近期新闻
+        llm = LLMBaseDeepSeek()
+        llm.set_response_text()
+        llm.set_model('deepseek-v4-flash')
+        recent_news = MarketNewsService.get_by_time_range(limit=300)
+        print(llm.ask(question=f'下面是最近的新闻：{recent_news}\n'
+                               f'我需要你为我整理飞书日历，重点关注的是可能会影响股票市场的事件'))
 
     def test_deepseek_mcp(self):
         llm = LLMBaseDeepSeek()

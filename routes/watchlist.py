@@ -52,22 +52,21 @@ def get_watchlist():
         # 将对象转换为字典列表
         watchlist = [item.to_dict() for item in items] if items else []
         stock_list = []
-
         for item in watchlist:
-            _stock_local = StockService.get_stock_by_symbol(item['stock_code'], fields=[
+            _stock = StockService.get_stock_by_symbol(item['stock_code'], fields=[
                 'symbol',
                 'name',
                 'market',
                 'concepts'
             ])
-            _stock = datagigi.get_stock_info(symbol=item['stock_code'], market='cn')
             if _stock is None:
+                continue
+            if _stock['market'] != 'cn':
                 continue
             _stock['greed_data'], _stock['main_force_behavior_phase'] = get_main_force_behavior_phase(_stock['symbol'])
             _stock['52week_low'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_low')
             _stock['52week_high'] = FactorValueService.get_latest_factor_value(ticker=_stock['symbol'], factor_name='52week_high')
             _stock['last_tick'] = datagigi.get_last_tick(symbol=_stock['symbol'])
-            _stock['concepts'] = _stock_local.get('concepts')
             stock_list.append(_stock)
 
         return jsonify(stock_list)

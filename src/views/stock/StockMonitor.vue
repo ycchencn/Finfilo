@@ -177,14 +177,6 @@ const getPhaseSeverity = (phaseInt) => {
     return PHASE_CONFIG[num]?.severity || PHASE_CONFIG[0].severity;
 };
 
-const conceptsFilterOptions = [
-    { label: '商业航天', value: '商业航天' },
-    { label: '机器人', value: '机器人' },
-    { label: 'CPO', value: 'CPO' },
-    { label: '创新药', value: '创新药' },
-    { label: '贵金属', value: '贵金属' },
-];
-
 </script>
 
 <template>

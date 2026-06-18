@@ -278,7 +278,7 @@ const handleRowClick = (rowData) => {
                         <template #body="{ data }">
                             <span class="text-up">
                               {{ data.top_stock || '--' }}
-                              <span class="text-sm">(+{{ data.top_stock_pct?.toFixed(2) }}%)</span>
+                              <span class="text-sm">({{ data.top_stock_pct?.toFixed(2) }}%)</span>
                             </span>
                         </template>
                     </Column>

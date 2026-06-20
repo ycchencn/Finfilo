@@ -4,7 +4,6 @@
  * Copyright (c) 2025 yccheni@163.com. All rights reserved.
 """
 
-import pandas as pd
 from datetime import date
 from backtest.strategy.strategy_runner import DailyStrategySimulator
 from models.database import db_session
@@ -162,39 +161,24 @@ class StrategyRunner:
 
                 # 从数据库获取行情数据
                 if is_etf(code):
-                    df = databull.get_etf_history(code, trading_date, trading_date)
+                    last_tick = databull.get_last_tick(code, 'etf', 'cn')
                 else:
-                    df = databull.get_history(code, trading_date, trading_date)
+                    last_tick = databull.get_last_tick(code, 'stock', 'cn')
 
-                if df is None or df.empty:
+                if last_tick is None or 'open' not in last_tick:
                     logger.warning(f"⚠️ 行情缺失: {code} 在 {trading_date} 无数据")
                     market_data[code] = {'close': 0}
                     continue
 
-                row = df.iloc[0]
-
-                def safe_get(col, default=0.0):
-                    return row[col] if col in row and pd.notna(row[col]) else default
-
-                close_price = safe_get('close')
-                open_price = safe_get('open')
-                high_price = safe_get('high')
-                low_price = safe_get('low')
-                volume = safe_get('volume', 0)
-
-                if close_price <= 0:
-                    logger.warning(f"⚠️ 无效收盘价: {code} @ {trading_date} -> {close_price}")
-                    close_price = 0.0
-
                 market_data[code] = {
-                    'close': float(close_price),
-                    'open': float(open_price),
-                    'high': float(high_price),
-                    'low': float(low_price),
-                    'volume': int(volume)
+                    'close': last_tick['lastPrice'],
+                    'prev_close': last_tick['lastClose'],
+                    'open': last_tick['open'],
+                    'high': last_tick['high'],
+                    'low': last_tick['low'],
                 }
 
-                logger.debug(f"✅ 加载行情: {code} | {trading_date} | 收盘: {close_price:.2f}")
+                logger.info(f"✅ 加载行情: {code} | {trading_date} | 收盘: {last_tick['lastPrice']:.2f}")
 
             except Exception as e:
                 logger.error(f"❌ 加载 {code} 行情失败: {e}")

@@ -254,4 +254,4 @@ if __name__ == '__main__':
     # stock_code = '300308'
     # job_stock_dcf_model_analysis(stock_code, skip_interval=True)
 
-    job_stock_dcf_model_analysis_daily(override=True)
+    job_stock_dcf_model_analysis_daily(override=False)

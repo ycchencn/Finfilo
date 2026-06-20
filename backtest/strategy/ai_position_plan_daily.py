@@ -208,6 +208,9 @@ def job_position_plan_daily_all(trade_day_override=False):
         # 跳过没有设置大模型的策略
         if prof.get('llm_setting') is None:
             continue
+        if prof.get('position_plan') is not None and len(prof.get('position_plan')) > 0:
+            logger.info(f"调仓计划已存在，跳过。#{prof.get('portfolio_id')}")
+            continue
         job_position_plan_daily(portfolio_id=prof.get('portfolio_id'))
 
 
